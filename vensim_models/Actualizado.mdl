@@ -1,0 +1,1407 @@
+{UTF-8}
+"HYDROGEN F. AMMONIA"  = A FUNCTION OF( "ammonia consumption f. agriculture",green hydrogen pentration\
+		) ~~|
+"HYDROGEN F. AMMONIA"=
+	"ammonia consumption f. agriculture"*green hydrogen pentration*"H2 - ammonia ratio"*\
+		1000
+	~	t H2
+	~	(tH2) = (MtNH3/year)*10^6*(kgH2/tNH3)/1000*%
+	|
+
+ammonia cost=
+	(hydrogen price / "NH3/H2" +
+	0.6 * "ELECTRICITY PRICE.")
+	/ 18.6
+	~	
+	~	€/MJ NH3
+	|
+
+NH3 decay=
+	"ammonia ICE energy consumption."/ship lifetime
+	~	
+	~		|
+
+"ammonia ICE energy consumption."= INTEG (
+	NH3 investment-NH3 decay,
+		0)
+	~	GWh
+	~		|
+
+"ELECTRICITY PRICE." = WITH LOOKUP (
+	Time,
+		 ([(0,0)-(10,10)],(2022,0.4),(2030,0.5),(2040,0.47),(2050,0.35) ))
+	~	
+	~	€/MWH
+	|
+
+ELECTRICITY TAX  = A FUNCTION OF( ) ~~|
+ELECTRICITY TAX=
+	2
+	~	
+	~	€/MWh
+	|
+
+OIL PRICE = WITH LOOKUP (
+	Time,
+		 ([(0,0)-(10,10)],(2022,11.3),(2030,14.3),(2040,15.2),(2050,16.2) ))
+	~	
+	~	€/GJ
+	|
+
+BIOMASS PRICE = WITH LOOKUP (
+	Time,
+		 ([(0,0)-(10,10)],(2022,12),(2030,11),(2040,10.5),(2050,10) ))
+	~	
+	~	€/GJ
+	|
+
+calc shipping switch=
+	IF THEN ELSE(ammonia cost<=fossil shipping fuel costs:OR:"bio-methanol cost"<=fossil shipping fuel costs\
+		, IF THEN ELSE(ammonia cost<="bio-methanol cost", 2 , 1 ) , 0 )
+	~	
+	~	outputs 0 if fossil fuels are cheapest, 1 if bio-methanol, and 2 if \
+		ammonia.
+	|
+
+HYDROGEN METHANOL SHIPPING  = A FUNCTION OF( methanol ICE energy consumption,"synthetic methanol - hydrogen rate"\
+		) ~~|
+HYDROGEN METHANOL SHIPPING=
+	(methanol ICE energy consumption*3600/22.7*("biomethanol - hydrogen rate"*1+"synthetic methanol - hydrogen rate"\
+		*0))/33.33
+	~	t H2
+	~	22.7 MJ/kg is the calorific power of methanol; 33.33 kWh/kg is the \
+		calorific power of h2 = 33.33 MWh/t
+	|
+
+"bio-methanol cost"=
+	(1.17*BIOMASS PRICE +
+	hydrogen price / "MeOH/H2" +
+	"ELECTRICITY PRICE." * 0.64)
+	/ 19.9
+	~	
+	~	€/MJ MeOH
+	|
+
+ownership cost diesel urban  = A FUNCTION OF( ) ~~|
+ownership cost diesel urban=
+	28000+(diesel price/10.7*0.87*240000)
+	~	€
+	~	10.7 kWh/l of diesel
+	|
+
+investments=
+	DELAY FIXED(fleet reinvestment, 1 , 0 )
+	~	
+	~		|
+
+energy increase=
+	"int. navigation energy consumption 0" - DELAY1("int. navigation energy consumption 0"\
+		, 1 )
+	~	
+	~		|
+
+fleet reinvested= INTEG (
+	investments-fossil investment-MeOH investment-NH3 investment,
+		0)
+	~	
+	~		|
+
+shipping hydrogen demand=
+	"methanol ICE energy consumption." * 3600
+	/ 19.9
+	/ "MeOH/H2"
+	+
+	"ammonia ICE energy consumption." * 3600
+	/ 18.6
+	/ "NH3/H2"
+	~	
+	~	Convert from GWh to GJ, then from GJ to tons fuel, then from tons fuel to tons H2.
+		Example 1:
+		MeOH cons. [GWh] * 3600 [GJ/GWh] / 19.9 [GJ/t] / 15.7 [t MeOH/t H2]
+		Example 2:
+		NH3 cons. [GWh] * 3600 [GJ/GWh] / 18.6 [GJ/t] / 5.56 [t NH3/t H2]
+	|
+
+"MeOH/H2"=
+	15.7
+	~	
+	~	kg MeOH/kg H2
+	|
+
+"int. navigation energy consumption 0" = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,501403),(2050,871296) ))
+	~	GWh
+	~	Considering an annual growth of 1,79%\!Year
+	|
+
+CARBON TAX = WITH LOOKUP (
+	Time,
+		 ([(-0.114068,0)-(19.1816,9.88593)],(2022,55),(2030,110),(2040,159),(2050,194) ))
+	~	
+	~	€/tCO2
+	|
+
+"int. shipping fossil energy consumption."= INTEG (
+	fossil investment-Fossil decay,
+		"int. navigation energy consumption 0")
+	~	GWh
+	~		|
+
+ownership cost diesel long haul  = A FUNCTION OF( ) ~~|
+ownership cost diesel long haul=
+	1.5e+06+(diesel price/10.7*4.33*1.2e+06)
+	~	€
+	~		|
+
+ship lifetime=
+	15
+	~	
+	~		|
+
+GAS PRICE = WITH LOOKUP (
+	Time,
+		 ([(0,0)-(10,10)],(2015,6.3),(2030,8.5),(2040,9.3),(2050,10.2) ))
+	~	
+	~	€/GJ
+	|
+
+MeOH investment=
+	IF THEN ELSE(calc shipping switch=1,fleet reinvested , 0 )
+	~	
+	~		|
+
+HYDROGEN AMMONIA SHIPPING  = A FUNCTION OF( ammonia ICE energy consumption) ~~|
+HYDROGEN AMMONIA SHIPPING=
+	ammonia ICE energy consumption *3600*"H2 - ammonia ratio"/22.5/1000
+	~	t H2
+	~	1 t NH3 = 160000 * GWh NH3
+	|
+
+MeOH decay=
+	"methanol ICE energy consumption."/ship lifetime
+	~	
+	~		|
+
+Fossil decay=
+	"int. shipping fossil energy consumption."/ship lifetime
+	~	
+	~		|
+
+"methanol ICE energy consumption."= INTEG (
+	MeOH investment-MeOH decay,
+		0)
+	~	GWh
+	~		|
+
+fossil investment=
+	IF THEN ELSE(calc shipping switch=0,fleet reinvested , 0 )
+	~	
+	~		|
+
+NH3 investment=
+	IF THEN ELSE(calc shipping switch=2, fleet reinvested , 0 )
+	~	
+	~		|
+
+"NH3/H2"=
+	5.56
+	~	
+	~	kg NH3/kg H2
+	|
+
+fleet reinvestment= INTEG (
+	energy increase+Fossil decay+MeOH decay+NH3 decay-investments,
+		"int. navigation energy consumption 0"/ship lifetime)
+	~	
+	~		|
+
+fossil shipping fuel costs=
+	OIL PRICE/1000 +
+	CARBON TAX * (0.075 / 1000)
+	~	
+	~	€/MJ Oil
+		Emission factor: 0.075 t per GJ
+	|
+
+"electricity (sensitivity)"=
+	1
+	~	
+	~		|
+
+electricity price=
+	"electricity (sensitivity)"*electricity price forecast
+	~	€/kWh
+	~		|
+
+ownership cost BEV urban=
+	35000+electricity price*electricity taxes*0.45*240000
+	~	€
+	~		|
+
+ownerhip cost BEV long haul=
+	390000+electricity price*electricity taxes*2.26*1.2e+06
+	~	€
+	~		|
+
+OPEX hydrogen=
+	electricity price
+	~	€/kWh
+	~		|
+
+ownership cost FCEV urban=
+	57000+(hydrogen price/33.33*0.71*240000)
+	~	€
+	~		|
+
+TOTAL HYDROGEN=
+	"HYDROGEN F. AMMONIA"+"HYDROGEN F. OLEFIN"+"HYDROGEN F. REFINERY"+"HYDROGEN F. STEEL"\
+		+"HYDROGEN F. INDUSTRIAL HEAT"+"HYDROGEN F. AVIATON"+"HYDROGEN F. HEAVY DUTY ROAD TRANSPORT"\
+		+"HYDROGEN F. SHIPPING"
+	~	t H2
+	~		|
+
+decarbonization curve refinery = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0),(2020,0),(2021,0.01),(2022,0.01),(2023,0.02),(2024,0.03),\
+		(2025,0.04),(2026,0.05),(2027,0.07)
+		,(2028,0.09),(2029,0.12),(2030,0.16),(2031,0.2),(2032,0.27),(2033,0.33),(2034,0.41)\
+		,(2035,0.49),(2036,0.57),(2037,0.65),
+		(2038,0.72),(2039,0.79),(2040,0.84),(2041,0.89),(2042,0.91),(2043,0.94),(2044,0.96)\
+		,(2045,0.97),(2046,0.98),(2047,0.99),
+		(2048,0.99),(2049,0.996294),(2050,0.998147) ))
+	~	
+	~		|
+
+"HYDROGEN F. REFINERY"=
+	4.8*10^6*decarbonization curve refinery
+	~	t H2
+	~		|
+
+"HYDROGEN F. SHIPPING"=
+	HYDROGEN AMMONIA SHIPPING+HYDROGEN METHANOL SHIPPING
+	~	t H2
+	~		|
+
+"hydrogen energy consumption dom. aviation"=
+	"dom. aviation energy consumption"*"hydrogen penetration in dom. aviation"
+	~	GWh
+	~		|
+
+"bio-kerosene energy consumption int. aviation"=
+	"decarbonization curve int. aviation"*"int. aviation energy consumption"*1
+	~	GWh
+	~		|
+
+"int. aviation energy consumption" = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,486033),(2050,703496) ))
+	~	GWh
+	~		|
+
+"decarbonization curve dom. aviation" = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0),(2020,0),(2021,0.01),(2022,0.01),(2023,0.02),(2024,0.03),\
+		(2025,0.04),(2026,0.05),(2027,0.07),(2028,0.09),(2029,0.12),(2030,0.16),(2031,0.2),\
+		(2032,0.27),(2033,0.33),(2034,0.41),(2035,0.49),(2036,0.57),(2037,0.65),(2038,0.72)\
+		,(2039,0.79),(2040,0.84),(2041,0.89),(2042,0.91),(2043,0.94),(2044,0.96),(2045,0.97\
+		),(2046,0.98),(2047,0.99),(2048,0.99),(2049,0.996294),(2050,0.998147) ))
+	~	
+	~		|
+
+"hydrogen penetration in dom. aviation" = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0),(2020,0),(2021,0),(2022,0),(2023,0),(2024,0),(2025,0),(2026\
+		,0),(2027,0),(2028,0),(2029,0),(2030
+		,0),(2031,0),(2032,0.01),(2033,0.01),(2034,0.02),(2035,0.03),(2036,0.04),(2037,0.05\
+		),(2038,0.07),(2039,0.09),(2040,0.12
+		)
+		,(2041,0.16),(2042,0.2),(2043,0.27),(2044,0.33),(2045,0.41),(2046,0.49),(2047,0.57)\
+		,(2048,0.65),(2049,0.72),(2050,0.79
+		) 
+		))
+	~	
+	~		|
+
+"decarbonization curve int. aviation" = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0),(2020,0),(2021,0.01),(2022,0.01),(2023,0.02),(2024,0.03),\
+		(2025,0.04),(2026,0.05),(2027,0.07),(2028,0.09),(2029,0.12),(2030,0.16),(2031,0.2),\
+		(2032,0.27),(2033,0.33),(2034,0.41),(2035,0.49),(2036,0.57),(2037,0.65),(2038,0.72)\
+		,(2039,0.79),(2040,0.84),(2041,0.89),(2042,0.91),(2043,0.94),(2044,0.96),(2045,0.97\
+		),(2046,0.98),(2047,0.99),(2048,0.99),(2049,0.996294),(2050,0.998147) ))
+	~	{%}
+	~		|
+
+"bio-kerosene energy consumption dom. aviation"=
+	(("decarbonization curve dom. aviation"*"dom. aviation energy consumption")-"hydrogen energy consumption dom. aviation"\
+		)*1
+	~	
+	~		|
+
+"HYDROGEN F. AVIATON"=
+	(("bio-kerosene energy consumption dom. aviation"+"bio-kerosene energy consumption int. aviation"\
+		)*"bio kerosene - hydrogen rate"+("synthetic kerosene energy consumption dom. aviation"\
+		+"synthetic kerosene energy consumption int. aviation")*"syn kerosene - hydrogen rate"\
+		+"hydrogen energy consumption dom. aviation")*10^3/33.33
+	~	t H2
+	~	33.33 MWh/t = calorific power H2
+	|
+
+"dom. aviation energy consumption" = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,75722),(2050,109601) ))
+	~	GWh
+	~		|
+
+"synthetic kerosene energy consumption int. aviation"=
+	"decarbonization curve int. aviation"*"int. aviation energy consumption"*0
+	~	GWh
+	~		|
+
+"synthetic kerosene energy consumption dom. aviation"=
+	(("dom. aviation energy consumption"*"decarbonization curve dom. aviation")-"hydrogen energy consumption dom. aviation"\
+		)*0
+	~	GWh
+	~		|
+
+ammonia ICE energy consumption=
+	"int. navigation energy consumption"*decarbonization curve shipping*0.35
+	~	GWh
+	~	CONSIDERING 50% OF AMMONIA
+	|
+
+"dom. navigation fossil energy consumption"=
+	"dom. navigation fossil fuel demand"/ICE efficiency
+	~	GWh
+	~		|
+
+methanol ICE energy consumption=
+	decarbonization curve shipping*"int. navigation energy consumption"*0.35
+	~	GWh
+	~	CONSIDERING 50% OF METHANOL; considering a sub-division of e-methanol and \
+		bio-methanol
+	|
+
+"int. aviation fossil energy consumption"=
+	"int. navigation energy consumption"-ammonia ICE energy consumption-methanol ICE energy consumption
+	~	GWh
+	~		|
+
+"ammonia consumption f. agriculture"=
+	19.1
+	~	Mt/Year
+	~	EHB European Backbone Report: 19.1 Mt/year
+		CEPS Report: 21 Mt/year (capacity)
+	|
+
+electrolyser cost = WITH LOOKUP (
+	electroliser capacity,
+		([(0,0)-(10,10)],(0,650),(1,612.12),(5,526.24),(10,489.25),(15,467.62),(20,452.27),\
+		(25,440.36),(30,430.63),(35,422.41),(40,415.28),(45,409),(50,403.37),(55,398.29),(60\
+		,393.65),(65,389.37),(70,385.42),(75,381.74),(80,378.3),(85,375.06),(90,372.01),(95\
+		,369.13),(100,366.39),(105,363.78),(110,361.3),(115,358.93),(120,356.66),(250,317.49\
+		),(500,280.51),(750,258.87),(1000,243.52),(1250,231.62),(1500,221.89),(1750,213.66)\
+		,(2000,206.54),(2250,200.25),(2500,194.63),(2750,189.54),(3000,184.9),(3250,180.63)\
+		,(3500,176.67),(3750,172.99),(4000,169.55),(4250,166.31),(4500,163.26),(4750,160.38\
+		),(5000,157.64),(5250,155.04),(5500,152.56),(5750,150.18),(6000,147.91) ))
+	~	€/kW
+	~	IRENA learning curve
+	|
+
+"hydrogen-syntheticnaphfta rate"=
+	5.85
+	~	MWh H2/t Naphfta
+	~		|
+
+Olefin production = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,4.1495e+07),(2050,3.3196e+07) ))
+	~	t
+	~	20% decrease in connection to plastic production forecasts
+	|
+
+green hydrogen pentration = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0),(2020,0),(2021,0.01),(2022,0.01),(2023,0.02),(2024,0.03),\
+		(2025,0.04),(2026,0.05),(2027,0.07),(2028,0.09),(2029,0.12),(2030,0.16),(2031,0.2),\
+		(2032,0.27),(2033,0.33),(2034,0.41),(2035,0.49),(2036,0.57),(2037,0.65),(2038,0.72)\
+		,(2039,0.79),(2040,0.84),(2041,0.89),(2042,0.91),(2043,0.94),(2044,0.96),(2045,0.97\
+		),(2046,0.98),(2047,0.99),(2048,0.99),(2049,0.996294),(2050,0.998147) ))
+	~	{%}
+	~		|
+
+"HYDROGEN F. OLEFIN"=
+	(synthetic naphfta demand for olefin production*"hydrogen-syntheticnaphfta rate"+"bio-naphfta demand for olefin production"\
+		*"hydrogen-bionaphfta rate")/33.33
+	~	t H2
+	~	33.33 kg/kWh = t/MWh
+	|
+
+"hydrogen-bionaphfta rate"=
+	0.78
+	~	MWh H2/t naphtfa
+	~		|
+
+synthetic naphfta demand for olefin production=
+	Olefin production*decarbonization curve for olefin production/2*"naphta-olefin rate"
+	~	t methanol
+	~		|
+
+"naphta-olefin rate"=
+	1.66
+	~	t Naphfta / t HVC
+	~		|
+
+"bio-naphfta demand for olefin production"=
+	Olefin production*decarbonization curve for olefin production/2*"naphta-olefin rate"
+	~	t Naphfta
+	~		|
+
+electricity taxes=
+	2
+	~	
+	~		|
+
+"bio kerosene - hydrogen rate"=
+	0.15
+	~	MWh H2 / MWh kero
+	~		|
+
+"synthetic methanol - hydrogen rate"=
+	6.3
+	~	MWh H2 / t synmethanol
+	~		|
+
+"syn kerosene - hydrogen rate"=
+	1.2
+	~	MWh H2 / MWh kero
+	~		|
+
+decarbonization curve for olefin production = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0),(2020,0),(2021,0.01),(2022,0.01),(2023,0.02),(2024,0.03),\
+		(2025,0.04),(2026,0.05),(2027,0.07),(2028,0.09),(2029,0.12),(2030,0.16),(2031,0.2),\
+		(2032,0.27),(2033,0.33),(2034,0.41),(2035,0.49),(2036,0.57),(2037,0.65),(2038,0.72)\
+		,(2039,0.79),(2040,0.84),(2041,0.89),(2042,0.91),(2043,0.94),(2044,0.96),(2045,0.97\
+		),(2046,0.98),(2047,0.99),(2048,0.99),(2049,0.996294),(2050,0.998147) ))
+	~	
+	~		|
+
+"Natural gas consumption f. industrial heat"=
+	175/2
+	~	TWh
+	~	Natural gas consumption (TWh)
+	|
+
+"Hydrogen implementation curve f. industrial heat" = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0),(2020,0),(2021,0.01),(2022,0.01),(2023,0.02),(2024,0.03),\
+		(2025,0.04),(2026,0.05),(2027,0.07),(2028,0.09),(2029,0.12),(2030,0.16),(2031,0.2),\
+		(2032,0.27),(2033,0.33),(2034,0.41),(2035,0.49),(2036,0.57),(2037,0.65),(2038,0.72)\
+		,(2039,0.79),(2040,0.84),(2041,0.89),(2042,0.91),(2043,0.94),(2044,0.96),(2045,0.97\
+		),(2046,0.98),(2047,0.99),(2048,0.99),(2049,0.996294),(2050,0.998147) ))
+	~	
+	~		|
+
+"HYDROGEN F. INDUSTRIAL HEAT"=
+	"Hydrogen implementation curve f. industrial heat"*"Natural gas consumption f. industrial heat"\
+		*10^6/33.33
+	~	t H2
+	~	1 (TWh) * 10^6 (MWh/TWh) / 33.33 (MWh/tH2) = tH2
+	|
+
+biofuels share=
+	IF THEN ELSE(rail electricity share<1, (0.1857*(Time-2019)+0.012)/100 , 0 )
+	~	
+	~		|
+
+fossil energy consumption from rail=
+	fossil energy demand/diesel locomotive efficiency
+	~	GWh
+	~		|
+
+fossil energy demand=
+	rail energy demand*(1-rail electricity share)*(1-biofuels share)
+	~	
+	~		|
+
+rail electricity share = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0.7615),(2038,1),(2050,1) ))
+	~	
+	~		|
+
+rail energy demand = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,47212),(2050,39177) ))
+	~	GWh
+	~		|
+
+diesel locomotive efficiency=
+	0.3
+	~	
+	~		|
+
+heavy duty FCEV energy demand= INTEG (
+	IF THEN ELSE(heavy duty efficiency=0.65, potential heavy duty energy switch , -potential heavy duty energy switch\
+		 ),
+		0)
+	~	GWh
+	~		|
+
+heavy duty FCEV enery consumption=
+	MIN(heavy duty FCEV energy demand, heavy duty energy demand)/0.65
+	~	GWh
+	~		|
+
+heavy duty fossil energy consumption=
+	MAX(heavy duty fossil energy demand, 0 )/0.35
+	~	GWh
+	~		|
+
+heavy duty fossil energy demand= INTEG (
+	IF THEN ELSE(heavy duty efficiency=0.35, potential heavy duty energy switch , -potential heavy duty energy switch\
+		 ),
+		heavy duty energy demand)
+	~	GWh
+	~		|
+
+heavy duty vehicle renovation rate=
+	0.0574
+	~	
+	~	Check excel files
+	|
+
+ownership cost FCEV long haul=
+	325000+(hydrogen price/33.33*3.53*1.2e+06)
+	~	€
+	~	33.33 (kWh/kg H2)
+	|
+
+"HYDROGEN F. HEAVY DUTY ROAD TRANSPORT"=
+	heavy duty FCEV enery consumption/33.33*10^3
+	~	t H2
+	~		|
+
+light duty fossil energy demand= INTEG (
+	IF THEN ELSE(light duty efficiency=0.35, potential light duty energy switch , -potential light duty energy switch\
+		 ),
+		light duty energy demand)
+	~	
+	~		|
+
+light duty vehicle renovation rate=
+	0.0498
+	~	
+	~	Check excel files
+	|
+
+light duty fossil energy consumption=
+	MAX(light duty fossil energy demand, 0 )/0.35
+	~	GWh
+	~		|
+
+light duty BEV energy consumption=
+	MIN(light duty BEV energy demand, light duty energy demand)/0.65
+	~	GWh
+	~		|
+
+light duty BEV energy demand= INTEG (
+	IF THEN ELSE(light duty efficiency=0.65, potential light duty energy switch , -potential light duty energy switch\
+		 ),
+		0)
+	~	
+	~		|
+
+light duty efficiency=
+	IF THEN ELSE( MIN( ownership cost BEV urban , ownership cost diesel urban )=ownership cost BEV urban\
+		 , 0.65 , 0.35 )
+	~	
+	~		|
+
+light duty energy demand=
+	total energy demand*(1-0.2677)
+	~	GWh
+	~		|
+
+potential light duty energy switch=
+	light duty energy demand*light duty vehicle renovation rate
+	~	
+	~		|
+
+total energy demand = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,867029),(2050,1.401e+06) ))
+	~	GWh
+	~	\!Year
+	|
+
+heavy duty energy demand=
+	total energy demand*0.2677
+	~	GWh
+	~	0.2677 comes from average emissions from heavy duty trucks and buses \
+		(Check excel files)
+	|
+
+potential heavy duty energy switch=
+	heavy duty energy demand*heavy duty vehicle renovation rate
+	~	
+	~		|
+
+heavy duty efficiency=
+	IF THEN ELSE( MIN( ownership cost FCEV long haul , ownership cost diesel long haul )\
+		=ownership cost FCEV long haul , 0.65 , 0.35 )
+	~	
+	~		|
+
+electricity price forecast = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0.038),(2030,0.05),(2050,0.045) ))
+	~	€/kWh
+	~	Ioannis e-mail
+	|
+
+hydrogen price=
+	(CAPEX hydrogen+OPEX hydrogen)*(33.33/electrolyser efficiency)
+	~	€/kg
+	~	33.33 kWh/kg as HVHh2
+	|
+
+electrolyser efficiency=
+	0.63
+	~	
+	~		|
+
+CAPEX hydrogen=
+	electrolyser cost/electrolyser life spand
+	~	€/kWh
+	~		|
+
+electrolyser life spand=
+	60000
+	~	h
+	~		|
+
+electroliser efficiency=
+	0.7
+	~	{%}
+	~		|
+
+electroliser average working hours=
+	4000
+	~	h
+	~		|
+
+electroliser capacity=
+	TOTAL HYDROGEN*33.33/electroliser efficiency/electroliser average working hours/1000
+	~	GW
+	~	Hydrogen demand (tH2) * 1000 (kgH2/tH2) * 33.33 (kWhH2/kgH2) / efficiency \
+		/ working hours (h) *10^-6 (GW/kW)= GW of electroliser capacity
+	|
+
+"dom. navigation energy demand"=
+	"dom. navigation energy consumption"*ICE efficiency
+	~	GWh
+	~		|
+
+"dom. navigation energy consumption" = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,49177),(2050,97795) ))
+	~	GWh
+	~	Considering an annual growth rate of 2.64%
+	|
+
+BEV implementation curve = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0),(2020,0),(2021,0.01),(2022,0.01),(2023,0.02),(2024,0.03),\
+		(2025,0.04),(2026,0.05),(2027,0.07),(2028,0.09),(2029,0.12),(2030,0.16),(2031,0.2),\
+		(2032,0.27),(2033,0.33),(2034,0.41),(2035,0.49),(2036,0.57),(2037,0.65),(2038,0.72)\
+		,(2039,0.79),(2040,0.84),(2041,0.89),(2042,0.91),(2043,0.94),(2044,0.96),(2045,0.97\
+		),(2046,0.98),(2047,0.99),(2048,0.99),(2049,0.996294),(2050,0.998147) ))
+	~	
+	~		|
+
+ICE efficiency=
+	0.45
+	~	
+	~	Considering the same efficiency for all the fossil fuel engines
+	|
+
+"int. navigation energy consumption" = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,501403),(2050,871296) ))
+	~	GWh
+	~	Considering an annual growth of 1,79%\!Year
+	|
+
+"dom. navigation fossil fuel demand"=
+	"dom. navigation energy demand"*(1-BEV implementation curve)
+	~	GWh
+	~		|
+
+decarbonization curve shipping = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0),(2020,0),(2021,0.01),(2022,0.01),(2023,0.02),(2024,0.03),\
+		(2025,0.04),(2026,0.05),(2027,0.07),(2028,0.09),(2029,0.12),(2030,0.16),(2031,0.2),\
+		(2032,0.27),(2033,0.33),(2034,0.41),(2035,0.49),(2036,0.57),(2037,0.65),(2038,0.72)\
+		,(2039,0.79),(2040,0.84),(2041,0.89),(2042,0.91),(2043,0.94),(2044,0.96),(2045,0.97\
+		),(2046,0.98),(2047,0.99),(2048,0.99),(2049,0.996294),(2050,0.998147) ))
+	~	
+	~	COMPLETE WITH BIOFUELS IMPLEMENTATION CURVE
+	|
+
+secondary growth = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0.4),(2050,0.5) ))
+	~	
+	~	At the same time, the
+		share of secondary steel production is expected to increase to 50%, as less scrap \
+		will
+		be exported out of Europe to now serve decarbonisation of steel production in the
+		European market\!year\!share of steel production
+	|
+
+synfuel curve = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0),(2025,0),(2028.48,0.0212121),(2033.4,0.129545),(2036.83,0.231818\
+		),(2039.81,0.354545),(2043.59,0.438636),(2047.54,0.484091),(2050,0.5) ))
+	~	
+	~		|
+
+fossil substitution aviation=
+	electric aircraft+hydrogen aircraft+biofuel+synfuel
+	~	
+	~		|
+
+biofuel=
+	biofuel curve*medium long range
+	~	
+	~		|
+
+biofuel curve = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0),(2025.32,0.00151515),(2028.22,0.0287879),(2031.21,0.0909091\
+		),(2033.31,0.143939),(2035.6,0.215152),(2038.85,0.290909),(2043.85,0.356061),(2050,\
+		0.4) ))
+	~	
+	~		|
+
+synfuel=
+	synfuel curve*medium long range
+	~	
+	~		|
+
+kerosene=
+	aviation-fossil substitution aviation
+	~	
+	~		|
+
+short hydrogen aircraft curve = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0),(2029.98,0.0568182),(2033.58,0.166667),(2037.97,0.583333)\
+		,(2040.78,0.80303),(2044.91,0.912879),(2050,1) ))
+	~	
+	~		|
+
+"HYDROGEN F. STEEL"=
+	"DRI-EAF"*10^6*H2 to steel
+	~	t H2
+	~		|
+
+"commuter/regional"=
+	0.03*aviation
+	~	GWh
+	~		|
+
+medium long range=
+	0.73*aviation
+	~	GWh
+	~		|
+
+electric aircraft=
+	"commuter/regional"*electric aircraft curve
+	~	
+	~		|
+
+electric aircraft curve = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0),(2025.15,0.00378788),(2029.98,0.0530303),(2032.52,0.155303\
+		),(2034.02,0.265152),(2035.16,0.344697),(2037.18,0.518939),(2039.29,0.715909),(2041.13\
+		,0.840909),(2043.85,0.931818),(2046.66,0.977273),(2050,1) ))
+	~	
+	~	\!Year\!share (%)
+	|
+
+hydrogen aircraft=
+	short hydrogen aircraft curve*short range
+	~	GWh
+	~		|
+
+short range=
+	0.24*aviation
+	~	GWh
+	~		|
+
+aviation = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,75721.7),(2030,95170.8),(2040,112645),(2050,130729) ))
+	~	GWh
+	~	That is 1.9% average annual growth per year over the 2017-2040 period. The \
+		traffic growth will be faster in the early years (2018-2030) than in the \
+		late years (2030-2040). Estimated 2.1% (2019-2030), 1.7% (2030-2040), 1.5% \
+		(2040-2050).\!year\!GWh
+	|
+
+"BF-BOF"=
+	primary*(1-decarbonization)
+	~	Mtsteel
+	~		|
+
+decarbonization = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,0),(2020,0),(2021,0.01),(2022,0.01),(2023,0.02),(2024,0.03),\
+		(2025,0.04),(2026,0.05),(2027,0.07),(2028,0.09),(2029,0.12),(2030,0.16),(2031,0.2),\
+		(2032,0.27),(2033,0.33),(2034,0.41),(2035,0.49),(2036,0.57),(2037,0.65),(2038,0.72)\
+		,(2039,0.79),(2040,0.84),(2041,0.89),(2042,0.91),(2043,0.94),(2044,0.96),(2045,0.97\
+		),(2046,0.98),(2047,0.99),(2048,0.99),(2049,0.996294),(2050,0.998147) ))
+	~	{%}
+	~		|
+
+"DRI-EAF"=
+	primary*decarbonization
+	~	Mtsteel
+	~		|
+
+H2 to steel=
+	0.0563
+	~	tH2/tsteel
+	~		|
+
+primary=
+	steel*(1-secondary growth)
+	~	Mtsteel
+	~		|
+
+secondary=
+	steel*secondary growth
+	~	Mtsteel
+	~		|
+
+steel = WITH LOOKUP (
+	Time,
+		([(0,0)-(10,10)],(2019,170),(2040,193),(2050,193) ))
+	~	Mtsteel
+	~	The change in European steel production is taken
+		from Material Economics’ modelling based on EUROFER, which yields a  0.6% yearly
+		increase in the steel stock/capacity up to the 2040s, when it stabilises at 193 \
+		million
+		tonnes per year, up from 170 million tonnes per year today.\!year\!Mt steel
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 2050
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 2019
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Iron and steel
+$192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,89,0
+10,1,steel,647,375,75,30,8,3,0,1,-1,0,0,0,255-128-192,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,2,primary,537,295,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,secondary,769,250,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,4,1,2,1,0,0,0,0,192,0,-1--1--1,,1|(562,356)|
+1,5,1,3,1,0,0,0,0,192,0,-1--1--1,,1|(844,331)|
+10,6,Time,635,448,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,7,6,1,1,0,0,0,0,192,0,-1--1--1,,1|(611,399)|
+10,8,secondary growth,670,306,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,9,8,3,1,0,0,0,0,192,0,-1--1--1,,1|(690,268)|
+1,10,8,2,1,0,0,0,0,192,0,-1--1--1,,1|(609,267)|
+10,11,"BF-BOF",376,252,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,12,"DRI-EAF",566,153,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,13,2,11,1,0,0,0,0,192,0,-1--1--1,,1|(462,310)|
+1,14,2,12,1,0,0,0,0,192,0,-1--1--1,,1|(525,263)|
+10,15,H2 to steel,670,97,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,16,decarbonization,427,182,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,17,16,12,1,0,0,0,0,192,0,-1--1--1,,1|(490,147)|
+1,18,16,11,1,0,0,0,0,192,0,-1--1--1,,1|(389,215)|
+10,19,Time,461,242,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,20,19,16,1,0,0,0,0,192,0,-1--1--1,,1|(457,212)|
+10,21,"HYDROGEN F. STEEL",551,65,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,22,12,21,1,0,0,0,0,192,0,-1--1--1,,1|(544,119)|
+1,23,15,21,1,0,0,0,0,192,0,-1--1--1,,1|(619,66)|
+10,24,Time,721,352,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,25,24,8,1,0,0,0,0,192,0,-1--1--1,,1|(689,350)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Transport
+$192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,93,0
+10,1,Time,-206,651,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,2,Time,-615,378,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,3,Time,-318,409,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,4,Time,102,430,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,5,"int. navigation energy consumption",798,575,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,6,"dom. navigation energy consumption",1158,580,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,7,Time,981,641,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,8,7,5,1,0,0,0,0,192,0,-1--1--1,,1|(881,630)|
+1,9,7,6,1,0,0,0,0,192,0,-1--1--1,,1|(1100,622)|
+10,10,ICE efficiency,1387,543,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,11,"dom. navigation energy demand",1239,494,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,12,10,11,1,0,0,0,0,192,0,-1--1--1,,1|(1317,502)|
+1,13,6,11,1,0,0,0,0,192,0,-1--1--1,,1|(1205,549)|
+10,14,BEV implementation curve,1136,461,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,15,"dom. navigation fossil fuel demand",1232,376,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,16,11,15,1,0,0,0,0,192,0,-1--1--1,,1|(1273,447)|
+1,17,14,15,1,0,0,0,0,192,0,-1--1--1,,1|(1194,444)|
+10,18,Time,1047,538,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,19,18,14,1,0,0,0,0,192,0,-1--1--1,,1|(1102,536)|
+10,20,decarbonization curve shipping,775,306,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,21,Time,770,243,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,22,21,20,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,23,ammonia ICE energy consumption,613,470,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,24,methanol ICE energy consumption,941,468,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,25,20,23,1,0,0,0,0,192,0,-1--1--1,,1|(646,375)|
+1,26,20,24,1,0,0,0,0,192,0,-1--1--1,,1|(899,372)|
+10,27,rail energy demand,1999,553,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,28,Time,1999,633,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,29,rail electricity share,2194,459,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,30,fossil energy demand,1912,470,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,31,fossil energy consumption from rail,1843,349,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,32,biofuels share,1695,501,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,33,diesel locomotive efficiency,1668,390,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,34,28,27,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,35,28,29,1,0,0,0,0,192,0,-1--1--1,,1|(2107,561)|
+1,36,27,30,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,37,29,30,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,38,32,30,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,39,28,32,1,0,0,0,0,192,0,-1--1--1,,1|(1831,595)|
+1,40,33,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,41,30,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,42,29,32,1,0,0,0,0,192,0,-1--1--1,,1|(1995,692)|
+10,43,HYDROGEN METHANOL SHIPPING,1000,382,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,44,24,43,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,45,"synthetic methanol - hydrogen rate",1088,278,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,47,45,43,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,48,46,43,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,49,"HYDROGEN F. AVIATON",-147,104,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,50,"bio kerosene - hydrogen rate",-58,19,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,51,"syn kerosene - hydrogen rate",-246,22,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,52,51,49,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,53,50,49,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,54,5,23,1,0,0,0,0,192,0,-1--1--1,,1|(679,541)|
+1,55,5,24,1,0,0,0,0,192,0,-1--1--1,,1|(878,531)|
+10,56,"int. aviation fossil energy consumption",783,424,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,57,5,56,1,0,0,0,0,192,0,-1--1--1,,1|(778,515)|
+1,58,23,56,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,59,24,56,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,61,HYDROGEN AMMONIA SHIPPING,532,376,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,62,23,61,1,0,0,0,0,192,0,-1--1--1,,1|(579,417)|
+1,63,60,61,1,0,0,0,0,192,0,-1--1--1,,1|(471,429)|
+10,64,"dom. navigation fossil energy consumption",1269,290,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,65,15,64,1,0,0,0,0,192,0,-1--1--1,,1|(1254,344)|
+1,66,10,64,1,0,0,0,0,192,0,-1--1--1,,1|(1353,414)|
+10,67,"int. aviation energy consumption",-421,572,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,68,"dom. aviation energy consumption",45,593,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,69,1,67,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,70,1,68,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,71,"decarbonization curve int. aviation",-430,352,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,72,"synthetic kerosene energy consumption int. aviation",-573,457,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,73,"bio-kerosene energy consumption int. aviation",-274,460,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,74,67,72,1,0,0,0,0,192,0,-1--1--1,,1|(-496,548)|
+1,75,67,73,1,0,0,0,0,192,0,-1--1--1,,1|(-330,535)|
+1,76,71,72,1,0,0,0,0,192,0,-1--1--1,,1|(-526,388)|
+1,77,71,73,1,0,0,0,0,192,0,-1--1--1,,1|(-323,385)|
+10,78,Time,-430,263,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,79,78,71,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,80,"hydrogen energy consumption dom. aviation",50,490,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,81,"decarbonization curve dom. aviation",42,226,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,82,"hydrogen penetration in dom. aviation",48,407,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,83,Time,40,312,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,84,83,81,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,85,"synthetic kerosene energy consumption dom. aviation",-135,457,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,86,"bio-kerosene energy consumption dom. aviation",240,462,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,87,68,85,1,0,0,0,0,192,0,-1--1--1,,1|(-46,558)|
+1,88,68,86,1,0,0,0,0,192,0,-1--1--1,,1|(157,562)|
+1,89,68,80,1,0,0,0,0,192,0,-1--1--1,,1|(51,556)|
+1,90,81,85,1,0,0,0,0,192,0,-1--1--1,,1|(-111,316)|
+1,91,81,86,1,0,0,0,0,192,0,-1--1--1,,1|(211,316)|
+1,92,82,80,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,93,80,85,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,94,80,86,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,95,83,82,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,96,72,49,1,0,0,0,0,192,0,-1--1--1,,1|(-448,245)|
+1,97,73,49,1,0,0,0,0,192,0,-1--1--1,,1|(-258,274)|
+1,98,85,49,1,0,0,0,0,192,0,-1--1--1,,1|(-182,289)|
+1,99,80,49,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,100,86,49,1,0,0,0,0,192,0,-1--1--1,,1|(221,297)|
+10,101,"HYDROGEN F. SHIPPING",759,183,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,102,61,101,1,0,0,0,0,192,0,-1--1--1,,1|(597,232)|
+1,103,43,101,1,0,0,0,0,192,0,-1--1--1,,1|(952,248)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Ammonia
+$192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,100,0
+10,2,"HYDROGEN F. AMMONIA",537,121,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,3,1,2,1,0,0,0,0,192,0,-1--1--1,,1|(424,150)|
+10,4,green hydrogen pentration,682,236,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,5,"ammonia consumption f. agriculture",536,240,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,6,Time,807,264,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,7,6,4,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,8,5,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,9,4,2,1,0,0,0,0,192,0,-1--1--1,,1|(608,135)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*HYDROGEN
+$192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,67,0
+10,1,TOTAL HYDROGEN,236,153,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,"HYDROGEN F. AMMONIA",26,255,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,3,"HYDROGEN F. STEEL",187,371,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,4,2,1,1,0,0,0,0,192,0,-1--1--1,,1|(77,213)|
+1,5,3,1,1,0,0,0,0,192,0,-1--1--1,,1|(198,280)|
+10,6,electroliser capacity,824,182,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,7,1,6,1,0,0,0,0,192,0,-1--1--1,,1|(548,101)|
+10,8,electroliser efficiency,764,73,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,9,electroliser average working hours,889,77,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,10,8,6,1,0,0,0,0,192,0,-1--1--1,,1|(792,138)|
+1,11,9,6,1,0,0,0,0,192,0,-1--1--1,,1|(850,135)|
+10,12,electrolyser cost,863,282,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,13,6,12,1,0,0,0,0,192,0,-1--1--1,,1|(858,226)|
+10,14,CAPEX hydrogen,822,408,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,15,electrolyser life spand,1004,394,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,16,15,14,1,0,0,0,0,192,0,-1--1--1,,1|(930,376)|
+1,17,12,14,1,0,0,0,0,192,0,-1--1--1,,1|(833,348)|
+12,18,0,767,535,89,48,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+OPEX hydrogen is electricity price and added together with CAPEX hydrogen we have hydrogen price
+10,19,electricity price forecast,1316,263,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,20,Time,1319,185,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,21,20,19,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,22,OPEX hydrogen,1234,410,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,23,hydrogen price,1050,533,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,24,14,23,1,0,0,0,0,192,0,-1--1--1,,1|(920,483)|
+1,25,22,23,1,0,0,0,0,192,0,-1--1--1,,1|(1158,489)|
+10,26,electrolyser efficiency,1043,453,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,27,26,23,1,0,0,0,0,192,0,-1--1--1,,1|(1033,492)|
+10,28,"HYDROGEN F. HEAVY DUTY ROAD TRANSPORT",484,218,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,29,28,1,1,0,0,0,0,192,0,-1--1--1,,1|(362,180)|
+10,30,"HYDROGEN F. INDUSTRIAL HEAT",247,491,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,31,30,1,1,0,0,0,0,192,0,-1--1--1,,1|(249,327)|
+10,32,Olefin production,70,397,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,33,"HYDROGEN F. OLEFIN",37,328,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,34,33,1,1,0,0,0,0,192,0,-1--1--1,,1|(106,257)|
+10,35,"HYDROGEN F. AVIATON",573,410,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,36,HYDROGEN METHANOL SHIPPING,439,442,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,37,35,1,1,0,0,0,0,192,0,-1--1--1,,1|(440,260)|
+10,38,"HYDROGEN F. REFINERY",84,403,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,39,HYDROGEN AMMONIA SHIPPING,375,504,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,40,38,1,1,0,0,0,0,192,0,-1--1--1,,1|(143,281)|
+10,41,"HYDROGEN F. SHIPPING",379,382,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,42,41,1,1,0,0,0,0,192,0,-1--1--1,,1|(320,269)|
+10,43,electricity taxes,1181,317,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,44,"electricity (sensitivity)",1176,265,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,45,electricity price,1293,339,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,46,19,45,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,47,44,45,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,48,45,22,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Refinery
+$192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,100,0
+10,1,heavy duty fossil energy consumption,483,517,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,2,light duty fossil energy consumption,639,527,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,3,"HYDROGEN F. REFINERY",562,163,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,fossil energy consumption from rail,760,438,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,5,decarbonization curve refinery,560,253,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,6,5,3,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,7,Time,562,319,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,8,7,5,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Industrial heat
+$192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,100,0
+10,1,"Natural gas consumption f. industrial heat",376,320,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,"Hydrogen implementation curve f. industrial heat",188,270,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,"HYDROGEN F. INDUSTRIAL HEAT",378,153,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,Time,116,340,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,5,4,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,6,1,3,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,7,2,3,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Road transport
+$192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,79,0
+10,1,total energy demand,1128,-20,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,light duty energy demand,761,41,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,heavy duty energy demand,1498,49,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,Time,1117,-90,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,5,4,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,6,1,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,7,1,3,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,8,potential heavy duty energy switch,1588,174,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,9,light duty vehicle renovation rate,567,64,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,10,heavy duty vehicle renovation rate,1709,77,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,11,3,8,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,12,10,8,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,13,ownership cost diesel urban,391,346,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,14,ownership cost BEV urban,391,414,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,15,ownership cost FCEV long haul,1855,430,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,16,electricity price forecast,197,413,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,17,hydrogen price,2024,434,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,18,17,15,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,19,light duty efficiency,612,377,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,20,13,19,1,0,0,0,0,192,0,-1--1--1,,1|(511,306)|
+1,21,14,19,1,0,0,0,0,192,0,-1--1--1,,1|(495,445)|
+10,22,ownership cost diesel long haul,1860,301,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,23,light duty fossil energy demand,657,286,60,20,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,24,19,23,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,25,2,23,1,0,0,0,0,192,1,-1--1--1,,1|(464,62)|
+11,26,0,721,208,8,6,1,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,27,potential light duty energy switch,628,190,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,28,2,27,1,0,0,0,0,192,0,-1--1--1,,1|(676,108)|
+1,29,9,27,1,0,0,0,0,192,0,-1--1--1,,1|(574,115)|
+1,30,27,23,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,31,light duty BEV energy demand,661,451,60,20,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,32,19,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,33,27,31,1,0,0,0,0,192,0,-1--1--1,,1|(968,454)|
+10,34,light duty fossil energy consumption,830,286,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,35,light duty BEV energy consumption,830,453,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,36,23,34,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,37,31,35,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,38,2,35,1,0,0,0,0,192,0,-1--1--1,,1|(949,284)|
+12,39,0,390,182,91,41,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+If the rate of change is 5%, cars changed in the first year wont be changed until 20 years ?????
+10,40,heavy duty efficiency,1658,371,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,41,heavy duty fossil energy demand,1591,289,60,27,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,42,heavy duty FCEV energy demand,1584,461,63,27,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,43,heavy duty fossil energy consumption,1391,290,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,44,heavy duty FCEV enery consumption,1398,465,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,45,22,40,1,0,0,0,0,192,0,-1--1--1,,1|(1747,309)|
+1,46,15,40,1,0,0,0,0,192,0,-1--1--1,,1|(1759,431)|
+1,47,40,41,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,48,40,42,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,49,41,43,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,50,42,44,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,51,8,41,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,52,3,41,1,0,0,0,0,192,1,-1--1--1,,1|(1817,80)|
+1,53,8,42,1,0,0,0,0,192,0,-1--1--1,,1|(1197,354)|
+1,54,3,44,1,0,0,0,0,192,0,-1--1--1,,1|(1285,271)|
+10,55,"HYDROGEN F. HEAVY DUTY ROAD TRANSPORT",1384,606,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,56,44,55,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,57,electricity taxes,199,450,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,58,57,14,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,60,hydrogen price,205,509,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,61,59,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,63,62,22,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,64,ownership cost FCEV urban,389,505,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,65,hydrogen price,215,527,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,66,65,64,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,67,ownerhip cost BEV long haul,1869,547,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,68,electricity price forecast,2036,548,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,69,electricity taxes,2030,603,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,70,69,67,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,71,electricity price,204,411,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,72,71,14,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,73,electricity price,2027,536,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,74,73,67,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Olefins
+$192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,100,0
+10,1,Olefin production,478,377,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,"bio-naphfta demand for olefin production",284,215,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,"naphta-olefin rate",465,290,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,decarbonization curve for olefin production,473,210,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,5,synthetic naphfta demand for olefin production,663,217,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,6,1,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,7,3,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,8,4,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,9,4,5,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,10,1,5,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,11,Time,470,129,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,12,11,4,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,13,"HYDROGEN F. OLEFIN",456,38,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,14,Time,596,406,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,15,14,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,16,3,5,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,17,"hydrogen-bionaphfta rate",189,87,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,18,"hydrogen-syntheticnaphfta rate",731,74,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,19,2,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,20,5,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,21,17,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,22,18,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 9
+$-1--1--1,0,Courier New|10||0-0-0|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,0
+10,1,"int. navigation energy consumption 0",745,-23,73,27,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,"ammonia ICE energy consumption.",683,209,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,"methanol ICE energy consumption.",833,209,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,"int. shipping fossil energy consumption.",519,210,67,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,5,1,4,0,0,0,0,0,192,1,-1--1--1,,1|(0,0)|
+10,6,"bio-methanol cost",832,596,62,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,7,hydrogen price,741,684,47,20,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,8,ammonia cost,704,596,62,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,9,fossil shipping fuel costs,572,596,52,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,10,7,6,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,11,7,8,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,12,CARBON TAX,612,688,62,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,13,12,9,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,14,ship lifetime,748,100,42,42,11,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,15,BIOMASS PRICE,917,688,42,20,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,16,15,6,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,17,fleet reinvestment,1037,324,67,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,18,20,3,100,0,0,22,0,192,0,-1--1--1,,1|(858,244)|
+1,19,20,17,4,0,0,22,0,192,0,-1--1--1,,1|(858,324)|
+11,20,0,858,257,8,6,33,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,21,MeOH decay,858,285,35,20,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,22,24,2,100,0,0,22,0,192,0,-1--1--1,,1|(726,249)|
+1,23,24,17,4,0,0,22,0,192,0,-1--1--1,,1|(726,324)|
+11,24,0,726,267,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,25,NH3 decay,758,267,24,1,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,26,28,4,100,0,0,22,0,192,0,-1--1--1,,1|(578,258)|
+1,27,28,17,4,0,0,22,0,192,0,-1--1--1,,1|(578,324)|
+11,28,0,578,283,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,29,Fossil decay,610,283,24,19,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,30,14,29,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,31,4,29,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,32,14,24,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,33,2,24,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,34,3,20,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,35,14,20,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,36,1,17,0,1,0,0,0,192,1,-1--1--1,,1|(0,0)|
+1,37,14,17,0,1,0,0,0,192,1,-1--1--1,,1|(0,0)|
+10,38,fleet reinvested,698,450,52,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,39,41,17,100,0,0,22,0,192,0,-1--1--1,,1|(906,324)|
+1,40,41,38,4,0,0,22,0,192,0,-1--1--1,,1|(906,450)|
+11,41,0,906,390,6,8,34,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,42,investments,940,390,26,15,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,43,17,42,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+12,44,48,1104,151,25,15,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,45,47,44,100,0,0,22,0,192,0,-1--1--1,,1|(1049,151)|
+1,46,47,17,4,0,0,22,0,192,0,-1--1--1,,1|(1049,273)|
+11,47,0,1049,237,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,48,energy increase,1049,267,47,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,49,1,48,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+11,50,0,641,333,8,6,1,3,0,0,1,0,0,0,0,0,0,0,0,0
+1,51,53,38,100,0,0,22,0,192,0,-1--1--1,,1|(523,450)|
+1,52,53,4,4,0,0,22,0,192,0,-1--1--1,,1|(523,301)|
+11,53,0,523,370,8,6,33,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,54,fossil investment,523,400,52,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,55,57,38,100,0,0,22,0,192,0,-1--1--1,,1|(644,450)|
+1,56,57,2,4,0,0,22,0,192,0,-1--1--1,,1|(644,298)|
+11,57,0,644,365,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,58,NH3 investment,676,365,24,35,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,59,61,38,100,0,0,22,0,192,0,-1--1--1,,1|(727,414)|
+1,60,61,3,4,0,0,22,0,192,0,-1--1--1,,1|(833,395)|
+11,61,0,727,395,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,62,MeOH investment,780,395,45,1,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,63,38,61,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,64,38,58,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,65,38,54,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,66,calc shipping switch,698,515,42,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,67,9,66,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,68,8,66,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,69,6,66,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,70,66,53,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,71,66,57,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,72,66,61,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,73,Time,940,-26,26,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,74,73,1,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,75,shipping hydrogen demand,523,29,42,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,76,2,75,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,77,3,75,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,78,OIL PRICE,453,683,57,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,79,78,9,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,80,"NH3/H2",266,372,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,81,"MeOH/H2",273,454,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,82,80,75,1,1,0,0,0,192,0,-1--1--1,,1|(341,180)|
+1,83,81,75,1,1,0,0,0,192,0,-1--1--1,,1|(384,212)|
+1,84,80,8,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,85,81,6,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,86,"ELECTRICITY PRICE.",850,751,62,20,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,87,86,8,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,88,86,6,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*INPUT PARAMETERS
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,0
+10,1,CARBON TAX,399,173,47,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,GAS PRICE,570,173,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,"ELECTRICITY PRICE.",712,173,51,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,BIOMASS PRICE,882,173,60,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,5,ELECTRICITY TAX,1048,173,51,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,6,Time,704,88,29,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,7,6,1,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,8,6,2,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,9,6,3,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,10,6,4,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,11,OIL PRICE,266,173,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,12,6,11,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+///---\\\
+:TABLE 1
+:TITLE 1
+:PRETTYNUM
+:FONT Arial Unicode MS|12||0-0-0
+:VAR Time
+:DATASET 
+:L<%^E!@
+4:Time
+5:ELECTRICITY TAX
+9:bio-fuels
+19:100,8
+24:2019
+25:2050
+26:2050
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:1
+72:0
+73:0
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:0
+41:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:0
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Courier|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

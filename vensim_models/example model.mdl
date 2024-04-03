@@ -1,0 +1,154 @@
+{UTF-8}
+Acceptability=
+	Green Movement + (1-Green Movement) * Sigmoid + (1-Green Movement - (1-Green Movement\
+		) * Sigmoid) * EC Users/(EC Users+SMR Users)
+	~	
+	~		|
+
+Adopters=
+	Users renovating*Acceptability
+	~	
+	~		|
+
+EC price=
+	15*(Green Hydrogen Demand/20)^0.8*20/Green Hydrogen Demand
+	~	
+	~		|
+
+EC Users= INTEG (
+	Adopters,
+		0.1)
+	~	
+	~		|
+
+Green Hydrogen Demand=
+	20
+	~	
+	~		|
+
+Green Movement=
+	0.1
+	~	
+	~		|
+
+Renovation Rate=
+	1/25
+	~	
+	~	Inverse of the Lifetime of SMR
+	|
+
+Sigmoid=
+	1/(1+EXP(EC price-SMR price))
+	~	
+	~		|
+
+SMR price=
+	20
+	~	
+	~		|
+
+SMR Users= INTEG (
+	-Adopters,
+		400-0.1)
+	~	
+	~		|
+
+Users renovating=
+	Renovation Rate*SMR Users
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 2050
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 2022
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP 
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,0
+10,1,SMR Users,532,245,60,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,EC Users,1034,245,42,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,3,5,1,100,0,0,22,0,192,0,-1--1--1,,1|(684,243)|
+1,4,5,2,4,0,0,22,0,192,0,-1--1--1,,1|(890,243)|
+11,5,0,783,243,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,6,Adopters,783,273,45,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,7,Acceptability,794,393,43,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,8,2,7,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,9,1,7,1,0,0,0,0,192,0,-1--1--1,,1|(640,344)|
+1,10,7,6,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,11,Renovation Rate,528,292,53,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,12,Users renovating,663,275,52,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,13,1,12,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,14,11,12,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,15,12,6,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,16,Green Hydrogen Demand,1179,348,51,25,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,17,SMR price,688,527,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,18,EC price,935,531,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,19,Green Movement,988,343,54,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,20,19,7,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,21,Sigmoid,797,483,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,22,17,21,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,23,18,21,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,24,21,7,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,25,16,18,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 2
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,0
+///---\\\
+:L<%^E!@
+1:current.vdfx
+4:Time
+5:SMR Users
+9:current
+19:100,0
+24:2022
+25:2050
+26:2050
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Bahnschrift Condensed|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1
