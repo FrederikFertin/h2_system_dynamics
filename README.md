@@ -36,14 +36,22 @@ Costs of energy for each sector is needed.
 ### Examples:
 #### Shipping:
 Determine area of hydrogen usage:
+
 Marine fuels
+
 Determine competing technologies:
+
 MeOH, NH3, MDO, (LNG, LPG, LBG, MGO)...
+
 Need {capex, lifetime, opex, resource needs, emission factor, capacity factor} of each technology to calculate cost of each technology/determine which one is to be invested in.
 
 #### Cement:
 Determine area of hydrogen usage:
+
 High temperature heat >1000*C
+
 Determine competing technologies:
+
 Electric arc, hydrogen combustion, nat. gas direct heat?
+
 Need {capex, lifetime, opex, resource needs, emission factor, capacity factor} of each technology to calculate cost of each technology/determine which one is to be invested in.
