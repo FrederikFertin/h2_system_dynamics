@@ -5,110 +5,214 @@ import matplotlib.pyplot as plt
 import numpy as np
 import data_loading
 
+# Function to plot the results of the model which expects two dict runs as input
+def plot_results(run1, run2):
+    run1_name = list(run1.keys())[0]
+    run2_name = list(run2.keys())[0]
+    run1 = run1[run1_name]
+    run2 = run2[run2_name]
 
-def plot_stocks(stocks):
-    fig, axs = plt.subplots(int(len(stocks)/2), 2, figsize=(10, 5*len(stocks)))
+    fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+    ax1 = axs[0, 0]
+    ax2 = axs[0, 1]
+    ax3 = axs[1, 0]
+    ax4 = axs[1, 1]
 
-    for i, stock in enumerate(stocks):
-        ax = axs[int(np.round(i/4+0.1)), np.round(i%2) ]
-        ax.plot(stock.index, stock["SMR Users"], label="SMR Users (LT={})".format(1/stock["Green Hydrogen Demand"].iloc[0]))
-        ax.plot(stock.index, stock["Adopters"], label="Adopters (LT={})".format(1/stock["Green Hydrogen Demand"].iloc[0]))
-        ax.plot(stock.index, stock["EC Users"], label="EC Users (LT={})".format(1/stock["Green Hydrogen Demand"].iloc[0]))
-        ax2 = ax.twinx()
-        ax2.plot(stock.index, stock["EC price"], label="EC price (LT={})".format(1/stock["Green Hydrogen Demand"].iloc[0]), color='black')
-        
-        h, l = ax.get_legend_handles_labels()
-        h2, l2 = ax2.get_legend_handles_labels()
-        ax.legend(h+h2, l+l2, loc='best')
-        
-        
+    # PLot run 1's consumption
+    ax1.plot(run1.index, run1["check"], label="Total consumption", linestyle='-', color='grey')
+    ax1.plot(run1.index, run1["HFO shipping consumption"], label="HFO", linestyle='--', color='black')
+    ax1.plot(run1.index, run1["NH3 shipping consumption"], label="NH3", linestyle=':', color='blue')
+    ax1.plot(run1.index, run1["MeOH shipping consumption"], label="MeOH", linestyle='-.', color='green')
+    ax1.title.set_text(f"{run1_name} - Consumption")
+
+    # Plot run 2's consumption
+    ax2.plot(run2.index, run2["check"], label="Total consumption", linestyle='-', color='grey')
+    ax2.plot(run2.index, run2["HFO shipping consumption"], label="HFO", linestyle='--', color='black')
+    ax2.plot(run2.index, run2["NH3 shipping consumption"], label="NH3", linestyle=':', color='blue')
+    ax2.plot(run2.index, run2["MeOH shipping consumption"], label="MeOH", linestyle='-.', color='green')
+    ax2.title.set_text(f"{run2_name} - Consumption")
+    
+    # PLot run 1's costs
+    ax3.plot(run1.index, run1["HFO cost"]*1000, label="HFO", linestyle='--', color='black')
+    ax3.plot(run1.index, run1["NH3 cost"]*1000, label="NH3", linestyle=':', color='blue')
+    ax3.plot(run1.index, run1["MeOH cost"]*1000, label="MeOH", linestyle='-.', color='green')
+    ax3.title.set_text(f"{run1_name} - Costs")
+
+    # Plot run 2's costs
+    ax4.plot(run2.index, run2["HFO cost"]*1000, label="HFO", linestyle='--', color='black')
+    ax4.plot(run2.index, run2["NH3 cost"]*1000, label="NH3", linestyle=':', color='blue')
+    ax4.plot(run2.index, run2["MeOH cost"]*1000, label="MeOH", linestyle='-.', color='green')
+    ax4.title.set_text(f"{run2_name} - Costs")
+
+    # Set labels
+    ax1.set_xlabel("Year")
+    ax2.set_xlabel("Year")
+    ax3.set_xlabel("Year")
+    ax4.set_xlabel("Year")
+
+    ax1.set_ylabel("Shipping consumption [GWh]")
+    ax2.set_ylabel("Shipping consumption [GWh]")
+    ax3.set_ylabel("Price [€/GJ]")
+    ax4.set_ylabel("Price [€/GJ]")
+
+    # Plot legend in each subplot
+    ax1.legend(loc='best')
+    ax2.legend(loc='best')
+    ax3.legend(loc='best')
+    ax4.legend(loc='best')
+
+    for ax in axs.flatten():
+        ax.grid(alpha=0.5)
+
     plt.show()
+
+# Function to plot the costs of the model which expects two dict runs as input
+def plot_costs(run1, run2):
+    run1_name = list(run1.keys())[0]
+    run2_name = list(run2.keys())[0]
+    run1 = run1[run1_name]
+    run2 = run2[run2_name]
+
+    fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+    ax1 = axs[0, 0]
+    ax2 = axs[0, 1]
+    ax3 = axs[1, 0]
+    ax4 = axs[1, 1]
+
+    # Plot run 1's investments
+    ax1.plot(run1.index, run1["HFO investment level"], label="HFO", linestyle='--', color='black')
+    ax1.plot(run1.index, run1["NH3 investment level"], label="NH3", linestyle=':', color='blue')
+    ax1.plot(run1.index, run1["MeOH investment level"], label="MeOH", linestyle='-.', color='green')
+    ax1.title.set_text(f"{run1_name} - Investments")
+
+    # Plot run 2's investments
+    ax2.plot(run2.index, run2["HFO investment level"], label="HFO", linestyle='--', color='black')
+    ax2.plot(run2.index, run2["NH3 investment level"], label="NH3", linestyle=':', color='blue')
+    ax2.plot(run2.index, run2["MeOH investment level"], label="MeOH", linestyle='-.', color='green')
+    ax2.title.set_text(f"{run2_name} - Investments")
+
+    # Plot run 1's prices
+    ax3_2 = ax3.twinx()
+    ax3_2.plot(run1.index, run1["carbon_tax"], label="CO2 tax", linestyle='--', color='grey')
+    ax3.plot(run1.index, run1["oil_price"], label="Oil price", linestyle='-.', color='black')
+    ax3.plot(run1.index, run1["hydrogen_price"]/0.12, label="H2 price", linestyle=':', color='blue')
+    ax3.title.set_text(f"{run1_name} - Prices")
+
+    # Plot run 2's prices
+    ax4_2 = ax4.twinx()
+    ax4_2.plot(run2.index, run2["carbon_tax"], label="CO2 tax", linestyle='--', color='grey')
+    ax4.plot(run2.index, run2["oil_price"], label="Oil price", linestyle='-.', color='black')
+    ax4.plot(run2.index, run2["hydrogen_price"]/0.12, label="H2 price", linestyle=':', color='blue')
+    ax4.title.set_text(f"{run2_name} - Prices")
+
+    # Set labels
+    ax1.set_xlabel("Year")
+    ax2.set_xlabel("Year")
+    ax3.set_xlabel("Year")
+    ax4.set_xlabel("Year")
+
+    ax1.set_ylabel("Investment level [fraction]")
+    ax2.set_ylabel("Investment level [fraction]")
+    ax3.set_ylabel("Price [€/GJ]")
+    ax3_2.set_ylabel("Price [€/tCO2]", color='grey')
+    ax4.set_ylabel("Price [€/GJ]")
+    ax4_2.set_ylabel("Price [€/tCO2]", color='grey')
+    
+    # Collect legend handles and labels in each subplot
+    h1, l1 = ax1.get_legend_handles_labels()
+    h2, l2 = ax2.get_legend_handles_labels()
+    h3, l3 = ax3.get_legend_handles_labels()
+    h4, l4 = ax4.get_legend_handles_labels()
+    h3_2, l3_2 = ax3_2.get_legend_handles_labels()
+    h4_2, l4_2 = ax4_2.get_legend_handles_labels()
+
+    # Plot legend in each subplot
+    ax1.legend(h1, l1, loc='best')
+    ax2.legend(h2, l2, loc='best')
+    ax3.legend(h3+h3_2, l3+l3_2, loc='best')
+    ax4.legend(h4+h4_2, l4+l4_2, loc='best')
+
+    for ax in axs.flatten():
+        ax.grid(alpha=0.5)
+
+    plt.show()
+
+
 
 ### ------- Load model from Vensim mdl file ------- ###
 cwd = os.getcwd()
 
 # Specify the file path of the Vensim model
-model_file = os.path.join(cwd,"vensim_models/Actualizado_new_flow.mdl")
+model_file = os.path.join(cwd,"vensim_models/Actualizado_new_switch.mdl")
 
 # Load the model using the `load` function from `pysd`
 model = pysd.read_vensim(model_file, split_views = True)
 
 # Now you can use the `model` object to interact with the Vensim model
+stocks_of_interest = ["hydrogen_price","oil_price", "carbon_tax",
+                                 "int shipping consumption", "HFO shipping consumption",
+                                 "NH3 shipping consumption", "MeOH shipping consumption",
+                                 "shipping hydrogen demand",
+                                 "fleet reinvestment",
+                                 "HFO investment level", "NH3 investment level", "MeOH investment level",
+                                 "HFO cost", "NH3 cost", "MeOH cost",
+                                 "check"]
+
 # For example, you can access model variables, run simulations, etc.
-run1 = model.run(return_columns=["hydrogen_price","oil_price", "carbon_tax", "int shipping consumption", "int shipping fossil energy consumption", "ammonia shipping consumption", "methanol shipping consumption", "shipping hydrogen demand"])
+run1 = model.run(return_columns=stocks_of_interest)
+run1_save = { "Vensim params" : run1 }
 
 ### ------- Load new data at run time ------- ###
 dl = data_loading.data_loading_class()
 carbon_taxes = dl.load_carbon_taxes()
 gas_prices = dl.load_gas_prices()
 oil_prices = dl.load_oil_prices()
-woodchip_prices = dl.load_woodchip_prices()
-print(dl.load_carbon_taxes())
+woodchip_prices = dl.load_woodchip_prices(sensitivity=1.5)
 
 ### ------- Run model with new data ------- ###
 model.set_components({"carbon_tax": carbon_taxes})
 model.set_components({"gas_price": gas_prices, "oil_price": oil_prices})
 model.set_components({"biomass_price": woodchip_prices})
 
-run2 = model.run(return_columns=["hydrogen_price", "oil_price", "carbon_tax", "int shipping consumption", "int shipping fossil energy consumption", "ammonia shipping consumption", "methanol shipping consumption", "shipping hydrogen demand"])
 
-### ------- Plot results ------- ###
-# Plot run and run2 together
-fig, ax1 = plt.subplots(figsize=(10, 5))
-ax2 = ax1.twinx()
-ax1.plot(run1.index, run1["int shipping consumption"], label="Total consumption", linestyle='-', color='grey')
-ax1.plot(run1.index, run1["int shipping fossil energy consumption"], label="MDO 1", linestyle='--', color='blue')
-ax1.plot(run1.index, run1["ammonia shipping consumption"], label="NH3 1", linestyle=':', color='blue')
-ax1.plot(run1.index, run1["methanol shipping consumption"], label="MeOH 1", linestyle='-.', color='blue')
+run2 = model.run(return_columns=stocks_of_interest)
+run2_save = { "Base" : run2 }
 
-ax1.plot(run2.index, run2["int shipping fossil energy consumption"], label="MDO 2", linestyle='--', color='red')
-ax1.plot(run2.index, run2["ammonia shipping consumption"], label="NH3 2", linestyle=':', color='red')
-ax1.plot(run2.index, run2["methanol shipping consumption"], label="MeOH 2", linestyle='-.', color='red')
+stocks_of_interest.append("electricity_price")
+model.set_components({"electricity_price": 0.0})
+run7 = model.run(return_columns=stocks_of_interest)
+run7_save = { "Electricity prices 0" : run7 }
 
-ax2.plot(run1.index, run1["shipping hydrogen demand"], label="H2 demand 1", linestyle='-', color='blue',alpha=0.5)
-ax2.plot(run2.index, run2["shipping hydrogen demand"], label="H2 demand 2", linestyle='-', color='red', alpha=0.5)
+plot_results(run2_save, run7_save)
+plot_costs(run2_save, run7_save)
 
-# set same y limits
-ax1.set_ylim(0, 10**6)
-ax2.set_ylim(0, 2*10**7)
+plot_results(run2_save, run1_save)
+plot_costs(run2_save, run1_save)
 
-ax1.set_xlabel("Time")
-ax1.set_ylabel("Shipping consumption [GWh]")
-ax2.set_ylabel("Hydrogen shipping demand [t H2]")
+carbon_taxes_seamaps = dl.load_carbon_taxes("seamaps")
+run3 = model.run(return_columns=stocks_of_interest, params={"carbon_tax": carbon_taxes_seamaps})
+run3_save = { "Seamaps CO2-Tax" : run3 }
 
-# collect legend handles and labels
-h1, l1 = ax1.get_legend_handles_labels()
-h2, l2 = ax2.get_legend_handles_labels()
-# merge legends
-ax1.legend(h1+h2, l1+l2, loc='best')
-ax1.grid(alpha=0.5)
+plot_results(run2_save, run3_save)
+plot_costs(run2_save, run3_save)
 
-plt.show()
+oil_prices_150 = dl.load_oil_prices(sensitivity=1.5)
+run4 = model.run(return_columns=stocks_of_interest, params={"oil_price": oil_prices_150, "carbon_tax": carbon_taxes_seamaps})
+run4_save = { "Oil 150%, Seamaps CO2-Tax" : run4 }
 
-fig, ax1 = plt.subplots(figsize=(10, 5))
-ax2 = ax1.twinx()
-ax2.plot(run1.index, run1["carbon_tax"]/1000, label="CO2 tax 1", linestyle='--', color='blue')
-ax2.plot(run2.index, run2["carbon_tax"]/1000, label="CO2 tax 2", linestyle='--', color='red')
-ax1.plot(run1.index, run1["oil_price"], label="Oil price 1", linestyle='-.', color='blue')
-ax1.plot(run2.index, run2["oil_price"], label="Oil price 2", linestyle='-.', color='red')
-ax1.plot(run1.index, run1["hydrogen_price"]/0.12, label="H2 price 1", linestyle=':', color='blue')
-ax1.plot(run2.index, run2["hydrogen_price"]/0.12, label="H2 price 2", linestyle=':', color='red')
+plot_results(run2_save, run4_save)
+plot_costs(run2_save, run4_save)
 
-#ax2.plot(run1.index, run1["shipping hydrogen demand"], label="hydrogen shipping demand", linestyle='-', color='blue',alpha=0.5)
-#ax2.plot(run2.index, run2["shipping hydrogen demand"], label="hydrogen shipping demand", linestyle='-', color='red', alpha=0.5)
+woodchip_prices = dl.load_woodchip_prices(sensitivity=1.5)
+run5 = model.run(return_columns=stocks_of_interest, params={"biomass_price": woodchip_prices, "oil_price" : oil_prices})
+run5_save = { "Woodchip 150%" : run5 }
 
-# set same y limits
-#ax1.set_ylim(0, 20)
+plot_results(run2_save, run5_save)
+plot_costs(run2_save, run5_save)
 
-ax1.set_xlabel("Time")
-ax2.set_ylabel("Carbon tax [€/kgCO2]")
-ax1.set_ylabel("Fuel price [€/GJ]")
+electricity_prices = dl.load_electricity_prices()
+run6 = model.run(return_columns=stocks_of_interest, params={"electricity_price": electricity_prices})
+run6_save = { "Electricity prices updated" : run6 }
 
-# collect legend handles and labels
-h1, l1 = ax1.get_legend_handles_labels()
-h2, l2 = ax2.get_legend_handles_labels()
-# merge legends
-ax1.legend(h1+h2, l1+l2, loc='best')
-ax1.grid(alpha=0.5)
-
-plt.show()
+plot_results(run2_save, run6_save)
+plot_costs(run2_save, run6_save)

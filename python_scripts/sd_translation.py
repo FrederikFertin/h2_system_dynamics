@@ -99,3 +99,24 @@ ax.legend(loc='upper left')
 ax2.legend(loc='upper right')
 
 plt.show()
+
+# Function to plot the results
+def plot_results(run1, run2):
+    fig, ax1 = plt.subplots(figsize=(10, 5))
+    ax2 = ax1.twinx()
+    ax1.plot(run1.index, run1["int shipping consumption"], label="Total consumption", linestyle='-', color='grey')
+    ax1.plot(run1.index, run1["int shipping fossil energy consumption"], label="MDO 1", linestyle='--', color='blue')
+    ax1.plot(run1.index, run1["ammonia shipping consumption"], label="NH3 1", linestyle=':', color='blue')
+    ax1.plot(run1.index, run1["methanol shipping consumption"], label="MeOH 1", linestyle='-.', color='blue')
+
+    ax1.plot(run2.index, run2["int shipping fossil energy consumption"], label="MDO 2", linestyle='--', color='red')
+    ax1.plot(run2.index, run2["ammonia shipping consumption"], label="NH3 2", linestyle=':', color='red')
+    ax1.plot(run2.index, run2["methanol shipping consumption"], label="MeOH 2", linestyle='-.', color='red')
+
+    ax2.plot(run1.index, run1["shipping hydrogen demand"], label="Shipping Hydrogen Demand 1", linestyle='-', color='black')
+    ax2.plot(run2.index, run2["shipping hydrogen demand"], label="Shipping Hydrogen Demand 2", linestyle='--', color='black')
+
+    ax1.legend(loc='best')
+    ax2.legend(loc='best')
+
+    plt.show()
