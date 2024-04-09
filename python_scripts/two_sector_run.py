@@ -1,10 +1,11 @@
-import pysd
+
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import data_loading
 
+import pysd
 ### ------- Load model from Vensim mdl file ------- ###
 cwd = os.getcwd()
 
@@ -19,3 +20,5 @@ base_run = model.run()
 base_run.plot()
 plt.title("Base run")
 plt.show()
+
+

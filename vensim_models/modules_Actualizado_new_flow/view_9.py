@@ -93,7 +93,7 @@ def calc_shipping_switch():
     name="energy increase",
     comp_type="Stateful",
     comp_subtype="Delay",
-    depends_on={"time": 1, "int_shipping_consumption": 1, "_delay_energy_increase": 1},
+    depends_on={"time": 1, "_delay_energy_increase": 1, "int_shipping_consumption": 1},
     other_deps={
         "_delay_energy_increase": {
             "initial": {"int_shipping_consumption": 1},
@@ -363,8 +363,8 @@ def ship_lifetime():
     depends_on={
         "methanol_shipping_consumption": 1,
         "meohh2": 1,
-        "nh3h2": 1,
         "ammonia_shipping_consumption": 1,
+        "nh3h2": 1,
     },
 )
 def shipping_hydrogen_demand():

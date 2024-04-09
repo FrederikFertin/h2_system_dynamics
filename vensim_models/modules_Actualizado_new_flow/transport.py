@@ -536,9 +536,9 @@ def hydrogen_energy_consumption_dom_aviation():
         "biokerosene_energy_consumption_dom_aviation": 1,
         "biokerosene_energy_consumption_int_aviation": 1,
         "bio_kerosene_hydrogen_rate": 1,
-        "syn_kerosene_hydrogen_rate": 1,
-        "synthetic_kerosene_energy_consumption_int_aviation": 1,
         "synthetic_kerosene_energy_consumption_dom_aviation": 1,
+        "synthetic_kerosene_energy_consumption_int_aviation": 1,
+        "syn_kerosene_hydrogen_rate": 1,
         "hydrogen_energy_consumption_dom_aviation": 1,
     },
 )
@@ -583,8 +583,8 @@ def hydrogen_f_shipping():
     comp_subtype="Normal",
     depends_on={
         "methanol_ice_energy_consumption": 1,
-        "synthetic_methanol_hydrogen_rate": 1,
         "biomethanol_hydrogen_rate": 1,
+        "synthetic_methanol_hydrogen_rate": 1,
     },
 )
 def hydrogen_methanol_shipping():

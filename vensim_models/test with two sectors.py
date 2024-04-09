@@ -109,8 +109,8 @@ def time_step():
             "step": {
                 "demand_distribution_s1": 1,
                 "renorate_s1": 1,
-                "demand_total_s1": 1,
                 "demand_annual_increase_s1": 1,
+                "demand_total_s1": 1,
             },
         }
     },
@@ -140,9 +140,9 @@ _integ_alternative_fuel_demand_s1 = Integ(
             "initial": {},
             "step": {
                 "demand_distribution_s2": 1,
+                "demand_total_s2": 1,
                 "renorate_s2": 1,
                 "demand_annual_increase_s2": 1,
-                "demand_total_s2": 1,
             },
         }
     },
@@ -484,8 +484,8 @@ _integ_fossil_demand_s1 = Integ(
             "step": {
                 "demand_distribution_s2": 1,
                 "demand_annual_increase_s2": 1,
-                "renorate_s2": 1,
                 "demand_total_s2": 1,
+                "renorate_s2": 1,
             },
         }
     },
