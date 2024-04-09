@@ -43,6 +43,7 @@ carbon_taxes = dl.load_carbon_taxes()
 gas_prices = dl.load_gas_prices()
 oil_prices = dl.load_oil_prices()
 woodchip_prices = dl.load_woodchip_prices()
+print(dl.load_carbon_taxes())
 
 ### ------- Run model with new data ------- ###
 model.set_components({"carbon_tax": carbon_taxes})
