@@ -112,8 +112,8 @@ def decarbonization_curve_for_olefin_production():
     depends_on={
         "synthetic_naphfta_demand_for_olefin_production": 1,
         "hydrogensyntheticnaphfta_rate": 1,
-        "hydrogenbionaphfta_rate": 1,
         "bionaphfta_demand_for_olefin_production": 1,
+        "hydrogenbionaphfta_rate": 1,
     },
 )
 def hydrogen_f_olefin():

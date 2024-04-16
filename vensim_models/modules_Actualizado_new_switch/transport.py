@@ -499,18 +499,23 @@ def fossil_energy_demand():
     )
 
 
+@component.add(name='"H2 - NH3 ratio"', comp_type="Constant", comp_subtype="Normal")
+def h2_nh3_ratio():
+    return 177
+
+
 @component.add(
     name="HYDROGEN AMMONIA SHIPPING",
     units="t H2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"ammonia_ice_energy_consumption": 1, "h2_ammonia_ratio": 1},
+    depends_on={"ammonia_ice_energy_consumption": 1, "h2_nh3_ratio": 1},
 )
 def hydrogen_ammonia_shipping():
     """
     1 t NH3 = 160000 * GWh NH3
     """
-    return ammonia_ice_energy_consumption() * 3600 * h2_ammonia_ratio() / 22.5 / 1000
+    return ammonia_ice_energy_consumption() * 3600 * h2_nh3_ratio() / 22.5 / 1000
 
 
 @component.add(
@@ -536,9 +541,9 @@ def hydrogen_energy_consumption_dom_aviation():
         "biokerosene_energy_consumption_dom_aviation": 1,
         "biokerosene_energy_consumption_int_aviation": 1,
         "bio_kerosene_hydrogen_rate": 1,
-        "synthetic_kerosene_energy_consumption_int_aviation": 1,
         "synthetic_kerosene_energy_consumption_dom_aviation": 1,
         "syn_kerosene_hydrogen_rate": 1,
+        "synthetic_kerosene_energy_consumption_int_aviation": 1,
         "hydrogen_energy_consumption_dom_aviation": 1,
     },
 )
@@ -583,8 +588,8 @@ def hydrogen_f_shipping():
     comp_subtype="Normal",
     depends_on={
         "methanol_ice_energy_consumption": 1,
-        "synthetic_methanol_hydrogen_rate": 1,
         "biomethanol_hydrogen_rate": 1,
+        "synthetic_methanol_hydrogen_rate": 1,
     },
 )
 def hydrogen_methanol_shipping():

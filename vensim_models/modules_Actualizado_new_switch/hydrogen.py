@@ -230,7 +230,6 @@ def opex_hydrogen():
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "hydrogen_f_ammonia": 1,
         "hydrogen_f_olefin": 1,
         "hydrogen_f_refinery": 1,
         "hydrogen_f_steel": 1,
@@ -239,12 +238,12 @@ def opex_hydrogen():
         "hydrogen_f_heavy_duty_road_transport": 1,
         "hydrogen_f_shipping": 1,
         "shipping_hydrogen_demand": 1,
+        "fertilizer_hydrogen_demand": 1,
     },
 )
 def total_hydrogen():
     return (
-        hydrogen_f_ammonia()
-        + hydrogen_f_olefin()
+        hydrogen_f_olefin()
         + hydrogen_f_refinery()
         + hydrogen_f_steel()
         + hydrogen_f_industrial_heat()
@@ -252,4 +251,5 @@ def total_hydrogen():
         + hydrogen_f_heavy_duty_road_transport()
         + hydrogen_f_shipping()
         + shipping_hydrogen_demand()
+        + fertilizer_hydrogen_demand()
     )

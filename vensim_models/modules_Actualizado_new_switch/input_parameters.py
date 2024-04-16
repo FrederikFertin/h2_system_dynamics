@@ -30,6 +30,11 @@ def carbon_tax():
     return np.interp(time(), [2019, 2030, 2040, 2050], [55, 110, 200, 300])
 
 
+@component.add(name="DISCOUNT RATE", comp_type="Constant", comp_subtype="Normal")
+def discount_rate():
+    return 0.08
+
+
 @component.add(
     name="ELECTRICITY PRICE",
     units="€/kWh",
