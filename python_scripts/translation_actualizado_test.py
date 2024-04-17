@@ -307,7 +307,7 @@ dl = data_loading.data_loading_class()
 carbon_taxes = dl.load_carbon_taxes()
 gas_prices = dl.load_gas_prices()
 oil_prices = dl.load_oil_prices()
-woodchip_prices = dl.load_woodchip_prices(sensitivity=1.5)
+woodchip_prices = dl.load_woodchip_prices(sensitivity=1)
 
 ### ------- Run model with new data ------- ###
 model.set_components({"carbon_tax": carbon_taxes})
@@ -321,7 +321,7 @@ run2_save = { "Base" : run2 }
 stocks_of_interest.append("electricity_price")
 model.set_components({"electricity_price": 0.0})
 run7 = model.run(return_columns=stocks_of_interest)
-run7_save = { "Electricity prices 0" : run7 }
+run7_save = { "No Electricity cost" : run7 }
 
 plot_shipping_results(run2_save, run7_save)
 plot_shipping_costs(run2_save, run7_save)
@@ -331,6 +331,18 @@ plot_shipping_costs(run2_save, run1_save)
 
 plot_fertilizer_results(run2_save, run1_save)
 plot_fertilizer_costs(run2_save, run1_save)
+
+# PLot fertilizer hydrogen demand and shipping hydrogen demand in the same plot
+fig, ax = plt.subplots(figsize=(12, 9))
+ax.plot(run2.index, run2["shipping hydrogen demand"], label="Shipping hydrogen demand", linestyle='-', color='blue')
+ax.plot(run2.index, run2["fertilizer hydrogen demand"], label="Fertilizer hydrogen demand", linestyle='-', color='green')
+ax.plot(run2.index, run2["shipping hydrogen demand"]+run2["fertilizer hydrogen demand"], label="Total hydrogen demand", linestyle='-', color='black')
+ax.title.set_text("Hydrogen demand - Base scenario")
+ax.set_xlabel("Year")
+ax.set_ylabel("Hydrogen demand [tH2]")
+ax.legend(loc='best')
+ax.grid(alpha=0.5)
+plt.show()
 
 carbon_taxes_seamaps = dl.load_carbon_taxes("seamaps")
 run3 = model.run(return_columns=stocks_of_interest, params={"carbon_tax": carbon_taxes_seamaps})

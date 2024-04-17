@@ -41,4 +41,8 @@ plt.ylabel("Level of adoption")
 plt.legend(loc='best')
 plt.show()"""
 
-print((1-(1 + 0.08)**(-25))/0.08)
+print(2000/33.33)
+print(1/15.7*1000)
+print()
+print(1/5.56*1000)
+print(177)

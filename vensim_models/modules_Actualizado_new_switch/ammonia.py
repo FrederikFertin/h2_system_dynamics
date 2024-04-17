@@ -31,11 +31,11 @@ def blue_decay():
     comp_subtype="Normal",
     depends_on={
         "smr_ccs_capex": 1,
-        "smr_af": 1,
         "smr_ccs_opex": 1,
+        "smr_af": 1,
         "smr_operating_hours": 1,
-        "smr_ccs_efficiency": 1,
         "gas_price": 1,
+        "smr_ccs_efficiency": 1,
         "smr_ccs_emission_factor": 1,
         "carbon_tax": 1,
     },
@@ -334,11 +334,11 @@ def grey_decay():
     comp_subtype="Normal",
     depends_on={
         "smr_capex": 1,
-        "smr_opex": 1,
         "smr_af": 1,
+        "smr_opex": 1,
         "smr_operating_hours": 1,
-        "smr_efficiency": 1,
         "gas_price": 1,
+        "smr_efficiency": 1,
         "smr_emission_factor": 1,
         "carbon_tax": 1,
     },
@@ -386,8 +386,8 @@ def grey_investment_level():
     depends_on={
         "grey_competitiveness": 1,
         "grey_nh3": 2,
-        "blue_nh3": 1,
         "green_nh3": 1,
+        "blue_nh3": 1,
     },
 )
 def grey_level():

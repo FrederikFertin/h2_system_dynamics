@@ -257,6 +257,33 @@ def k_p():
 
 
 @component.add(
+    name="MeOH AF",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"discount_rate": 2, "meoh_lifetime": 1},
+)
+def meoh_af():
+    return 1 / ((1 - (1 + discount_rate()) ** -meoh_lifetime()) / discount_rate())
+
+
+@component.add(
+    name="MeOH bm usage", units="kg/kg", comp_type="Constant", comp_subtype="Normal"
+)
+def meoh_bm_usage():
+    """
+    kg biomass per kg MeOH
+    """
+    return 1.17
+
+
+@component.add(
+    name="MeOH CAPEX", units="€/kgMeOH/h", comp_type="Constant", comp_subtype="Normal"
+)
+def meoh_capex():
+    return 20000
+
+
+@component.add(
     name="MeOH competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -272,10 +299,17 @@ def meoh_competitiveness():
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "biomass_price": 1,
-        "meohh2": 1,
+        "meoh_capex": 1,
+        "meoh_af": 1,
+        "meoh_opex": 1,
+        "meoh_operating_hours": 1,
+        "meoh_lhv": 2,
+        "meoh_bm_usage": 1,
         "hydrogen_price": 1,
+        "meoh_el_usage": 1,
         "electricity_price": 1,
+        "biomass_price": 1,
+        "meoh_h2_usage": 1,
     },
 )
 def meoh_cost():
@@ -283,10 +317,14 @@ def meoh_cost():
     €/MJ MeOH [ [kgBM/kgMeOH] * [€/GJ] * [MJ/kgBM ] / [MJ/GJ] + [€/kgH2] / [kgMeOH/kgH2] + [€/kWh * kWh/kgMeOH] ] / [MJ/kgMeOH]
     """
     return (
-        1.17 * biomass_price() * (12.5 / 1000)
-        + hydrogen_price() / meohh2()
-        + electricity_price() * 0.64
-    ) / 19.9
+        meoh_capex() * (meoh_af() + meoh_opex()) / (meoh_operating_hours() * meoh_lhv())
+        + (
+            meoh_bm_usage() * biomass_price() * (12.5 / 1000)
+            + hydrogen_price() / meoh_h2_usage()
+            + electricity_price() * meoh_el_usage()
+        )
+        / meoh_lhv()
+    )
 
 
 @component.add(
@@ -297,6 +335,28 @@ def meoh_cost():
 )
 def meoh_decay():
     return meoh_shipping_consumption() / ship_lifetime()
+
+
+@component.add(name="MeOH el usage", comp_type="Constant", comp_subtype="Normal")
+def meoh_el_usage():
+    """
+    kWhe/kgMeOH
+    """
+    return 0.64
+
+
+@component.add(
+    name="MeOH H2 usage",
+    units="kg/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"meohh2": 1},
+)
+def meoh_h2_usage():
+    """
+    kg MeOH per kg H2
+    """
+    return meohh2()
 
 
 @component.add(
@@ -357,8 +417,8 @@ def meoh_investment_level():
     depends_on={
         "meoh_competitiveness": 1,
         "meoh_shipping_consumption": 2,
-        "nh3_shipping_consumption": 1,
         "hfo_shipping_consumption": 1,
+        "nh3_shipping_consumption": 1,
     },
 )
 def meoh_level():
@@ -372,6 +432,38 @@ def meoh_level():
             + nh3_shipping_consumption()
         )
     )
+
+
+@component.add(
+    name="MeOH LHV", units="MJ/kg", comp_type="Constant", comp_subtype="Normal"
+)
+def meoh_lhv():
+    return 19.9
+
+
+@component.add(name="MeOH lifetime", comp_type="Constant", comp_subtype="Normal")
+def meoh_lifetime():
+    return 20
+
+
+@component.add(
+    name="MeOH operating hours",
+    units="h/Year",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def meoh_operating_hours():
+    return 8000
+
+
+@component.add(
+    name="MeOH OPEX", units="percent", comp_type="Constant", comp_subtype="Normal"
+)
+def meoh_opex():
+    """
+    Percentage of CAPEX
+    """
+    return 0.04
 
 
 @component.add(
@@ -398,12 +490,29 @@ _integ_meoh_shipping_consumption = Integ(
 )
 
 
-@component.add(name='"MeOH/H2"', comp_type="Constant", comp_subtype="Normal")
+@component.add(
+    name='"MeOH/H2"', units="kg/kg", comp_type="Constant", comp_subtype="Normal"
+)
 def meohh2():
     """
     kg MeOH/kg H2
     """
     return 15.7
+
+
+@component.add(
+    name="NH3 AF",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"discount_rate": 2, "nh3_lifetime": 1},
+)
+def nh3_af():
+    return 1 / ((1 - (1 + discount_rate()) ** -nh3_lifetime()) / discount_rate())
+
+
+@component.add(name="NH3 CAPEX", comp_type="Constant", comp_subtype="Normal")
+def nh3_capex():
+    return 6700
 
 
 @component.add(
@@ -421,13 +530,27 @@ def nh3_competitiveness():
     units="€/MJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hydrogen_price": 1, "nh3h2": 1, "electricity_price": 1},
+    depends_on={
+        "nh3_capex": 1,
+        "nh3_af": 1,
+        "nh3_opex": 1,
+        "nh3_operating_hours": 1,
+        "nh3_lhv": 2,
+        "nh3_el_usage": 1,
+        "hydrogen_price": 1,
+        "electricity_price": 1,
+        "nh3_h2_usage": 1,
+    },
 )
 def nh3_cost():
     """
     €/MJ NH3 [ [ [€/kgH2] / [kgNH3/kgH2] ] + [kWh/kgNH3 * €/kWh] ] / [MJ/kgNH3] + [kWhe/kWhNH3 * €/kWhe] * [kWh/MJ]
     """
-    return (hydrogen_price() / nh3h2() + 0.315 * electricity_price()) / 18.9
+    return (
+        nh3_capex() * (nh3_af() + nh3_opex()) / (nh3_operating_hours() * nh3_lhv())
+        + (hydrogen_price() / nh3_h2_usage() + nh3_el_usage() * electricity_price())
+        / nh3_lhv()
+    )
 
 
 @component.add(
@@ -438,6 +561,21 @@ def nh3_cost():
 )
 def nh3_decay():
     return nh3_shipping_consumption() / ship_lifetime()
+
+
+@component.add(name="NH3 el usage", comp_type="Constant", comp_subtype="Normal")
+def nh3_el_usage():
+    return 0.315
+
+
+@component.add(
+    name="NH3 H2 usage",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"nh3h2": 1},
+)
+def nh3_h2_usage():
+    return nh3h2()
 
 
 @component.add(
@@ -515,6 +653,26 @@ def nh3_level():
     )
 
 
+@component.add(name="NH3 LHV", comp_type="Constant", comp_subtype="Normal")
+def nh3_lhv():
+    return 18.9
+
+
+@component.add(name="NH3 lifetime", comp_type="Constant", comp_subtype="Normal")
+def nh3_lifetime():
+    return 25
+
+
+@component.add(name="NH3 operating hours", comp_type="Constant", comp_subtype="Normal")
+def nh3_operating_hours():
+    return 8000
+
+
+@component.add(name="NH3 OPEX", comp_type="Constant", comp_subtype="Normal")
+def nh3_opex():
+    return 0.04
+
+
 @component.add(
     name="NH3 shipping consumption",
     units="GWh",
@@ -557,8 +715,8 @@ def ship_lifetime():
     depends_on={
         "meoh_shipping_consumption": 1,
         "meohh2": 1,
-        "nh3_shipping_consumption": 1,
         "nh3h2": 1,
+        "nh3_shipping_consumption": 1,
     },
 )
 def shipping_hydrogen_demand():
