@@ -1,18 +1,599 @@
 {UTF-8}
+Alternative Blue price=
+	Grey H2 price + SMR emission factor * CC Capture Rate * (CCS cost - CARBON TAX) / 1000
+	~	€/kgH2
+	~		|
+
+BF Coal decay 0=
+	Coal BF BOF 0/foundry lifetime 0
+	~	
+	~		|
+
+foundry reinvestment 0= INTEG (
+	BF CCS decay 0+BF Coal decay 0+demand change steel 0+HDRI EAF decay 0-BF CCS investment 0\
+		-BF Coal investment 0-HDRI EAF investment 0,
+		primary sector 0/foundry lifetime 0)
+	~	GWh
+	~		|
+
+ctrl steel 0=
+	k p*error steel 0 + error int steel 0
+	~	GWh
+	~		|
+
+Gas BF BOF CCS 0= INTEG (
+	BF CCS investment 0-BF CCS decay 0,
+		0)
+	~	GWh
+	~		|
+
+BF CCS competitiveness 0=
+	MAX(BF CCS cost/HDRI cost, BF CCS cost/BF Coal cost)
+	~	
+	~		|
+
+BF Coal investment level 0=
+	steel equalizer 0*BF Coal level 0
+	~	percent
+	~		|
+
+HDRI EAF 0= INTEG (
+	HDRI EAF investment 0-HDRI EAF decay 0,
+		0)
+	~	GWh
+	~		|
+
+BF CCS decay 0=
+	Gas BF BOF CCS 0/foundry lifetime 0
+	~	
+	~		|
+
+HDRI EAF competitiveness 0=
+	MAX(HDRI cost/BF CCS cost, HDRI cost/BF Coal cost)
+	~	
+	~		|
+
+HDRI EAF decay 0=
+	HDRI EAF 0 / foundry lifetime 0
+	~	
+	~		|
+
+BF CCS imitators 0=
+	foundry reinvestment 0 * BF CCS investment level 0
+	~	
+	~		|
+
+HDRI EAF imitators 0=
+	foundry reinvestment 0*HDRI EAF investment level 0
+	~	
+	~		|
+
+BF CCS inno switch 0=
+	IF THEN ELSE(BF CCS competitiveness 0 < 2, 1 , 0 )
+	~	
+	~		|
+
+primary sector 0  = A FUNCTION OF( ) ~~|
+primary sector 0=
+	Steel Production Forecast*(1-secondary sector growth)
+	~	Mtsteel
+	~		|
+
+BF CCS innovators 0=
+	foundry reinvestment 0*innovators*BF CCS inno switch 0
+	~	
+	~		|
+
+HDRI EAF innovators 0=
+	foundry reinvestment 0*innovators*HDRI EAF inno switch 0
+	~	
+	~		|
+
+BF CCS investment 0=
+	BF CCS innovators 0+BF CCS imitators 0
+	~	
+	~		|
+
+HDRI EAF investment 0=
+	HDRI EAF imitators 0+HDRI EAF innovators 0
+	~	
+	~		|
+
+BF CCS investment level 0=
+	steel equalizer 0*BF CCS level 0
+	~	percent
+	~		|
+
+HDRI EAF investment level 0=
+	steel equalizer 0*HDRI EAF level 0
+	~	percent
+	~		|
+
+BF CCS level 0=
+	1 / ( 1 + EXP(10 * (BF CCS competitiveness 0 - 1.1) ) ) * Gas BF BOF CCS 0 / (Coal BF BOF 0\
+		 + HDRI EAF 0 + Gas BF BOF CCS 0)
+	~	
+	~		|
+
+CC Capacity Factor=
+	1-0.05-3/52
+	~	percent
+	~	CF = 1 - Planned Outage - Forced Outage
+	|
+
+CC CAPEX = WITH LOOKUP (
+	Time,
+		( [(0,0)-(10,10)], (2019, 4.1), (2025, 2.9), (2030, 2.3), (2040, 2), (2050, 1.9)))
+	~	M€/(tCO2/h)
+	~	Taken from Technology Catalogue Table. Learning rate is assumed based on \
+		time, but is highly relevant for size of unit installed as well.
+	|
+
+BF Coal competitiveness 0=
+	MAX(BF Coal cost/BF CCS cost, BF Coal cost/HDRI cost)
+	~	
+	~		|
+
+CC Cost=
+	CC CAPEX * 10^6/(8760*CC Capacity Factor) * (CC FIXED OPEX + CC AF) +
+	CC ELECTRICITY USAGE * ELECTRICITY PRICE * 1000 +
+	CC HEAT USAGE * HEAT COST +
+	CC VARIABLE COST
+	~	€/tCO2
+	~		|
+
+CC ELECTRICITY USAGE = WITH LOOKUP (
+	Time,
+		( [(0,0)-(10,10)], (2019, 0.03), (2025, 0.03), (2030, 0.025), (2040, 0.023), (2050,\
+		 0.02))
+		)
+	~	MWh/tCO2
+	~	Taken from Technology Catalogue Table. Learning rate is assumed based on \
+		time.
+	|
+
+CC FIXED OPEX=
+	0.03
+	~	percent
+	~	Percent of CAPEX
+	|
+
+CC HEAT USAGE = WITH LOOKUP (
+	Time,
+		( [(0,0)-(10,10)], (2019, 0.83), (2025, 0.83), (2030, 0.72), (2040, 0.66), (2050, 0.66\
+		))
+		)
+	~	MWh/tCO2
+	~	Taken from Technology Catalogue Table. Learning rate is assumed based on \
+		time.
+	|
+
+CC Lifetime=
+	25
+	~	years
+	~		|
+
+BF Coal investment 0=
+	BF Coal investment level 0*foundry reinvestment 0
+	~	
+	~		|
+
+CCS cost=
+	CC Cost + Carbon Storage costs
+	~	€/tCO2
+	~		|
+
+error steel 0=
+	primary sector 0-check steel 0
+	~	
+	~		|
+
+CS CAPEX = WITH LOOKUP (
+	Time,
+		( [(0,0)-(10,10)], (2019, 3.89), (2025, 3.7), (2030, 3.52), (2040, 3.18), (2050, 3.18\
+		)))
+	~	€/tCO2
+	~		|
+
+BF Coal level 0=
+	1 / ( 1 + EXP(10 * (BF Coal competitiveness 0 - 0.9) ) ) * Coal BF BOF 0 / (Coal BF BOF 0\
+		 + HDRI EAF 0 + Gas BF BOF CCS 0)
+	~	
+	~		|
+
+HDRI EAF level 0=
+	1 / ( 1 + EXP(10 * (HDRI EAF competitiveness 0 - 1.1) ) ) * HDRI EAF 0 / (Coal BF BOF 0\
+		 + HDRI EAF 0 + Gas BF BOF CCS 0)
+	~	
+	~		|
+
+HEAT COST=
+	20
+	~	€/MWh
+	~	Normal assumption for value of waste heat (cheap heat assumption).
+	|
+
+demand change steel 0=
+	ctrl steel 0
+	~	
+	~		|
+
+check steel 0=
+	Coal BF BOF 0+HDRI EAF 0+Gas BF BOF CCS 0
+	~	GWh
+	~		|
+
+foundry lifetime 0=
+	30
+	~	
+	~		|
+
+HDRI EAF inno switch 0=
+	IF THEN ELSE(HDRI EAF competitiveness 0 < 2, 1 , 0 )
+	~	
+	~		|
+
+error int steel 0= INTEG (
+	k i*error steel 0,
+		0)
+	~	e
+	~		|
+
+steel equalizer 0=
+	1/(BF Coal level 0+HDRI EAF level 0+BF CCS level 0)
+	~	
+	~		|
+
+CC VARIABLE COST=
+	2 + 0.5
+	~	€/tCO2
+	~	2.0 € for amine.
+		0.5 € for other chemicals.
+	|
+
+H2 to steel 0=
+	0.0563
+	~	tH2/tsteel
+	~		|
+
+Carbon Storage costs=
+	CS CAPEX+CS decommisioning+CS FIXED OPEX+CS OTHER EXPENDITURES+CS VARIABLE COST
+	~	€/tCO2
+	~		|
+
+steel hydrogen demand 0=
+	HDRI EAF 0*10^6*H2 to steel 0
+	~	t H2
+	~		|
+
+CS decommisioning = WITH LOOKUP (
+	Time,
+		( [(0,0)-(10,10)], (2019, 0.84), (2025, 0.8), (2030, 0.76), (2040, 0.69), (2050, 0.69\
+		)))
+	~	€/tCO2
+	~		|
+
+CS FIXED OPEX = WITH LOOKUP (
+	Time,
+		( [(0,0)-(10,10)], (2019, 1.46), (2025, 1.39), (2030, 1.32), (2040, 1.19), (2050, 1.19\
+		)))
+	~	€/tCO2
+	~		|
+
+CS OTHER EXPENDITURES = WITH LOOKUP (
+	Time,
+		( [(0,0)-(10,10)], (2019, 0.73), (2025, 0.7), (2030, 0.66), (2040, 0.6), (2050, 0.6\
+		)))
+	~	€/tCO2
+	~		|
+
+CS VARIABLE COST = WITH LOOKUP (
+	Time,
+		( [(0,0)-(10,10)], (2019, 10.18), (2025, 9.68), (2030, 9.2), (2040, 8.33), (2050, 8.33\
+		)))
+	~	€/tCO2
+	~		|
+
+CC Capture Rate=
+	0.9
+	~	percent
+	~	Assumes a capture rate of 90% for retrofitted CC units.
+	|
+
+Coal BF BOF 0= INTEG (
+	BF Coal investment 0-BF Coal decay 0,
+		primary sector 0)
+	~	GWh
+	~		|
+
+CC AF=
+	1 / ((1-(1 + DISCOUNT RATE)^(-CC Lifetime))/DISCOUNT RATE)
+	~	percent
+	~		|
+
+LD ownership cost FCEV=
+	LD FCEV CAPEX +
+	LD FCEV OPEX
+	~	€
+	~	Read Carmen's thesis for explanation on the cost sources.
+		57000 € is cost of car.
+		240000 km is driving range over the car's lifetime.
+		33.33 kWh/kg is LHV of H2.
+		Price/LHV: €/kWh.
+		Then 0.71 is kWh/km.
+	|
+
+OIL PRICE INIT= INITIAL(
+	OIL PRICE)
+	~	
+	~		|
+
+LD Diesel OPEX=
+	(DIESEL PRICE / LHV Diesel + CARBON TAX * Diesel Emission Factor) * LD Car Mileage *\
+		 LD Diesel efficiency
+	~	€
+	~		|
+
+LD FCEV OPEX=
+	Green H2 price / LHV H2 * LD FCEV efficiency * LD Car Mileage
+	~	€
+	~		|
+
+international shipping biomass demand=
+	MeOH shipping consumption
+	* 3.6e+06
+	/ MeOH LHV
+	* MeOH biomass usage
+	~	kgBiomass
+	~	Convert to MJ MeOH, then to kg MeOH, then to kg Biomass.
+	|
+
+DIESEL PRICE=
+	OIL PRICE / OIL PRICE INIT * 1.5
+	~	€/l
+	~	Scale the diesel price with the oil price by assuming that the 2019 oil \
+		price corresponds to a diesel price of 1.5€/l.
+	|
+
+LD ownership cost diesel=
+	LD Diesel CAPEX +
+	LD Diesel OPEX
+	~	€
+	~	Read Carmen's thesis for explanation on the cost sources.
+		28000 € is cost of car.
+		240000 km is driving range over the car's lifetime.
+		10.7 kWh/l of diesel is LHV of Diesel.
+		Price/LHV: €/kWh.
+		Then 0.87 is kWh/km.
+	|
+
+BIOMASS BASE PRICE = WITH LOOKUP (
+	Time,
+		 ([(0,0)-(10,10)],(2019,12),(2030,11),(2040,10.5),(2050,5) ))
+	~	€/GJ
+	~	€/GJ
+	|
+
+BIOMASS DEMAND SATURATION = WITH LOOKUP (
+	biomass used/biomass availability,
+		([(0,1)-(1.3, 25)], (0, 1), (0.4, 1), (0.5, 1.1), (0.6, 1.3), (0.7, 1.6), (0.8, 2.2\
+		), (0.9, 3), (1, 10), (1.1, 20)))
+	~	
+	~		|
+
+BIOMASS PRICE=
+	BIOMASS BASE PRICE*BIOMASS DEMAND SATURATION
+	~	€/GJ
+	~	€/GJ
+	|
+
+biomass used=
+	international shipping biomass demand
+	~	kgBiomass
+	~		|
+
+LD ownership cost BEV=
+	LD BEV CAPEX + 
+	LD BEV OPEX
+	~	€
+	~	Read Carmen's thesis for explanation on the cost sources.
+		35000 € is cost of car.
+		240000 km is driving range over the car's lifetime.
+		Electricity Price: €/kWh.
+		Then 0.45 is kWh/km.
+	|
+
+biomass availability=
+	100*10^9
+	~	kgBiomass
+	~		|
+
+LD BEV OPEX=
+	ELECTRICITY PRICE * Electricity Taxes * LD BEV efficiency * LD Car Mileage
+	~	€
+	~		|
+
+Blue refinery decay=
+	Blue refinery/SMR lifetime
+	~	
+	~		|
+
+Blue refinery imitators=
+	Refinery reinvestment * Blue refinery investment level
+	~	
+	~		|
+
+Blue refinery inno switch=
+	IF THEN ELSE(Blue refinery competitiveness < 2, 1 , 0 )
+	~	
+	~		|
+
+Blue refinery innovators=
+	Refinery reinvestment*innovators*Blue refinery inno switch
+	~	
+	~		|
+
+Blue refinery investment=
+	Blue refinery innovators+Blue refinery imitators
+	~	
+	~		|
+
+Blue refinery investment level=
+	Refinery equalizer*Blue refinery level
+	~	percent
+	~		|
+
+Blue refinery level=
+	1 / ( 1 + EXP(10 * (Blue refinery competitiveness - 1.1) ) ) * Blue refinery / (Grey refinery\
+		 + Green refinery + Blue refinery)
+	~	
+	~		|
+
+Green refinery level=
+	1 / ( 1 + EXP(10 * (Green refinery competitiveness - 1.1) ) ) * Green refinery / (Grey refinery\
+		 + Green refinery + Blue refinery)
+	~	
+	~		|
+
+Grey refinery investment=
+	Grey refinery investment level*Refinery reinvestment
+	~	
+	~		|
+
+Grey refinery investment level=
+	Refinery equalizer*Grey refinery level
+	~	percent
+	~		|
+
+Refinery consumption=
+	2.4
+	~	MT H2
+	~	2.4 MT/year - assumed constant moving forward.
+		https://www.petrochemistry.eu/wp-content/uploads/2021/03/Petrochemicals_Pap\
+		er_hydrogen-1.pdf
+	|
+
+Refinery equalizer=
+	1/(Grey refinery level+Green refinery level+Blue refinery level)
+	~	
+	~		|
+
+refinery hydrogen demand=
+	Green refinery * 10^6
+	~	t H2
+	~	Convert from MT to T NH3, then from T NH3 to T H2.
+	|
+
+check refining=
+	Grey refinery+Green refinery+Blue refinery
+	~	MT H2
+	~		|
+
+Refinery reinvestment= INTEG (
+	Blue refinery decay+Green refinery decay+Grey refinery decay-Blue refinery investment\
+		-Green refinery investment-Grey refinery investment,
+		Refinery consumption/SMR lifetime)
+	~	MT H2
+	~		|
+
+Green refinery innovators=
+	Refinery reinvestment*innovators*Green refinery inno switch
+	~	
+	~		|
+
+Grey refinery= INTEG (
+	Grey refinery investment-Grey refinery decay,
+		Refinery consumption)
+	~	MT NH3
+	~		|
+
+Grey refinery competitiveness=
+	MAX(Grey H2 price/Blue H2 price, Grey H2 price/Green H2 price)
+	~	
+	~		|
+
+Grey refinery decay=
+	Grey refinery/SMR lifetime
+	~	
+	~		|
+
+Green refinery imitators=
+	Refinery reinvestment*Green refinery investment level
+	~	
+	~		|
+
+Blue refinery= INTEG (
+	Blue refinery investment-Blue refinery decay,
+		0)
+	~	MT H2
+	~		|
+
+Grey refinery level=
+	1 / ( 1 + EXP(10 * (Grey refinery competitiveness - 0.9) ) ) * Grey refinery / (Grey refinery\
+		 + Green refinery + Blue refinery)
+	~	
+	~		|
+
+Green refinery competitiveness=
+	MAX(Green H2 price/Blue H2 price, Green H2 price/Grey H2 price)
+	~	
+	~		|
+
+Green refinery decay=
+	Green refinery / (electrolyser lifetime/electrolyser average working hours)
+	~	
+	~		|
+
+Green refinery= INTEG (
+	Green refinery investment-Green refinery decay,
+		0)
+	~	MT H2
+	~		|
+
+Green refinery inno switch=
+	IF THEN ELSE(Green refinery competitiveness < 2, 1 , 0 )
+	~	
+	~		|
+
+Green refinery investment level=
+	Refinery equalizer*Green refinery level
+	~	percent
+	~		|
+
+Green refinery investment=
+	Green refinery imitators+Green refinery innovators
+	~	
+	~		|
+
+Blue refinery competitiveness=
+	MAX(Blue H2 price/Green H2 price , Blue H2 price/Grey H2 price)
+	~	
+	~		|
+
+TOTAL GREEN HYDROGEN DEMAND=
+	steel hydrogen demand+
+	international shipping hydrogen demand+
+	fertilizer hydrogen demand+
+	light duty hydrogen demand+
+	heavy duty hydrogen demand+
+	refinery hydrogen demand
+	~	t H2
+	~		|
+
 Light duty fraction=
 	1-0.2677
 	~	
 	~	Fraction of road transport energy consumption which is light duty.
 	|
 
-electricity taxes 0=
+Electricity Taxes=
 	2
-	~	€/kWh
+	~	percent
 	~		|
 
 light duty hydrogen demand=
 	LD FCEV consumption/FCEV efficiency * 1000 / LHV H2
-	~	tH2
+	~	t H2
 	~	GWh * MWh/GWh / MWh/t
 	|
 
@@ -89,7 +670,7 @@ Heavy duty fraction=
 
 heavy duty hydrogen demand=
 	HD FCEV consumption/FCEV efficiency * 1000 / LHV H2
-	~	tH2
+	~	t H2
 	~	GWh * MWh/GWh / MWh/t
 	|
 
@@ -157,7 +738,7 @@ LD FCEV level=
 
 Green H2 price=
 	(CAPEX hydrogen+OPEX hydrogen)*(LHV H2/electrolyser efficiency)
-	~	€/kg
+	~	€/kgH2
 	~		|
 
 LD Fossil consumption= INTEG (
@@ -186,42 +767,6 @@ LD Fossil level=
 		LD Fossil consumption + LD FCEV consumption + LD BEV consumption)
 	~	
 	~		|
-
-LD ownership cost BEV=
-	LD BEV CAPEX +
-	ELECTRICITY PRICE * electricity taxes 0 * LD BEV efficiency * LD Car Mileage
-	~	€
-	~	Read Carmen's thesis for explanation on the cost sources.
-		35000 € is cost of car.
-		240000 km is driving range over the car's lifetime.
-		Electricity Price: €/kWh.
-		Then 0.45 is kWh/km.
-	|
-
-LD ownership cost diesel=
-	LD Diesel CAPEX +
-	(DIESEL PRICE / LHV Diesel + CARBON TAX * Diesel Emission Factor) * LD Car Mileage *\
-		 LD Diesel efficiency
-	~	€
-	~	Read Carmen's thesis for explanation on the cost sources.
-		28000 € is cost of car.
-		240000 km is driving range over the car's lifetime.
-		10.7 kWh/l of diesel is LHV of Diesel.
-		Price/LHV: €/kWh.
-		Then 0.87 is kWh/km.
-	|
-
-LD ownership cost FCEV=
-	LD FCEV CAPEX +
-	Green H2 price / LHV H2 * LD FCEV efficiency * LD Car Mileage
-	~	€
-	~	Read Carmen's thesis for explanation on the cost sources.
-		57000 € is cost of car.
-		240000 km is driving range over the car's lifetime.
-		33.33 kWh/kg is LHV of H2.
-		Price/LHV: €/kWh.
-		Then 0.71 is kWh/km.
-	|
 
 LD RT consumption=
 	RT energy demand*Light duty fraction
@@ -410,11 +955,6 @@ HD FCEV investment=
 	~	
 	~		|
 
-DIESEL PRICE=
-	1.5
-	~	€/l
-	~		|
-
 HD FCEV level=
 	1 / ( 1 + EXP(10 * (HD FCEV competitiveness - 1.1) ) ) * HD FCEV consumption / (HD Fossil consumption\
 		 + HD FCEV consumption + HD BEV consumption)
@@ -456,7 +996,7 @@ HD Fossil level=
 
 HD ownership cost BEV=
 	HD BEV CAPEX +
-	ELECTRICITY PRICE*electricity taxes 0 * HD BEV efficiency * HD Truck Mileage
+	ELECTRICITY PRICE*Electricity Taxes * HD BEV efficiency * HD Truck Mileage
 	~	€
 	~		|
 
@@ -503,12 +1043,6 @@ FCEV efficiency=
 	~	65% efficiency from energy content of H2 to energy delivered to the wheels.
 	|
 
-HD BEV competitiveness=
-	MAX(HD ownership cost BEV/HD ownership cost FCEV, HD ownership cost BEV/HD ownership cost diesel\
-		)
-	~	
-	~		|
-
 HD BEV consumption= INTEG (
 	HD BEV investment-HD BEV decay,
 		0)
@@ -532,8 +1066,9 @@ RT energy demand = WITH LOOKUP (
 	~	2.05% increase per year compared to the base year (2019)
 	|
 
-LD Car Mileage=
-	240000
+HD BEV competitiveness=
+	MAX(HD ownership cost BEV/HD ownership cost FCEV, HD ownership cost BEV/HD ownership cost diesel\
+		)
 	~	
 	~		|
 
@@ -559,46 +1094,27 @@ HD FCEV investment level=
 	~	percent
 	~		|
 
+LD Car Mileage=
+	240000
+	~	
+	~		|
+
 HD BEV level=
 	1 / ( 1 + EXP(10 * (HD BEV competitiveness - 1.1) ) ) * HD BEV consumption / (HD Fossil consumption\
 		 + HD FCEV consumption + HD BEV consumption)
 	~	
 	~		|
 
-ownership cost diesel long haul  = A FUNCTION OF( ) ~~|
-ownership cost diesel long haul=
-	1.5e+06+(DIESEL PRICE/10.7*4.33*1.2e+06)
-	~	€
-	~		|
-
-ownerhip cost BEV long haul  = A FUNCTION OF( ELECTRICITY PRICE) ~~|
-ownerhip cost BEV long haul=
-	390000+ELECTRICITY PRICE*electricity taxes*2.26*1.2e+06
-	~	€
-	~		|
-
-TOTAL GREEN HYDROGEN DEMAND=
-	"HYDROGEN F. OLEFIN"+
-	"HYDROGEN F. REFINERY"+
-	steel hydrogen demand+
-	"HYDROGEN F. INDUSTRIAL HEAT"+
-	"HYDROGEN F. AVIATON"+
-	"HYDROGEN F. HEAVY DUTY ROAD TRANSPORT"+
-	international shipping hydrogen demand+
-	fertilizer hydrogen demand
-	~	t H2
-	~		|
-
 BF Coal CAPEX=
 	(600+311)/2
-	~	
+	~	€/tsteel
 	~	https://doi.org/10.1016/j.jclepro.2023.136391
 		Table 2 average
 	|
 
 BF CCS CAPEX=
 	(265+590)/2
-	~	€/t
+	~	€/tsteel
 	~	https://doi.org/10.1016/j.jclepro.2023.136391
 		Table 2 average
 	|
@@ -613,7 +1129,7 @@ BF CCS cost=
 	(CARBON TAX * BF CCS emission factor +
 	GAS PRICE * Gas to Steel +
 	BF CCS CAPEX) * 5
-	~	
+	~	€/tsteel
 	~	Option currently excluded from model
 	|
 
@@ -631,7 +1147,7 @@ ELECTRICITY SENSITIVITY=
 ELECTRICITY BASE PRICE = WITH LOOKUP (
 	Time,
 		([(0,0)-(10,10)],(2019,0.038),(2030,0.05),(2050,0.045) ))
-	~	
+	~	€/kWh
 	~	€/kWh
 	|
 
@@ -648,7 +1164,7 @@ BF Coal cost=
 	COAL PRICE * (Coal to Steel * LHV Coal) +
 	ELECTRICITY PRICE * EL to Steel BF Coal +
 	BF Coal CAPEX
-	~	
+	~	€/tsteel
 	~	Variable costs - CAPEX and OPEX as well as iron ore/steel raw material \
 		costs are assumed identical across technologies.
 	|
@@ -662,7 +1178,7 @@ HDRI cost=
 	(Green H2 price * 1000) * H2 to steel +
 	(ELECTRICITY PRICE * 1000) * (EL to Steel HDRI /3.6) +
 	HDRI CAPEX
-	~	
+	~	€/tsteel
 	~		|
 
 ELECTRICITY PRICE=
@@ -673,7 +1189,7 @@ ELECTRICITY PRICE=
 
 HDRI CAPEX=
 	(945+635+670)/3
-	~	€/t
+	~	€/tsteel
 	~	https://doi.org/10.1016/j.jclepro.2023.136391
 		Table 2 average
 	|
@@ -751,7 +1267,7 @@ Gas to Steel=
 
 Coal to Steel=
 	0.8
-	~	t/tsteel
+	~	tCoal/tsteel
 	~	ton Coal per ton steel
 		https://doi.org/10.1016/j.jclepro.2023.136391
 	|
@@ -835,7 +1351,7 @@ error steel=
 
 SMR operating hours=
 	8500
-	~	
+	~	h
 	~		|
 
 HDRI EAF inno switch=
@@ -856,7 +1372,7 @@ Gas BF BOF CCS= INTEG (
 
 MeOH lifetime=
 	20
-	~	
+	~	years
 	~		|
 
 bioMeOH cost without hydrogen=
@@ -898,18 +1414,18 @@ Blue H2 price=
 	    + (GAS PRICE/1000*3.6) / SMR CCS efficiency
 	    + (CARBON TAX/1000) * (SMR CCS emission factor / 33.33)
 	) * 33.33
-	~	€/kg
+	~	€/kgH2
 	~	€/kg H2
 	|
 
 NH3 AF=
 	1 / ((1-(1 + DISCOUNT RATE)^(-NH3 lifetime))/DISCOUNT RATE)
-	~	
+	~	percent
 	~		|
 
 NH3 CAPEX=
 	6700
-	~	
+	~	€/(kgNH3/h)
 	~		|
 
 ctrl steel=
@@ -924,7 +1440,7 @@ check steel=
 
 Green NH3 price=
 	NH3 cost without hydrogen costs + Green H2 price / NH3 H2 usage / NH3 LHV
-	~	
+	~	€/MJ
 	~		|
 
 Grey bioMeOH price=
@@ -934,7 +1450,7 @@ Grey bioMeOH price=
 
 Blue NH3 price=
 	NH3 cost without hydrogen costs + Blue H2 price / NH3 H2 usage / NH3 LHV
-	~	
+	~	€/MJ
 	~		|
 
 Grey decay=
@@ -948,7 +1464,7 @@ Grey H2 price=
 	    + (GAS PRICE/1000*3.6) / SMR efficiency
 	    + (CARBON TAX/1000) * (SMR emission factor / 33.33)
 	) * 33.33
-	~	€/kg
+	~	€/kgH2
 	~	€/kg grey H2
 	|
 
@@ -959,12 +1475,12 @@ SLOPE=
 
 MeOH AF=
 	1 / ((1-(1 + DISCOUNT RATE)^(-MeOH lifetime))/DISCOUNT RATE)
-	~	
+	~	percent
 	~		|
 
 SMR CAPEX=
 	800
-	~	
+	~	€/kWH2
 	~	€/kWH2
 	|
 
@@ -983,7 +1499,7 @@ COAL PRICE = WITH LOOKUP (
 
 SMR CCS emission factor=
 	1
-	~	
+	~	kgCO2/kgH2
 	~	1 kgCO2 / kgH2
 	|
 
@@ -999,7 +1515,7 @@ CROSS INNOVATION=
 
 NH3 OPEX=
 	0.04
-	~	
+	~	percent
 	~		|
 
 NH3 reinvestment= INTEG (
@@ -1010,13 +1526,13 @@ NH3 reinvestment= INTEG (
 
 MeOH biomass usage=
 	1.17
-	~	kg/kg
+	~	kgBiomass/kgMeOH
 	~	kg biomass per kg MeOH
 	|
 
 SMR OPEX=
 	0.047
-	~	
+	~	percent
 	~	%/yr of CAPEX
 	|
 
@@ -1054,12 +1570,12 @@ MeOH OPEX=
 
 Grey NH3 price=
 	NH3 cost without hydrogen costs + Grey H2 price / NH3 H2 usage / NH3 LHV
-	~	
+	~	€/MJ
 	~		|
 
 NH3 H2 usage=
 	5.56
-	~	
+	~	kgNH3/kgH2
 	~		|
 
 HFO competitiveness=
@@ -1069,19 +1585,19 @@ HFO competitiveness=
 
 SMR emission factor=
 	8.9
-	~	
+	~	kgCO2/kgH2
 	~	8.9 kgCO2 / kgH2
 	|
 
 SMR CCS OPEX=
 	0.047
-	~	
+	~	percent
 	~	%/yr of CAPEX
 	|
 
 NH3 el usage=
 	0.315
-	~	
+	~	kWh/kgNH3
 	~		|
 
 MeOH competitiveness=
@@ -1114,34 +1630,34 @@ electroliser capacity=
 
 SMR AF=
 	1 / ((1-(1 + DISCOUNT RATE)^(-SMR lifetime))/DISCOUNT RATE)
-	~	
+	~	percent
 	~		|
 
 NH3 lifetime=
 	25
-	~	
+	~	years
 	~		|
 
 SMR CCS CAPEX = WITH LOOKUP (
 	Time,
 		 ([(1.90114,0)-(9.2016,4.18251)],(2019,1680),(2030,1360),(2050,1280) ))
-	~	
+	~	€/kWH2
 	~	€/kWH2
 	|
 
 SMR CCS efficiency=
 	0.69
-	~	
+	~	percent
 	~		|
 
 NH3 LHV=
 	18.9
-	~	
+	~	MJ/kgNH3
 	~		|
 
 MeOH electricity usage=
 	0.64
-	~	
+	~	kWh/kgMeOH
 	~	kWhe/kgMeOH
 	|
 
@@ -1158,12 +1674,12 @@ Green bioMeOH price=
 
 SMR lifetime=
 	25
-	~	
+	~	years
 	~		|
 
 MeOH operating hours=
 	8000
-	~	h/Year
+	~	h
 	~		|
 
 MeOH CAPEX=
@@ -1178,18 +1694,18 @@ steel hydrogen demand=
 
 NH3 operating hours=
 	8000
-	~	
+	~	h
 	~		|
 
 MeOH H2 usage=
 	15.7
-	~	kg/kg
+	~	kgMeOH/kgH2
 	~	kg MeOH per kg H2
 	|
 
 SMR efficiency=
 	0.76
-	~	
+	~	percent
 	~		|
 
 NH3 fertilizer consumption=
@@ -1294,7 +1810,7 @@ Green investment=
 
 DISCOUNT RATE=
 	0.08
-	~	
+	~	percent
 	~		|
 
 Green inno switch=
@@ -1349,7 +1865,7 @@ shipping equalizer=
 
 innovators=
 	0.025
-	~	
+	~	percent
 	~		|
 
 shipping reinvestment= INTEG (
@@ -1370,9 +1886,9 @@ HFO shipping consumption= INTEG (
 	~	GWh
 	~		|
 
-INTEREST RATES=
+INTEREST RATE=
 	0.08
-	~	
+	~	percent
 	~		|
 
 k i=
@@ -1392,7 +1908,7 @@ check shipping=
 
 late majority=
 	0.34
-	~	
+	~	percent
 	~		|
 
 ctrl shipping=
@@ -1462,17 +1978,17 @@ MeOH level=
 
 laggards=
 	0.16
-	~	
+	~	percent
 	~		|
 
 early adopters=
 	0.135
-	~	
+	~	percent
 	~		|
 
 early majority=
 	0.34
-	~	
+	~	percent
 	~		|
 
 NH3 investment level=
@@ -1497,13 +2013,6 @@ OIL PRICE = WITH LOOKUP (
 	~	€/GJ
 	|
 
-BIOMASS PRICE = WITH LOOKUP (
-	Time,
-		 ([(0,0)-(10,10)],(2019,12),(2030,11),(2040,10.5),(2050,5) ))
-	~	
-	~	€/GJ
-	|
-
 MeOH decay=
 	MeOH shipping consumption/ship lifetime
 	~	
@@ -1524,7 +2033,7 @@ HFO decay=
 GAS PRICE = WITH LOOKUP (
 	Time,
 		 ([(0,0)-(10,10)],(2015,6.3),(2030,8.5),(2040,9.3),(2050,10.2) ))
-	~	
+	~	€/GJ
 	~	€/GJ
 	|
 
@@ -1546,23 +2055,6 @@ int shipping consumption = WITH LOOKUP (
 ship lifetime=
 	15
 	~	
-	~		|
-
-decarbonization curve refinery = WITH LOOKUP (
-	Time,
-		([(0,0)-(10,10)],(2019,0),(2020,0),(2021,0.01),(2022,0.01),(2023,0.02),(2024,0.03),\
-		(2025,0.04),(2026,0.05),(2027,0.07)
-		,(2028,0.09),(2029,0.12),(2030,0.16),(2031,0.2),(2032,0.27),(2033,0.33),(2034,0.41)\
-		,(2035,0.49),(2036,0.57),(2037,0.65),
-		(2038,0.72),(2039,0.79),(2040,0.84),(2041,0.89),(2042,0.91),(2043,0.94),(2044,0.96)\
-		,(2045,0.97),(2046,0.98),(2047,0.99),
-		(2048,0.99),(2049,0.996294),(2050,0.998147) ))
-	~	
-	~		|
-
-"HYDROGEN F. REFINERY"=
-	4.8*10^6*decarbonization curve refinery
-	~	t H2
 	~		|
 
 "hydrogen energy consumption dom. aviation"=
@@ -1667,7 +2159,7 @@ electrolyser cost = WITH LOOKUP (
 	~	IRENA learning curve
 	|
 
-"hydrogen-syntheticnaphfta rate"=
+hydrogen synthetic naphfta rate=
 	5.85
 	~	MWh H2/t Naphfta
 	~		|
@@ -1680,13 +2172,13 @@ Olefin production = WITH LOOKUP (
 	|
 
 "HYDROGEN F. OLEFIN"=
-	(synthetic naphfta demand for olefin production*"hydrogen-syntheticnaphfta rate"+"bio-naphfta demand for olefin production"\
-		*"hydrogen-bionaphfta rate")/33.33
+	(synthetic naphfta demand for olefin production*hydrogen synthetic naphfta rate+"bio-naphfta demand for olefin production"\
+		*hydrogen bio naphfta rate)/33.33
 	~	t H2
 	~	33.33 kg/kWh = t/MWh
 	|
 
-"hydrogen-bionaphfta rate"=
+hydrogen bio naphfta rate=
 	0.78
 	~	MWh H2/t naphtfa
 	~		|
@@ -1781,75 +2273,9 @@ diesel locomotive efficiency=
 	~	
 	~		|
 
-heavy duty FCEV energy demand= INTEG (
-	IF THEN ELSE(heavy duty efficiency=0.65, potential heavy duty energy switch , -potential heavy duty energy switch\
-		 ),
-		0)
-	~	GWh
-	~		|
-
-heavy duty FCEV enery consumption=
-	MIN(heavy duty FCEV energy demand, heavy duty energy demand)/0.65
-	~	GWh
-	~		|
-
-heavy duty fossil energy consumption=
-	MAX(heavy duty fossil energy demand, 0 )/0.35
-	~	GWh
-	~		|
-
-heavy duty fossil energy demand= INTEG (
-	IF THEN ELSE(heavy duty efficiency=0.35, potential heavy duty energy switch , -potential heavy duty energy switch\
-		 ),
-		heavy duty energy demand)
-	~	GWh
-	~		|
-
-heavy duty vehicle renovation rate=
-	0.0574
-	~	
-	~	Check excel files
-	|
-
-ownership cost FCEV long haul=
-	325000+(Green H2 price/33.33*3.53*1.2e+06)
-	~	€
-	~	33.33 (kWh/kg H2)
-	|
-
-"HYDROGEN F. HEAVY DUTY ROAD TRANSPORT"=
-	heavy duty FCEV enery consumption/33.33*10^3
-	~	t H2
-	~		|
-
-total energy demand = WITH LOOKUP (
-	Time,
-		([(0,0)-(10,10)],(2019,867029),(2050,1.401e+06) ))
-	~	GWh
-	~	\!Year
-	|
-
-heavy duty energy demand=
-	total energy demand*0.2677
-	~	GWh
-	~	0.2677 comes from average emissions from heavy duty trucks and buses \
-		(Check excel files)
-	|
-
-potential heavy duty energy switch=
-	heavy duty energy demand*heavy duty vehicle renovation rate
-	~	
-	~		|
-
-heavy duty efficiency=
-	IF THEN ELSE( MIN( ownership cost FCEV long haul , ownership cost diesel long haul )\
-		=ownership cost FCEV long haul , 0.65 , 0.35 )
-	~	
-	~		|
-
 electrolyser efficiency=
 	0.63
-	~	
+	~	percent
 	~		|
 
 CAPEX hydrogen=
@@ -2052,44 +2478,58 @@ TIME STEP  = 0.0625
 
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
-*INPUT PARAMETERS
+*--------- INPUT PARAMETERS ---------
 $-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
-10,1,CARBON TAX,1005,322,49,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,2,GAS PRICE,781,220,44,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,3,ELECTRICITY PRICE,1001,206,51,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,4,BIOMASS PRICE,797,354,60,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,5,ELECTRICITY BASE PRICE,1003,260,51,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,6,Time,911,223,29,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,7,6,1,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,8,6,2,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,9,6,4,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,10,OIL PRICE,781,162,44,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,11,6,10,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,12,INTEREST RATES,557,144,62,21,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,13,DISCOUNT RATE,555,204,60,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,14,COAL PRICE,784,292,47,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-12,15,0,775,-95,212,46,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
-Main input parameters, which should be updated through PySD before running scenarios. Numbers are given, but not verifiable.
-12,16,0,548,56,47,47,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
-Financial
-12,17,0,775,56,48,48,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
-Resources
-12,18,0,1002,56,50,50,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
-Electricity and Carbon Taxes
-12,19,0,1207,56,66,47,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
-Sigmoid Hyperparameters
-10,20,SLOPE,1204,162,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,21,CROSS INNOVATION,1210,221,47,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,22,CROSS CONVENTIONAL,1211,279,58,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,23,6,14,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,24,5,3,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,25,6,5,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,26,ELECTRICITY SENSITIVITY,1000,147,51,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,27,26,3,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,28,DIESEL PRICE,790,417,50,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,1,0,626,286,101,101,11,7,0,0,-1,0,0,0,0,0,0,0,0,0
+INSERT DESCRIPTION
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
-*adoption categories
+*Financial, Resources and Hyperparameters
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
+10,1,CARBON TAX,995,522,49,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,GAS PRICE,707,419,44,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,ELECTRICITY PRICE,991,406,51,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,BIOMASS PRICE,707,622,60,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,5,ELECTRICITY BASE PRICE,993,460,51,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,6,Time,842,424,42,12,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,7,6,1,1,1,0,0,0,192,0,-1--1--1,,1|(893,504)|
+1,8,6,2,1,1,0,0,0,192,0,-1--1--1,,1|(794,425)|
+10,9,OIL PRICE,707,361,44,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,10,6,9,1,1,0,0,0,192,0,-1--1--1,,1|(801,380)|
+10,11,INTEREST RATE,475,343,62,21,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,12,DISCOUNT RATE,473,403,60,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,13,COAL PRICE,707,491,47,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,14,0,847,128,224,46,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+Main input parameters, which should be updated through PySD before running scenarios. Base numbers are given, but not verifiable.
+12,15,0,466,255,47,47,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+Financial
+12,16,0,707,255,48,48,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+Resources
+12,17,0,992,256,50,50,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+Electricity and Carbon Taxes
+12,18,0,1256,254,66,47,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+Sigmoid Hyperparameters - not used anywhere currently
+10,19,SLOPE,1253,360,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,20,CROSS INNOVATION,1259,419,47,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,21,CROSS CONVENTIONAL,1260,477,58,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,22,6,13,1,1,0,0,0,192,0,-1--1--1,,1|(807,475)|
+1,23,5,3,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,24,6,5,1,1,0,0,0,192,0,-1--1--1,,1|(887,457)|
+10,25,ELECTRICITY SENSITIVITY,990,347,51,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,26,25,3,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,27,DIESEL PRICE,707,766,50,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,28,BIOMASS BASE PRICE,707,562,59,17,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,29,6,28,1,1,0,0,0,192,0,-1--1--1,,1|(805,534)|
+1,30,28,4,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,31,BIOMASS DEMAND SATURATION,707,696,62,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,32,31,4,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,33,9,27,1,1,0,0,0,192,0,-1--1--1,,1|(608,559)|
+10,34,OIL PRICE INIT,572,766,58,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,35,9,34,1,1,0,0,0,192,1,-1--1--1,,1|(575,562)|
+1,36,34,27,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Adoption Categories
 $-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
 10,1,innovators,277,220,47,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 10,2,early adopters,432,222,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
@@ -2100,160 +2540,173 @@ $-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
 Percentage of a market population, which typically belong to each category, when discussing penetrating a market with an innovation. 
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
+*--------- TECHNOLOGY COSTS ---------
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
+12,1,0,924,424,101,101,11,7,0,0,-1,0,0,0,0,0,0,0,0,0
+INSERT DESCRIPTION
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
 *Hydrogen production
 $192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,67,2
-10,1,TOTAL GREEN HYDROGEN DEMAND,719,534,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,2,steel hydrogen demand,395,641,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,3,2,1,1,0,0,0,0,192,0,-1--1--1,,1|(529,605)|
-10,4,electroliser capacity,1038,609,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,5,1,4,1,0,0,0,0,192,0,-1--1--1,,1|(892,534)|
-10,6,electrolyser average working hours,1103,504,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,7,6,4,1,0,0,0,0,192,0,-1--1--1,,1|(1064,562)|
-10,8,electrolyser cost,1050,697,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,9,4,8,1,0,0,0,0,192,0,-1--1--1,,1|(1059,651)|
-10,10,CAPEX hydrogen,1075,850,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,11,electrolyser lifetime,920,740,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,12,11,10,1,0,0,0,0,192,0,-1--1--1,,1|(966,802)|
-1,13,8,10,1,0,0,0,0,192,0,-1--1--1,,1|(1055,782)|
-12,14,0,981,962,89,48,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+10,1,TOTAL GREEN HYDROGEN DEMAND,789,414,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,steel hydrogen demand,464,515,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,3,2,1,1,0,0,0,0,192,0,-1--1--1,,1|(602,489)|
+10,4,electroliser capacity,1107,483,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,5,1,4,1,0,0,0,0,192,0,-1--1--1,,1|(961,411)|
+10,6,electrolyser average working hours,1172,378,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,7,6,4,1,0,0,0,0,192,0,-1--1--1,,1|(1133,436)|
+10,8,electrolyser cost,1119,571,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,9,4,8,1,0,0,0,0,192,0,-1--1--1,,1|(1128,525)|
+10,10,CAPEX hydrogen,1144,724,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,11,electrolyser lifetime,989,614,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,12,11,10,1,0,0,0,0,192,0,-1--1--1,,1|(1035,676)|
+1,13,8,10,1,0,0,0,0,192,0,-1--1--1,,1|(1124,656)|
+12,14,0,1050,836,89,48,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 OPEX hydrogen is electricity price and added together with CAPEX hydrogen we have hydrogen price
-10,15,OPEX hydrogen,1380,828,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,16,Green H2 price,1264,960,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,17,10,16,1,0,0,0,0,192,0,-1--1--1,,1|(1157,917)|
-1,18,15,16,1,0,0,0,0,192,0,-1--1--1,,1|(1339,904)|
-10,19,electrolyser efficiency,1260,603,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,15,OPEX hydrogen,1449,702,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,16,Green H2 price,1333,834,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,17,10,16,1,0,0,0,0,192,0,-1--1--1,,1|(1226,791)|
+1,18,15,16,1,0,0,0,0,192,0,-1--1--1,,1|(1408,778)|
+10,19,electrolyser efficiency,1329,477,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,20,19,16,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,21,"HYDROGEN F. HEAVY DUTY ROAD TRANSPORT",400,245,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,22,21,1,1,0,0,0,0,192,0,-1--1--1,,1|(570,361)|
-10,23,"HYDROGEN F. INDUSTRIAL HEAT",391,705,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,24,23,1,1,0,0,0,0,192,0,-1--1--1,,1|(548,652)|
-10,25,"HYDROGEN F. OLEFIN",394,496,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,26,25,1,1,0,0,0,0,192,0,-1--1--1,,1|(511,499)|
-10,27,"HYDROGEN F. AVIATON",396,776,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,28,27,1,1,0,0,0,0,192,0,-1--1--1,,1|(583,701)|
-10,29,"HYDROGEN F. REFINERY",395,562,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,30,29,1,1,0,0,0,0,192,0,-1--1--1,,1|(539,538)|
-10,31,international shipping hydrogen demand,395,415,47,34,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,32,31,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,33,ELECTRICITY PRICE,1407,702,71,24,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,34,33,15,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,35,fertilizer hydrogen demand,396,326,42,35,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,36,35,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,37,Blue H2 price,2276,724,59,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,38,Grey H2 price,1866,729,60,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,39,CARBON TAX,2071,660,41,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,40,39,38,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,41,SMR lifetime,1986,929,75,30,0,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,42,GAS PRICE,2071,612,54,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,43,42,38,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,44,42,37,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,45,SMR CAPEX,1649,661,58,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,46,SMR emission factor,1649,777,63,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-1,47,45,38,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,48,46,38,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,49,SMR efficiency,1649,713,42,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-1,50,49,38,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,51,SMR OPEX,1649,832,52,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-1,52,51,38,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,53,DISCOUNT RATE,2165,930,48,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,54,SMR AF,2071,833,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-1,55,53,54,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,56,41,54,1,1,0,0,0,192,0,-1--1--1,,1|(2033,888)|
-1,57,54,38,1,0,0,0,0,192,0,-1--1--1,,1|(1981,762)|
-10,58,SMR operating hours,2071,731,65,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-1,59,58,38,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,60,39,37,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,61,SMR CCS CAPEX,2471,655,46,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,62,SMR CCS emission factor,2471,721,66,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,63,SMR CCS efficiency,2471,835,46,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,64,SMR CCS OPEX,2471,779,46,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-1,65,61,37,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,66,63,37,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,67,64,37,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,68,62,37,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,69,58,37,1,0,0,0,0,192,0,-1--1--1,,1|(2186,735)|
-1,70,54,37,1,0,0,0,0,192,0,-1--1--1,,1|(2181,801)|
-10,71,Time,2471,575,29,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,72,71,61,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,73,19,4,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,74,LHV H2,1267,1056,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,75,74,16,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,21,"HYDROGEN F. INDUSTRIAL HEAT",283,579,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,22,"HYDROGEN F. OLEFIN",254,370,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,23,"HYDROGEN F. AVIATON",284,655,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,24,international shipping hydrogen demand,456,359,47,34,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,25,24,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,26,ELECTRICITY PRICE,1476,576,71,24,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,27,26,15,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,28,fertilizer hydrogen demand,457,281,42,35,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,29,28,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,30,Blue H2 price,2345,598,59,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,31,Grey H2 price,1935,603,60,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,32,CARBON TAX,2136,502,41,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,33,32,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,34,SMR lifetime,2088,751,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,35,GAS PRICE,2140,558,54,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,36,35,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,37,35,30,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,38,SMR CAPEX,1717,650,58,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,39,SMR emission factor,1718,530,63,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,40,38,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,41,39,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,42,SMR efficiency,1718,587,42,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,43,42,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,44,SMR OPEX,1718,706,52,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,45,44,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,46,DISCOUNT RATE,2218,754,48,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,47,SMR AF,2151,663,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,48,46,47,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,49,34,47,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,50,47,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,51,SMR operating hours,2140,605,65,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,52,51,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,53,32,30,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,54,SMR CCS CAPEX,2540,529,46,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,55,SMR CCS emission factor,2540,595,66,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,56,SMR CCS efficiency,2540,709,46,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,57,SMR CCS OPEX,2540,653,46,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,58,54,30,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,59,56,30,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,60,57,30,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,61,55,30,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,62,51,30,1,0,0,0,0,192,0,-1--1--1,,1|(2255,609)|
+1,63,47,30,1,0,0,0,0,192,0,-1--1--1,,1|(2251,651)|
+10,64,Time,2540,449,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,65,64,54,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,66,19,4,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,67,LHV H2,1336,930,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,68,67,16,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,69,light duty hydrogen demand,457,587,34,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,70,heavy duty hydrogen demand,451,653,40,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,71,69,1,1,0,0,0,0,192,0,-1--1--1,,1|(622,539)|
+1,72,70,1,1,0,0,0,0,192,0,-1--1--1,,1|(621,600)|
+10,73,refinery hydrogen demand,465,449,62,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,74,73,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,75,Alternative Blue price,1935,478,53,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,76,CC Capture Rate,1863,408,47,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,77,76,75,1,0,0,0,0,192,0,-1--1--1,,1|(1893,454)|
+1,78,31,75,1,0,0,0,0,192,0,-1--1--1,,1|(1939,540)|
+1,79,32,75,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,80,39,75,1,0,0,0,0,192,0,-1--1--1,,1|(1830,486)|
+10,81,CCS cost,1995,409,40,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,82,81,75,1,0,0,0,0,192,0,-1--1--1,,1|(1967,448)|
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
 *NH3 production
 $-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
-10,1,Green H2 price,1153,417,38,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,2,NH3 cost without hydrogen costs,718,417,58,21,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,3,ELECTRICITY PRICE,717,313,50,15,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,1,Green H2 price,1091,403,38,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,2,NH3 cost without hydrogen costs,656,403,58,21,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,ELECTRICITY PRICE,655,299,50,15,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,4,3,2,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,5,DISCOUNT RATE,546,314,62,8,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,6,NH3 CAPEX,533,514,38,8,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,7,NH3 OPEX,535,550,34,8,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,8,NH3 operating hours,528,597,54,15,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,9,NH3 LHV,718,542,30,8,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,10,NH3 el usage,532,470,50,8,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,11,NH3 lifetime,411,387,50,8,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,12,NH3 AF,548,385,26,8,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,5,DISCOUNT RATE,484,300,62,8,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,6,NH3 CAPEX,471,500,38,8,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,7,NH3 OPEX,473,536,34,8,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,8,NH3 operating hours,466,583,54,15,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,9,NH3 LHV,656,528,30,8,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,10,NH3 el usage,470,456,50,8,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,11,NH3 lifetime,349,373,50,8,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,12,NH3 AF,486,371,26,8,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,13,5,12,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,14,11,12,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,15,12,2,1,1,0,0,0,192,0,-1--1--1,,1|(628,386)|
-1,16,6,2,1,1,0,0,0,192,0,-1--1--1,,1|(625,482)|
+1,15,12,2,1,1,0,0,0,192,0,-1--1--1,,1|(566,372)|
+1,16,6,2,1,1,0,0,0,192,0,-1--1--1,,1|(563,468)|
 1,17,9,2,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,18,10,2,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,19,8,2,1,1,0,0,0,192,0,-1--1--1,,1|(636,536)|
-1,20,7,2,1,1,0,0,0,192,0,-1--1--1,,1|(628,508)|
-10,21,Green NH3 price,984,421,62,8,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,19,8,2,1,1,0,0,0,192,0,-1--1--1,,1|(574,522)|
+1,20,7,2,1,1,0,0,0,192,0,-1--1--1,,1|(566,494)|
+10,21,Green NH3 price,922,407,62,8,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,22,2,21,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,23,1,21,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,24,9,21,1,1,0,0,0,192,0,-1--1--1,,1|(862,508)|
-10,25,Grey H2 price,1153,542,62,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,26,Blue H2 price,1159,639,62,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,27,Grey NH3 price,980,542,58,8,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,28,Blue NH3 price,985,639,58,8,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,24,9,21,1,1,0,0,0,192,0,-1--1--1,,1|(800,494)|
+10,25,Grey H2 price,1091,528,62,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,26,Blue H2 price,1097,625,62,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,27,Grey NH3 price,918,528,58,8,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,28,Blue NH3 price,923,625,58,8,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,29,2,27,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,30,2,28,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,31,9,27,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,32,9,28,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,33,25,27,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,34,26,28,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,35,NH3 H2 usage,724,640,50,8,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,35,NH3 H2 usage,662,626,50,8,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,36,35,21,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,37,35,27,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,38,35,28,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-12,39,0,767,255,241,30,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+12,39,0,705,241,241,30,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 NH3 price calculations - calculates levelized cost for different types of ammonia production. Unit is EUR/MJ.
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
 *MeOH production
 $-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
-10,1,bioMeOH cost without hydrogen,700,361,56,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,2,Green H2 price,1165,381,41,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,3,BIOMASS PRICE,656,262,43,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,1,bioMeOH cost without hydrogen,639,344,56,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,Green H2 price,1104,364,41,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,3,BIOMASS PRICE,595,245,43,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,4,3,1,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,5,MeOH lifetime,340,324,60,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,6,MeOH CAPEX,502,377,47,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,7,MeOH OPEX,499,417,50,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,8,MeOH electricity usage,489,461,60,26,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,9,MeOH biomass usage,489,510,60,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,10,MeOH H2 usage,696,557,60,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,11,MeOH operating hours,488,555,61,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,12,DISCOUNT RATE,495,262,48,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,13,MeOH AF,499,328,50,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,5,MeOH lifetime,279,307,60,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,6,MeOH CAPEX,441,360,47,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,7,MeOH OPEX,438,400,50,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,8,MeOH electricity usage,428,444,60,26,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,9,MeOH biomass usage,428,493,60,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,10,MeOH H2 usage,635,540,60,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,11,MeOH operating hours,427,538,61,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,12,DISCOUNT RATE,434,245,48,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,13,MeOH AF,438,311,50,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,14,5,13,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,15,12,13,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,16,6,1,1,1,0,0,0,192,0,-1--1--1,,1|(600,374)|
-1,17,7,1,1,1,0,0,0,192,0,-1--1--1,,1|(601,399)|
-1,18,8,1,1,1,0,0,0,192,0,-1--1--1,,1|(615,435)|
-1,19,9,1,1,1,0,0,0,192,0,-1--1--1,,1|(627,471)|
-1,20,11,1,1,1,0,0,0,192,0,-1--1--1,,1|(621,498)|
-1,21,13,1,1,1,0,0,0,192,0,-1--1--1,,1|(583,331)|
-10,22,MeOH LHV,702,488,55,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,16,6,1,1,1,0,0,0,192,0,-1--1--1,,1|(539,357)|
+1,17,7,1,1,1,0,0,0,192,0,-1--1--1,,1|(540,382)|
+1,18,8,1,1,1,0,0,0,192,0,-1--1--1,,1|(554,418)|
+1,19,9,1,1,1,0,0,0,192,0,-1--1--1,,1|(566,454)|
+1,20,11,1,1,1,0,0,0,192,0,-1--1--1,,1|(560,481)|
+1,21,13,1,1,1,0,0,0,192,0,-1--1--1,,1|(522,314)|
+10,22,MeOH LHV,641,471,55,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,23,22,1,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,24,Grey H2 price,1163,462,38,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,25,Blue H2 price,1159,541,38,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,26,Green bioMeOH price,994,386,60,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,27,Grey bioMeOH price,994,463,56,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,28,Blue bioMeOH price,1000,542,56,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,24,Grey H2 price,1102,445,38,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,25,Blue H2 price,1098,524,38,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,26,Green bioMeOH price,933,369,60,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,27,Grey bioMeOH price,933,446,56,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,28,Blue bioMeOH price,939,525,56,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,29,1,26,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,30,1,27,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,31,1,28,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
@@ -2266,202 +2719,285 @@ $-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
 1,38,22,26,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,39,22,27,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,40,22,28,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,41,ELECTRICITY PRICE,787,264,56,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,41,ELECTRICITY PRICE,726,247,56,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,42,41,1,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-12,43,0,792,180,241,30,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+12,43,0,731,163,241,30,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 MeOH price calculations - calculates levelized cost for different types of methanol production. Unit is EUR/MJ.
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
 *Steel production
 $-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
-10,1,COAL PRICE,327,325,59,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,2,CARBON TAX,828,406,41,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,3,GAS PRICE,811,283,54,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,4,ELECTRICITY PRICE,1213,234,57,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,5,Green H2 price,1214,282,41,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-12,6,0,997,654,191,77,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+10,1,COAL PRICE,431,337,59,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,2,CARBON TAX,932,418,41,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,3,GAS PRICE,915,295,54,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,4,ELECTRICITY PRICE,1317,246,57,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,5,Green H2 price,1318,294,41,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+12,6,0,1101,666,191,77,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 Point of comparison is $/t of steel. CAPEX is included, OPEX numbers from same source include fuel costs, why it is here assumed OPEX is only the fuel costs.|<<NnN>>||<<NnN>>|Technology review: https://doi.org/10.1016/j.jclepro.2023.136391|<<NnN>>||<<NnN>>|H2DRI-EAF needs high quality iron ores, which might become scarce.
-10,7,Coal to Steel,337,282,60,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,8,Gas to Steel,810,231,56,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,9,BF Coal cost,624,259,51,24,3,3,0,0,-1,0,0,0,1,0,0,0,0,0
-10,10,BF CCS cost,1023,287,51,31,3,3,0,0,-1,1,0,0,1,0,0,0,0,0
-10,11,HDRI cost,1430,256,49,27,3,3,0,0,-1,0,0,0,1,0,0,0,0,0
-1,12,5,11,1,0,0,0,0,192,0,-1--1--1,,1|(1326,290)|
+10,7,Coal to Steel,441,294,60,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,8,Gas to Steel,914,243,56,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,9,BF Coal cost,728,271,51,24,3,3,0,0,-1,0,0,0,1,0,0,0,0,0
+10,10,BF CCS cost,1127,299,51,31,3,3,0,0,-1,1,0,0,1,0,0,0,0,0
+10,11,HDRI cost,1534,268,49,27,3,3,0,0,-1,0,0,0,1,0,0,0,0,0
+1,12,5,11,1,0,0,0,0,192,0,-1--1--1,,1|(1430,302)|
 1,13,4,11,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,14,7,9,1,0,0,0,0,192,0,-1--1--1,,1|(493,286)|
-1,15,1,9,1,0,0,0,0,192,0,-1--1--1,,1|(471,329)|
-1,16,2,10,1,0,0,0,0,192,0,-1--1--1,,1|(916,386)|
-1,17,8,10,1,0,0,0,0,192,0,-1--1--1,,1|(917,246)|
+1,14,7,9,1,0,0,0,0,192,0,-1--1--1,,1|(597,298)|
+1,15,1,9,1,0,0,0,0,192,0,-1--1--1,,1|(575,341)|
+1,16,2,10,1,0,0,0,0,192,0,-1--1--1,,1|(1020,398)|
+1,17,8,10,1,0,0,0,0,192,0,-1--1--1,,1|(1021,258)|
 1,18,3,10,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,19,BF Coal emission factor,339,230,42,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,20,BF CCS emission factor,814,342,42,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,21,20,10,1,0,0,0,0,192,0,-1--1--1,,1|(909,333)|
+10,19,BF Coal emission factor,443,242,42,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,20,BF CCS emission factor,918,354,42,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,21,20,10,1,0,0,0,0,192,0,-1--1--1,,1|(1013,345)|
 1,22,19,9,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,23,H2 to steel,1224,330,60,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,24,23,11,1,0,0,0,0,192,0,-1--1--1,,1|(1329,322)|
-10,25,CARBON TAX,317,367,41,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,26,25,9,1,0,0,0,0,192,0,-1--1--1,,1|(473,355)|
-10,27,ELECTRICITY PRICE,318,411,57,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,28,27,9,1,0,0,0,0,192,0,-1--1--1,,1|(484,403)|
-10,29,EL to Steel BF Coal,317,457,51,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,30,29,9,1,0,0,0,0,192,0,-1--1--1,,1|(500,456)|
-10,31,EL to Steel HDRI,1228,387,51,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,32,31,11,1,0,0,0,0,192,0,-1--1--1,,1|(1350,354)|
-10,33,LHV Coal,321,518,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,34,33,9,1,0,0,0,0,192,0,-1--1--1,,1|(524,474)|
-10,35,HDRI CAPEX,1227,446,47,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,36,BF CCS CAPEX,816,189,56,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,37,36,10,1,0,0,0,0,192,0,-1--1--1,,1|(906,212)|
-1,38,35,11,1,0,0,0,0,192,0,-1--1--1,,1|(1363,395)|
-10,39,BF Coal CAPEX,313,164,60,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,40,39,9,1,0,0,0,0,192,0,-1--1--1,,1|(485,195)|
+10,23,H2 to steel,1328,342,60,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,24,23,11,1,0,0,0,0,192,0,-1--1--1,,1|(1433,334)|
+10,25,CARBON TAX,421,379,41,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,26,25,9,1,0,0,0,0,192,0,-1--1--1,,1|(577,367)|
+10,27,ELECTRICITY PRICE,422,423,57,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,28,27,9,1,0,0,0,0,192,0,-1--1--1,,1|(588,415)|
+10,29,EL to Steel BF Coal,421,469,51,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,30,29,9,1,0,0,0,0,192,0,-1--1--1,,1|(604,468)|
+10,31,EL to Steel HDRI,1332,399,51,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,32,31,11,1,0,0,0,0,192,0,-1--1--1,,1|(1454,366)|
+10,33,LHV Coal,425,530,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,34,33,9,1,0,0,0,0,192,0,-1--1--1,,1|(628,486)|
+10,35,HDRI CAPEX,1331,458,47,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,36,BF CCS CAPEX,920,201,56,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,37,36,10,1,0,0,0,0,192,0,-1--1--1,,1|(1010,224)|
+1,38,35,11,1,0,0,0,0,192,0,-1--1--1,,1|(1467,407)|
+10,39,BF Coal CAPEX,417,176,60,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,40,39,9,1,0,0,0,0,192,0,-1--1--1,,1|(589,207)|
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
 *Road Transport costs
 $-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
-10,1,LD ownership cost diesel,610,206,55,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,2,LD ownership cost BEV,610,405,55,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,3,electricity taxes 0,856,458,35,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,4,3,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,5,LD ownership cost FCEV,610,554,55,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,6,Green H2 price,856,554,41,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,7,6,5,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,8,ELECTRICITY PRICE,861,405,57,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,9,8,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,10,HD ownership cost FCEV,1108,554,65,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,11,HD ownership cost diesel,1108,206,64,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,12,HD ownership cost BEV,1108,405,59,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-12,13,0,491,126,164,37,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+10,1,LD ownership cost diesel,575,167,55,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,LD ownership cost BEV,575,366,55,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,Electricity Taxes,821,419,46,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,LD ownership cost FCEV,575,515,55,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,5,Green H2 price,821,515,41,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,6,ELECTRICITY PRICE,826,366,57,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,7,HD ownership cost FCEV,1073,515,65,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,8,HD ownership cost diesel,1073,167,64,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,9,HD ownership cost BEV,1073,366,59,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,10,0,456,87,164,37,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 Light Duty Road Transport|<<NnN>>|
-12,14,0,1209,131,173,38,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+12,11,0,1174,92,173,38,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 Heavy Duty Road Transport|<<NnN>>|
-10,15,CARBON TAX,856,341,50,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,16,15,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,17,LD Diesel CAPEX,390,207,62,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,18,LD Diesel efficiency,370,256,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,19,17,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,20,18,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,21,Diesel Emission Factor,854,205,50,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,22,21,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,23,LHV Diesel,856,256,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,24,23,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,25,DIESEL PRICE,856,294,58,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,26,25,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,27,HD Diesel CAPEX,1329,210,62,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,28,HD Diesel efficiency,1349,256,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,29,27,11,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,30,28,11,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,31,21,11,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,32,23,11,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,33,25,11,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,34,15,11,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,35,8,12,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,36,3,12,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,37,6,10,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,38,LHV H2,856,609,41,23,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,39,38,5,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,40,38,10,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,41,LD Car Mileage,386,352,58,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,42,LD BEV CAPEX,383,409,50,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,43,LD FCEV CAPEX,382,558,54,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,44,41,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,45,41,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,46,41,5,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,47,42,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,48,43,5,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,49,HD Truck Mileage,1349,336,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,50,HD BEV CAPEX,1346,409,50,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,51,HD FCEV CAPEX,1337,558,54,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,52,49,11,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,53,49,12,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,54,49,10,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,55,50,12,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,56,51,10,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,57,HD BEV efficiency,1349,462,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,58,HD FCEV efficiency,1349,608,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,59,LD BEV efficiency,370,462,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,60,LD FCEV efficiency,370,608,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,61,59,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,62,60,5,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,63,58,10,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,64,57,12,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,12,CARBON TAX,821,302,50,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,13,LD Diesel CAPEX,355,168,62,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,14,LD Diesel efficiency,335,217,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,15,13,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,16,Diesel Emission Factor,819,166,50,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,17,LHV Diesel,821,217,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,18,DIESEL PRICE,821,255,58,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,19,HD Diesel CAPEX,1294,171,62,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,20,HD Diesel efficiency,1314,217,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,21,19,8,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,22,20,8,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,23,16,8,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,24,17,8,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,25,18,8,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,26,12,8,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,27,6,9,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,28,3,9,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,29,5,7,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,30,LHV H2,821,570,41,23,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,31,30,7,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,32,LD Car Mileage,424,311,58,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,33,LD BEV CAPEX,333,368,50,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,34,LD FCEV CAPEX,347,519,54,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,35,33,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,36,34,4,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,37,HD Truck Mileage,1314,297,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,38,HD BEV CAPEX,1311,370,50,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,39,HD FCEV CAPEX,1302,519,54,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,40,37,8,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,41,37,9,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,42,37,7,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,43,38,9,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,44,39,7,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,45,HD BEV efficiency,1314,423,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,46,HD FCEV efficiency,1314,569,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,47,LD BEV efficiency,335,423,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,48,LD FCEV efficiency,335,569,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,49,46,7,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,50,45,9,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,51,LD Diesel OPEX,576,230,58,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,52,LD BEV OPEX,575,433,46,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,53,LD FCEV OPEX,574,581,50,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,54,32,53,1,0,0,0,0,192,0,-1--1--1,,1|(438,504)|
+1,55,16,51,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,56,17,51,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,57,18,51,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,58,12,51,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,59,14,51,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,60,32,51,1,0,0,0,0,192,0,-1--1--1,,1|(472,259)|
+1,61,51,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,62,47,52,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,63,32,52,1,0,0,0,0,192,0,-1--1--1,,1|(468,396)|
+1,64,3,52,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,65,6,52,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,66,48,53,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,67,5,53,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,68,30,53,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,69,52,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,70,53,4,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Carbon Capture and Storage
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
+12,1,0,601,141,80,40,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+Carbon Capture
+12,2,0,955,141,80,40,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+Carbon Usage
+10,3,CC CAPEX,470,314,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,CC FIXED OPEX,465,376,54,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,5,CC VARIABLE COST,471,522,54,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,6,0,778,141,80,40,8,7,0,0,-1,0,0,0,0,0,0,0,0,0
+Source: Technology Catalogue for Carbon Capture and Storage (ENS)
+10,7,Time,336,313,28,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,8,7,3,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,9,CC ELECTRICITY USAGE,470,448,58,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,10,7,9,1,0,0,0,0,192,0,-1--1--1,,1|(377,414)|
+10,11,CC HEAT USAGE,463,577,54,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,12,7,11,1,0,0,0,0,192,0,-1--1--1,,1|(360,475)|
+10,13,HEAT COST,461,635,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,14,CC Capture Rate,455,141,62,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,15,CC Lifetime,461,214,46,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,16,DISCOUNT RATE,336,267,46,20,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,17,ELECTRICITY PRICE,463,698,55,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,18,CC AF,461,270,44,10,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,19,15,18,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,20,16,18,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,21,CC Cost,627,376,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,22,3,21,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,23,4,21,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,24,9,21,1,0,0,0,0,192,0,-1--1--1,,1|(554,434)|
+1,25,5,21,1,0,0,0,0,192,0,-1--1--1,,1|(571,483)|
+1,26,11,21,1,0,0,0,0,192,0,-1--1--1,,1|(593,551)|
+1,27,13,21,1,0,0,0,0,192,0,-1--1--1,,1|(580,621)|
+1,28,17,21,1,0,0,0,0,192,0,-1--1--1,,1|(598,651)|
+1,29,18,21,1,0,0,0,0,192,0,-1--1--1,,1|(555,303)|
+10,30,CC Capacity Factor,461,761,46,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,31,30,21,1,0,0,0,0,192,0,-1--1--1,,1|(577,714)|
+10,32,CCS cost,777,377,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,33,21,32,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,34,Carbon Storage costs,937,378,58,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,35,34,32,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,36,Time,1221,373,26,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,37,CS CAPEX,1082,253,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,38,CS decommisioning,1086,312,58,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,39,CS FIXED OPEX,1084,366,54,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,40,CS VARIABLE COST,1089,439,46,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,41,CS OTHER EXPENDITURES,1089,511,50,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,42,36,37,1,0,0,0,0,192,0,-1--1--1,,1|(1179,288)|
+1,43,36,38,1,0,0,0,0,192,0,-1--1--1,,1|(1184,328)|
+1,44,36,39,1,0,0,0,0,192,0,-1--1--1,,1|(1155,367)|
+1,45,36,40,1,0,0,0,0,192,0,-1--1--1,,1|(1190,420)|
+1,46,36,41,1,0,0,0,0,192,0,-1--1--1,,1|(1208,449)|
+1,47,37,34,1,0,0,0,0,192,0,-1--1--1,,1|(993,271)|
+1,48,38,34,1,0,0,0,0,192,0,-1--1--1,,1|(994,317)|
+1,49,39,34,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,50,40,34,1,0,0,0,0,192,0,-1--1--1,,1|(1025,435)|
+1,51,41,34,1,0,0,0,0,192,0,-1--1--1,,1|(988,461)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Biomass supply side
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
+10,1,BIOMASS DEMAND SATURATION,579,333,58,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,2,0,861,178,356,56,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+The aim of this view is to formulate and evaluate a cost curve for the biomass price as a function of the demand vs supply of biomass on a European scale. The cost curve should be almost constantly equal to 1 and then start increasing significantly once e.g. 50 % of the available resource is used. A curve could look something like:|<<NnN>>||<<NnN>>|(0%,1)-(40%,1)-(50%,1.1)-(60%,1.3)-(70%,1.6)-(80%,2.2)-(90%,3.0)-(95%,5.0)-(100%,10.0)-(110%,20.0).|<<NnN>>||<<NnN>>|The used biomass price likely has some of these dynamics assumed as well exogenously.
+10,3,international shipping biomass demand,738,561,66,21,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,4,biomass availability,848,333,50,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,5,biomass used,739,444,50,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,6,3,5,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,7,5,1,1,0,0,0,0,192,0,-1--1--1,,1|(699,377)|
+1,8,4,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*--------- SECTOR BREAKDOWN ---------
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
+12,1,0,924,409,101,101,11,7,0,0,-1,0,0,0,0,0,0,0,0,0
+INSERT DESCRIPTION
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
 *International shipping demand
-$-1--1--1,0,Courier New|10||0-0-0|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,54,2
-10,1,int shipping consumption,1394,422,73,27,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,2,NH3 shipping consumption,1738,590,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,3,MeOH shipping consumption,2052,589,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,4,HFO shipping consumption,1396,588,67,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+$-1--1--1,0,Courier New|10||0-0-0|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,95,2
+10,1,int shipping consumption,525,247,73,27,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,NH3 shipping consumption,869,415,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,MeOH shipping consumption,1183,414,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,HFO shipping consumption,527,413,67,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,5,1,4,0,0,0,0,0,192,1,-1--1--1,,1|(0,0)|
-10,6,HFO cost,1509,1288,52,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,7,CARBON TAX,1670,1377,62,11,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,6,HFO cost,640,1113,52,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,7,CARBON TAX,801,1202,62,11,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,8,7,6,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,9,ship lifetime,1892,739,42,42,11,3,2,0,-1,0,0,0,0,0,0,0,0,0
-10,10,shipping reinvestment,2365,910,67,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,11,13,3,100,0,0,22,0,192,0,-1--1--1,,1|(2008,625)|
-1,12,13,10,4,0,0,22,0,192,0,-1--1--1,,1|(2008,910)|
-11,13,0,2008,638,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,14,MeOH decay,2041,638,25,1,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,15,17,2,100,0,0,22,0,192,0,-1--1--1,,1|(1684,626)|
-1,16,17,10,4,0,0,22,0,192,0,-1--1--1,,1|(1684,910)|
-11,17,0,1684,640,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,18,NH3 decay,1715,640,23,1,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,19,21,4,100,0,0,22,0,192,0,-1--1--1,,1|(1353,626)|
-1,20,21,10,4,0,0,22,0,192,0,-1--1--1,,1|(1353,910)|
-11,21,0,1353,642,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,22,HFO decay,1383,642,22,3,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,23,9,22,1,2,0,0,0,192,0,-1--1--1,,1|(1466,746)|
+10,9,ship lifetime,1023,564,42,42,11,3,2,0,-1,0,0,0,0,0,0,0,0,0
+10,10,shipping reinvestment,1496,735,67,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,11,13,3,100,0,0,22,0,192,0,-1--1--1,,1|(1139,450)|
+1,12,13,10,4,0,0,22,0,192,0,-1--1--1,,1|(1139,735)|
+11,13,0,1139,463,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,14,MeOH decay,1172,463,25,1,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,15,17,2,100,0,0,22,0,192,0,-1--1--1,,1|(815,451)|
+1,16,17,10,4,0,0,22,0,192,0,-1--1--1,,1|(815,735)|
+11,17,0,815,465,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,18,NH3 decay,846,465,23,1,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,19,21,4,100,0,0,22,0,192,0,-1--1--1,,1|(484,451)|
+1,20,21,10,4,0,0,22,0,192,0,-1--1--1,,1|(484,735)|
+11,21,0,484,467,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,22,HFO decay,514,467,22,3,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,23,9,22,1,2,0,0,0,192,0,-1--1--1,,1|(597,571)|
 1,24,4,22,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,25,9,17,1,2,0,0,0,192,0,-1--1--1,,1|(1721,724)|
+1,25,9,17,1,2,0,0,0,192,0,-1--1--1,,1|(852,549)|
 1,26,2,17,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,27,3,13,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,28,9,13,1,2,0,0,0,192,0,-1--1--1,,1|(1919,670)|
+1,28,9,13,1,2,0,0,0,192,0,-1--1--1,,1|(1050,495)|
 1,29,1,10,0,1,0,0,0,192,1,-1--1--1,,1|(0,0)|
-10,30,Time,1394,325,26,9,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,30,Time,525,150,26,9,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,31,30,1,0,2,0,0,0,64,0,-1--1--1,,1|(0,0)|
-10,32,international shipping hydrogen demand,1884,421,87,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,32,international shipping hydrogen demand,1015,246,87,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,33,2,32,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,34,3,32,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,35,OIL PRICE,1508,1374,57,11,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,35,OIL PRICE,639,1199,57,11,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,36,35,6,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,37,1,10,0,1,0,0,0,192,1,-1--1--1,,1|(0,0)|
-1,38,40,10,100,0,0,22,0,192,0,-1--1--1,,1|(2099,910)|
-1,39,40,3,4,0,0,22,0,192,0,-1--1--1,,1|(2099,652)|
-11,40,0,2099,693,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,41,MeOH investment,2150,693,43,25,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,42,44,10,100,0,0,22,0,192,0,-1--1--1,,1|(1774,910)|
-1,43,44,2,4,0,0,22,0,192,0,-1--1--1,,1|(1774,654)|
-11,44,0,1774,696,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,45,NH3 investment,1823,696,41,17,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,46,48,10,100,0,0,22,0,192,0,-1--1--1,,1|(1448,910)|
-1,47,48,4,4,0,0,22,0,192,0,-1--1--1,,1|(1448,647)|
-11,48,0,1448,684,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,49,HFO investment,1508,684,52,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,50,10,49,1,1,0,0,0,192,0,-1--1--1,,1|(1853,863)|
-10,51,error int shipping,2519,394,47,22,3,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,52,k p,2654,525,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,53,k i,2662,394,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,54,ctrl shipping,2523,529,47,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,38,40,10,100,0,0,22,0,192,0,-1--1--1,,1|(1230,735)|
+1,39,40,3,4,0,0,22,0,192,0,-1--1--1,,1|(1230,477)|
+11,40,0,1230,518,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,41,MeOH investment,1281,518,43,25,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,42,44,10,100,0,0,22,0,192,0,-1--1--1,,1|(905,735)|
+1,43,44,2,4,0,0,22,0,192,0,-1--1--1,,1|(905,479)|
+11,44,0,905,521,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,45,NH3 investment,954,521,41,17,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,46,48,10,100,0,0,22,0,192,0,-1--1--1,,1|(579,735)|
+1,47,48,4,4,0,0,22,0,192,0,-1--1--1,,1|(579,472)|
+11,48,0,579,509,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,49,HFO investment,639,509,52,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,50,10,49,1,1,0,0,0,192,0,-1--1--1,,1|(984,688)|
+10,51,error int shipping,1650,219,47,22,3,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,52,k p,1785,350,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,53,k i,1793,219,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,54,ctrl shipping,1654,354,47,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,55,51,54,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,56,error shipping,2332,385,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-1,57,1,56,1,2,0,0,0,192,0,-1--1--1,,1|(1879,358)|
+10,56,error shipping,1463,210,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,57,1,56,1,2,0,0,0,192,0,-1--1--1,,1|(1010,183)|
 1,58,56,51,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,59,53,51,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,60,56,54,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,61,52,54,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,62,9,10,0,2,0,0,0,192,1,-1--1--1,,1|(0,0)|
-12,63,48,2363,579,25,15,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,64,66,63,100,0,0,22,0,192,0,-1--1--1,,1|(2363,630)|
-1,65,66,10,4,0,0,22,0,192,0,-1--1--1,,1|(2363,783)|
-11,66,0,2363,673,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,67,demand change shipping,2413,673,42,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,68,54,66,1,1,0,0,0,192,0,-1--1--1,,1|(2424,582)|
-10,69,NH3 innovators,1823,778,52,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,70,MeOH innovators,2148,773,52,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,71,NH3 imitators,1947,693,47,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,72,MeOH imitators,2280,693,47,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,73,innovators,2011,817,62,11,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+12,63,48,1494,404,25,15,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,64,66,63,100,0,0,22,0,192,0,-1--1--1,,1|(1494,455)|
+1,65,66,10,4,0,0,22,0,192,0,-1--1--1,,1|(1494,608)|
+11,66,0,1494,498,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,67,demand change shipping,1544,498,42,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,68,54,66,1,1,0,0,0,192,0,-1--1--1,,1|(1555,407)|
+10,69,NH3 innovators,954,603,52,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,70,MeOH innovators,1279,598,52,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,71,NH3 imitators,1078,518,47,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,72,MeOH imitators,1411,518,47,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,73,innovators,1142,642,62,11,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,74,10,71,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,75,10,72,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,76,10,69,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
@@ -2470,43 +3006,43 @@ $-1--1--1,0,Courier New|10||0-0-0|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,54,2
 1,79,69,45,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,80,70,41,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,81,72,41,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,82,NH3 inno switch,1822,1026,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,83,MeOH inno switch,2151,1027,47,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,82,NH3 inno switch,953,851,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,83,MeOH inno switch,1282,852,47,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,84,82,69,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,85,83,70,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,86,73,69,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,87,73,70,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,88,check shipping,2205,439,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,88,check shipping,1336,264,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,89,4,88,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,90,2,88,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,91,3,88,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,92,NH3 competitiveness,1917,1186,72,29,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,93,MeOH competitiveness,2286,1190,72,29,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,92,NH3 competitiveness,1048,1011,72,29,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,93,MeOH competitiveness,1417,1015,72,29,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,94,6,93,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,95,6,92,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,96,93,83,1,1,0,0,0,192,0,-1--1--1,,1|(2175,1127)|
-1,97,92,82,1,1,0,0,0,192,0,-1--1--1,,1|(1845,1113)|
-10,98,HFO competitiveness,1510,1170,72,29,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,96,93,83,1,1,0,0,0,192,0,-1--1--1,,1|(1306,952)|
+1,97,92,82,1,1,0,0,0,192,0,-1--1--1,,1|(976,938)|
+10,98,HFO competitiveness,641,995,72,29,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,99,6,98,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,100,MeOH level,2286,1118,52,29,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,101,HFO level,1510,1097,64,16,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,102,NH3 level,1899,1119,64,16,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,100,MeOH level,1417,943,52,29,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,101,HFO level,641,922,64,16,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,102,NH3 level,1030,944,64,16,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,103,93,100,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,104,98,101,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,105,92,102,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,106,shipping equalizer,1713,1086,47,22,8,3,2,0,-1,0,0,0,0,0,0,0,0,0
+10,106,shipping equalizer,844,911,47,22,8,3,2,0,-1,0,0,0,0,0,0,0,0,0
 1,107,100,106,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,108,101,106,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,109,102,106,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,110,MeOH investment level,2286,1028,64,16,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,111,HFO investment level,1510,1021,59,16,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,112,NH3 investment level,1949,1023,59,16,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,110,MeOH investment level,1417,853,64,16,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,111,HFO investment level,641,846,59,16,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,112,NH3 investment level,1080,848,59,16,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,113,106,111,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,114,101,111,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,115,100,110,1,1,0,0,0,192,0,-1--1--1,,1|(2309,1066)|
+1,115,100,110,1,1,0,0,0,192,0,-1--1--1,,1|(1440,891)|
 1,116,106,110,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,117,106,112,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,118,102,112,1,1,0,0,0,192,0,-1--1--1,,1|(1947,1084)|
+1,118,102,112,1,1,0,0,0,192,0,-1--1--1,,1|(1078,909)|
 1,119,110,72,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,120,111,49,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,121,112,71,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
@@ -2520,76 +3056,81 @@ $-1--1--1,0,Courier New|10||0-0-0|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,54,2
 1,129,2,101,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,130,3,101,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,131,6,92,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,132,Green NH3 price,1917,1288,52,20,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,132,Green NH3 price,1048,1113,52,20,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,133,132,98,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,134,132,92,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,135,132,93,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,136,MeOH H2 usage,2051,404,42,20,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,136,MeOH H2 usage,1182,229,42,20,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,137,136,32,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,138,NH3 H2 usage,1719,411,37,20,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,138,NH3 H2 usage,850,236,37,20,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,139,138,32,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,140,Green bioMeOH price,2288,1288,37,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,140,Green bioMeOH price,1419,1113,37,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,141,140,93,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,142,140,92,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,143,140,98,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-12,144,0,1855,269,194,52,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+12,144,0,986,94,194,52,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 View, which simulates the European international shipping sector fuel demand for three different types of fuel.
 1,145,88,56,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-12,146,0,1927,1456,80,40,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+12,146,0,1058,1281,80,40,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 Point of comparison is €/MJ of fuel.
-1,147,1,51,1,2,0,0,0,192,1,-1--1--1,,1|(1979,335)|
-10,148,NH3 LHV,1711,453,33,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,149,MeOH LHV,2042,442,37,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,147,1,51,1,2,0,0,0,192,1,-1--1--1,,1|(1110,160)|
+10,148,NH3 LHV,842,278,33,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,149,MeOH LHV,1173,267,37,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,150,149,32,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,151,148,32,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,152,international shipping biomass demand,1331,414,58,24,8,3,2,0,-1,0,0,0,0,0,0,0,0,0
+1,153,3,152,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,154,MeOH biomass usage,1325,353,47,17,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,155,154,152,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,156,149,152,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
 *NH3 fertilizer demand
 $192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,64,2
-10,1,NH3 fertilizer consumption,703,261,56,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,2,Blue NH3,1047,429,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,3,Green NH3,1361,428,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,4,Grey NH3,705,427,67,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,1,NH3 fertilizer consumption,754,239,56,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,Blue NH3,1098,407,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,Green NH3,1412,406,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,Grey NH3,756,405,67,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,5,1,4,0,0,0,0,0,192,1,-1--1--1,,1|(0,0)|
-10,6,Green H2 price,1556,1144,39,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,7,NH3 reinvestment,1674,749,67,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,8,10,3,100,0,0,22,0,192,0,-1--1--1,,1|(1323,467)|
-1,9,10,7,4,0,0,22,0,192,0,-1--1--1,,1|(1323,749)|
-11,10,0,1323,484,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,11,Green decay,1370,484,39,20,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,12,14,2,100,0,0,22,0,192,0,-1--1--1,,1|(993,465)|
-1,13,14,7,4,0,0,22,0,192,0,-1--1--1,,1|(993,749)|
-11,14,0,993,478,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,15,Blue decay,1028,478,27,21,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,16,18,4,100,0,0,22,0,192,0,-1--1--1,,1|(662,465)|
-1,17,18,7,4,0,0,22,0,192,0,-1--1--1,,1|(662,749)|
-11,18,0,662,481,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,19,Grey decay,697,481,27,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,6,Green H2 price,1607,1122,39,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,7,NH3 reinvestment,1725,727,67,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,8,10,3,100,0,0,22,0,192,0,-1--1--1,,1|(1374,445)|
+1,9,10,7,4,0,0,22,0,192,0,-1--1--1,,1|(1374,727)|
+11,10,0,1374,462,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,11,Green decay,1421,462,39,20,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,12,14,2,100,0,0,22,0,192,0,-1--1--1,,1|(1044,443)|
+1,13,14,7,4,0,0,22,0,192,0,-1--1--1,,1|(1044,727)|
+11,14,0,1044,456,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,15,Blue decay,1079,456,27,21,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,16,18,4,100,0,0,22,0,192,0,-1--1--1,,1|(713,443)|
+1,17,18,7,4,0,0,22,0,192,0,-1--1--1,,1|(713,727)|
+11,18,0,713,459,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,19,Grey decay,748,459,27,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,20,4,19,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,21,2,14,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,22,3,10,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,23,1,7,0,1,0,0,0,192,1,-1--1--1,,1|(0,0)|
-10,24,fertilizer hydrogen demand,1362,271,67,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,24,fertilizer hydrogen demand,1413,249,67,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,25,3,24,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,26,1,7,0,1,0,0,0,192,1,-1--1--1,,1|(0,0)|
-1,27,29,7,100,0,0,22,0,192,0,-1--1--1,,1|(1408,749)|
-1,28,29,3,4,0,0,22,0,192,0,-1--1--1,,1|(1408,491)|
-11,29,0,1408,532,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,30,Green investment,1439,532,23,24,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,31,33,7,100,0,0,22,0,192,0,-1--1--1,,1|(1083,749)|
-1,32,33,2,4,0,0,22,0,192,0,-1--1--1,,1|(1083,493)|
-11,33,0,1083,534,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,34,Blue investment,1117,534,26,23,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,35,37,7,100,0,0,22,0,192,0,-1--1--1,,1|(757,749)|
-1,36,37,4,4,0,0,22,0,192,0,-1--1--1,,1|(757,485)|
-11,37,0,757,521,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,38,Grey investment,790,521,25,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,39,7,38,1,1,0,0,0,192,0,-1--1--1,,1|(1144,702)|
-10,40,Blue innovators,1132,617,45,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,41,Green innovators,1457,612,45,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,42,Blue imitators,1256,532,59,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,43,Green imitators,1589,532,42,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,44,innovators,1320,656,47,10,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,27,29,7,100,0,0,22,0,192,0,-1--1--1,,1|(1459,727)|
+1,28,29,3,4,0,0,22,0,192,0,-1--1--1,,1|(1459,469)|
+11,29,0,1459,510,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,30,Green investment,1490,510,23,24,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,31,33,7,100,0,0,22,0,192,0,-1--1--1,,1|(1134,727)|
+1,32,33,2,4,0,0,22,0,192,0,-1--1--1,,1|(1134,471)|
+11,33,0,1134,512,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,34,Blue investment,1168,512,26,23,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,35,37,7,100,0,0,22,0,192,0,-1--1--1,,1|(808,727)|
+1,36,37,4,4,0,0,22,0,192,0,-1--1--1,,1|(808,463)|
+11,37,0,808,499,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,38,Grey investment,841,499,25,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,39,7,38,1,1,0,0,0,192,0,-1--1--1,,1|(1195,680)|
+10,40,Blue innovators,1183,595,45,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,41,Green innovators,1508,590,45,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,42,Blue imitators,1307,510,59,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,43,Green imitators,1640,510,42,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,44,innovators,1371,634,47,10,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,45,7,42,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,46,7,43,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,47,7,40,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
@@ -2598,40 +3139,40 @@ $192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,
 1,50,40,34,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,51,41,30,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,52,43,30,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,53,Blue inno switch,1091,865,42,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,54,Green inno switch,1410,866,48,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,53,Blue inno switch,1142,843,42,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,54,Green inno switch,1461,844,48,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,55,53,40,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,56,54,41,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,57,44,40,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,58,44,41,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,59,check NH3,858,262,48,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,59,check NH3,909,240,48,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,60,4,59,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,61,2,59,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,62,3,59,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,63,Blue competitiveness,1208,1025,71,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,64,Green competitiveness,1535,1029,71,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-1,65,64,54,1,1,0,0,0,192,0,-1--1--1,,1|(1430,964)|
-1,66,63,53,1,1,0,0,0,192,0,-1--1--1,,1|(1126,954)|
-10,67,Grey competitiveness,878,1026,71,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,68,Green level,1535,957,49,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,69,Grey level,881,939,44,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,70,Blue level,1208,958,43,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,63,Blue competitiveness,1259,1003,71,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,64,Green competitiveness,1586,1007,71,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,65,64,54,1,1,0,0,0,192,0,-1--1--1,,1|(1481,942)|
+1,66,63,53,1,1,0,0,0,192,0,-1--1--1,,1|(1177,932)|
+10,67,Grey competitiveness,929,1004,71,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,68,Green level,1586,935,49,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,69,Grey level,932,917,44,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,70,Blue level,1259,936,43,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,71,64,68,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,72,67,69,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,73,63,70,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,74,NH3 equalizer,1022,925,61,22,8,3,2,0,-1,0,0,0,0,0,0,0,0,0
+10,74,NH3 equalizer,1073,903,61,22,8,3,2,0,-1,0,0,0,0,0,0,0,0,0
 1,75,68,74,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,76,69,74,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,77,70,74,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,78,Green investment level,1535,867,69,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,79,Grey investment level,879,860,70,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,80,Blue investment level,1208,862,69,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,78,Green investment level,1586,845,69,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,79,Grey investment level,930,838,70,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,80,Blue investment level,1259,840,69,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,81,74,79,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,82,69,79,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,83,68,78,1,1,0,0,0,192,0,-1--1--1,,1|(1558,905)|
+1,83,68,78,1,1,0,0,0,192,0,-1--1--1,,1|(1609,883)|
 1,84,74,78,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,85,74,80,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,86,70,80,1,1,0,0,0,192,0,-1--1--1,,1|(1231,913)|
+1,86,70,80,1,1,0,0,0,192,0,-1--1--1,,1|(1282,891)|
 1,87,78,43,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,88,79,38,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,89,80,42,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
@@ -2644,92 +3185,92 @@ $192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,
 1,96,4,69,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,97,2,69,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,98,3,69,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,99,electrolyser lifetime,1494,426,56,24,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,99,electrolyser lifetime,1545,404,56,24,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,100,99,11,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,101,electrolyser average working hours,1612,428,70,35,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,101,electrolyser average working hours,1663,406,70,35,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,102,101,11,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,103,SMR lifetime,574,809,61,24,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,103,SMR lifetime,625,787,61,24,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,104,103,19,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,105,103,15,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,106,103,7,0,2,0,0,0,192,1,-1--1--1,,1|(0,0)|
 1,107,6,64,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,108,6,63,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,109,6,67,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,110,Blue H2 price,1197,1144,41,24,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,111,Grey H2 price,876,1144,42,24,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,110,Blue H2 price,1248,1122,41,24,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,111,Grey H2 price,927,1122,42,24,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,112,111,67,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,113,111,63,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,114,111,64,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,115,110,63,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,116,110,67,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,117,110,64,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,118,NH3 H2 usage,1559,196,40,24,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,118,NH3 H2 usage,1610,174,40,24,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,119,118,24,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,120,MeOH H2 usage,1075,186,42,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,121,NH3 H2 usage,1213,188,34,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-12,122,0,1117,160,194,52,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+10,120,MeOH H2 usage,1126,164,42,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,121,NH3 H2 usage,1264,166,34,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+12,122,0,1168,138,194,52,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 View, which simulates the European NH3 production for fertilizer use considering three different sources of H2.
-12,123,0,1192,1229,80,40,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+12,123,0,1243,1207,80,40,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 Point of comparison is €/kg of hydrogen.
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
 *Iron and steel demand
 $192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,56,2
-10,1,Steel Production Forecast,668,-4,75,30,8,3,0,1,-1,0,0,0,255-128-192,0-0-0,|||0-0-0,0,0,0,0,0,0
-10,2,primary sector,875,127,45,28,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,3,secondary sector,486,126,47,32,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,4,1,2,1,0,0,0,0,192,0,-1--1--1,,1|(758,72)|
-1,5,1,3,1,0,0,0,0,192,0,-1--1--1,,1|(607,68)|
-10,6,secondary sector growth,670,129,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,1,Steel Production Forecast,1018,163,75,30,8,3,0,1,-1,0,0,0,255-128-192,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,2,primary sector,1225,294,45,28,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,secondary sector,836,293,47,32,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,4,1,2,1,0,0,0,0,192,0,-1--1--1,,1|(1108,239)|
+1,5,1,3,1,0,0,0,0,192,0,-1--1--1,,1|(957,235)|
+10,6,secondary sector growth,1020,296,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,7,6,3,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,8,6,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,9,H2 to steel,1369,219,49,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,10,steel hydrogen demand,1540,226,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,9,H2 to steel,1719,386,49,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,10,steel hydrogen demand,1890,393,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,11,9,10,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,12,Time,665,67,31,15,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,12,Time,1015,234,31,15,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,13,12,6,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,14,12,1,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-12,15,0,398,422,346,250,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+12,15,0,748,589,346,250,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 Iron and steel production is divided into primary (iron ore) and secondary (recycling) production.|<<NnN>>||<<NnN>>|Primary prod. has the current technology Blast Furnace - BOF (Basic Oxygen Furnace) - using oxygen and coal (natural gas) as the dominant technology.|<<NnN>>||<<NnN>>|Alternative, non-polluting methods include, DRI-EAF ( Direct reduced iron - electric arch furnace) using electricity and hydrogen.|<<NnN>>||<<NnN>>|H2-DRI-EAF involves the use of hydrogen (H2) to produce direct reduced iron (DRI), which is then processed in an electric arc furnace (EAF) to produce steel. |<<NnN>>||<<NnN>>|"In the BloombergNEF net-zero outlook, 64% of the total primary steel production projected for 2050 is associated with H2-DRI-EAF, followed at 25% by DRI-EAF equipped with CCS technology. The remaining share is allocated to blast furnace-basic oxygen furnace (BF-BOF) steelmaking and other technologies.|<<NnN>>|In its revised net-zero roadmap 2023, the International Energy Agency (IEA) envisions that 44% of iron production will be derived from hydrogen-based processes by 2050, followed by other technologies including CCS and direct iron ore electrolysis."|<<NnN>>|- https://energypost.eu/green-steel-pathways-for-the-new-hydrogen-powered-dri-eaf-projects/|<<NnN>>||<<NnN>>|Report on decarbonization of primary production: https://www.europarl.europa.eu/RegData/etudes/BRIE/2020/641552/EPRS_BRI(2020)641552_EN.pdf|<<NnN>>|
-12,16,0,395,-4,176,84,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+12,16,0,745,163,176,84,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 EAF used to melt scrap metal. Seems hard to argue that hydrogen should be used here.|<<NnN>>||<<NnN>>|Report on decarbonization of secondary production:|<<NnN>>|https://backend.orbit.dtu.dk/ws/portalfiles/portal/119496311/2009_Damgaard_et_al_Metal_Recycling_article_PostPrint_Final.pdf
-10,17,Gas BF BOF CCS,1178,358,70,35,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,18,HDRI EAF,1540,362,62,36,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,19,Coal BF BOF,884,359,67,34,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,20,foundry reinvestment,1912,671,67,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,21,23,18,100,0,0,22,0,192,0,-1--1--1,,1|(1486,419)|
-1,22,23,20,4,0,0,22,0,192,0,-1--1--1,,1|(1486,671)|
-11,23,0,1486,446,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,24,HDRI EAF decay,1525,446,31,32,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,25,27,17,100,0,0,22,0,192,0,-1--1--1,,1|(1120,417)|
-1,26,27,20,4,0,0,22,0,192,0,-1--1--1,,1|(1120,671)|
-11,27,0,1120,448,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,28,BF CCS decay,1155,448,27,37,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,29,31,19,100,0,0,22,0,192,0,-1--1--1,,1|(833,413)|
-1,30,31,20,4,0,0,22,0,192,0,-1--1--1,,1|(833,671)|
-11,31,0,833,440,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,32,BF Coal decay,871,440,30,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,17,Gas BF BOF CCS,1528,525,70,35,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,18,HDRI EAF,1890,529,62,36,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,19,Coal BF BOF,1234,526,67,34,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,20,foundry reinvestment,2262,838,67,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,21,23,18,100,0,0,22,0,192,0,-1--1--1,,1|(1836,586)|
+1,22,23,20,4,0,0,22,0,192,0,-1--1--1,,1|(1836,838)|
+11,23,0,1836,613,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,24,HDRI EAF decay,1875,613,31,32,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,25,27,17,100,0,0,22,0,192,0,-1--1--1,,1|(1470,584)|
+1,26,27,20,4,0,0,22,0,192,0,-1--1--1,,1|(1470,838)|
+11,27,0,1470,615,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,28,BF CCS decay,1505,615,27,37,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,29,31,19,100,0,0,22,0,192,0,-1--1--1,,1|(1183,580)|
+1,30,31,20,4,0,0,22,0,192,0,-1--1--1,,1|(1183,838)|
+11,31,0,1183,607,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,32,BF Coal decay,1221,607,30,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,33,19,32,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,34,17,27,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,35,18,23,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,36,38,20,100,0,0,22,0,192,0,-1--1--1,,1|(1593,671)|
-1,37,38,18,4,0,0,22,0,192,0,-1--1--1,,1|(1593,415)|
-11,38,0,1593,439,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,39,HDRI EAF investment,1648,439,47,24,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,40,42,20,100,0,0,22,0,192,0,-1--1--1,,1|(1234,671)|
-1,41,42,17,4,0,0,22,0,192,0,-1--1--1,,1|(1234,410)|
-11,42,0,1234,434,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,43,BF CCS investment,1281,434,39,25,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,44,46,20,100,0,0,22,0,192,0,-1--1--1,,1|(939,671)|
-1,45,46,19,4,0,0,22,0,192,0,-1--1--1,,1|(939,404)|
-11,46,0,939,422,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,47,BF Coal investment,994,422,47,24,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,48,20,47,1,1,0,0,0,192,0,-1--1--1,,1|(1358,614)|
-10,49,BF CCS innovators,1280,521,45,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,50,HDRI EAF innovators,1649,516,47,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,51,BF CCS imitators,1397,435,53,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,52,HDRI EAF imitators,1775,439,47,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,53,innovators,1492,519,47,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,36,38,20,100,0,0,22,0,192,0,-1--1--1,,1|(1943,838)|
+1,37,38,18,4,0,0,22,0,192,0,-1--1--1,,1|(1943,582)|
+11,38,0,1943,606,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,39,HDRI EAF investment,1998,606,47,24,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,40,42,20,100,0,0,22,0,192,0,-1--1--1,,1|(1584,838)|
+1,41,42,17,4,0,0,22,0,192,0,-1--1--1,,1|(1584,577)|
+11,42,0,1584,601,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,43,BF CCS investment,1631,601,39,25,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,44,46,20,100,0,0,22,0,192,0,-1--1--1,,1|(1289,838)|
+1,45,46,19,4,0,0,22,0,192,0,-1--1--1,,1|(1289,571)|
+11,46,0,1289,589,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,47,BF Coal investment,1344,589,47,24,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,48,20,47,1,1,0,0,0,192,0,-1--1--1,,1|(1708,781)|
+10,49,BF CCS innovators,1630,688,45,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,50,HDRI EAF innovators,1999,683,47,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,51,BF CCS imitators,1747,602,53,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,52,HDRI EAF imitators,2125,606,47,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,53,innovators,1842,686,47,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,54,20,51,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,55,20,52,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,56,20,49,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
@@ -2738,40 +3279,40 @@ EAF used to melt scrap metal. Seems hard to argue that hydrogen should be used h
 1,59,49,43,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,60,50,39,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,61,52,39,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,62,BF CCS inno switch,1286,757,57,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,63,HDRI EAF inno switch,1659,761,48,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,62,BF CCS inno switch,1636,924,57,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,63,HDRI EAF inno switch,2009,928,48,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,64,62,49,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,65,63,50,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,66,53,49,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,67,53,50,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,68,check steel,1215,163,50,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,68,check steel,1565,330,50,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,69,19,68,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,70,17,68,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,71,18,68,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,72,BF CCS competitiveness,1407,952,71,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,73,HDRI EAF competitiveness,1782,958,71,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,74,73,63,1,0,0,0,0,192,0,-1--1--1,,1|(1670,871)|
-1,75,72,62,1,0,0,0,0,192,0,-1--1--1,,1|(1319,861)|
-10,76,BF Coal competitiveness,982,931,71,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,77,HDRI EAF level,1782,876,55,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,78,BF Coal level,982,864,64,28,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,79,BF CCS level,1407,874,59,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,72,BF CCS competitiveness,1757,1119,71,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,73,HDRI EAF competitiveness,2132,1125,71,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,74,73,63,1,0,0,0,0,192,0,-1--1--1,,1|(2020,1038)|
+1,75,72,62,1,0,0,0,0,192,0,-1--1--1,,1|(1669,1028)|
+10,76,BF Coal competitiveness,1332,1098,71,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,77,HDRI EAF level,2132,1043,55,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,78,BF Coal level,1332,1031,64,28,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,79,BF CCS level,1757,1041,59,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,80,73,77,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,81,76,78,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,82,72,79,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,83,steel equalizer,1201,821,58,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,83,steel equalizer,1551,988,58,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,84,77,83,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,85,78,83,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,86,79,83,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,87,HDRI EAF investment level,1782,763,69,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,88,BF Coal investment level,982,760,69,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,89,BF CCS investment level,1407,758,69,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,87,HDRI EAF investment level,2132,930,69,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,88,BF Coal investment level,1332,927,69,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,89,BF CCS investment level,1757,925,69,24,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,90,83,88,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,91,78,88,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,92,77,87,1,0,0,0,0,192,0,-1--1--1,,1|(1809,813)|
+1,92,77,87,1,0,0,0,0,192,0,-1--1--1,,1|(2159,980)|
 1,93,83,87,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,94,83,89,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,95,79,89,1,0,0,0,0,192,0,-1--1--1,,1|(1436,820)|
+1,95,79,89,1,0,0,0,0,192,0,-1--1--1,,1|(1786,987)|
 1,96,87,52,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,97,88,47,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,98,89,51,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
@@ -2787,33 +3328,33 @@ EAF used to melt scrap metal. Seems hard to argue that hydrogen should be used h
 1,108,2,19,0,1,0,0,0,192,1,-1--1--1,,1|(0,0)|
 1,109,2,20,0,1,0,0,0,192,1,-1--1--1,,1|(0,0)|
 1,110,18,10,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,111,error steel,1756,162,45,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-1,112,2,111,1,1,0,0,0,192,0,-1--1--1,,1|(1329,87)|
+10,111,error steel,2106,329,45,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,112,2,111,1,1,0,0,0,192,0,-1--1--1,,1|(1679,254)|
 1,113,68,111,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,114,error int steel,1977,166,42,23,3,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,115,ctrl steel,1980,344,50,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,114,error int steel,2327,333,42,23,3,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,115,ctrl steel,2330,511,50,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,116,114,115,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,117,111,114,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,118,111,115,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-12,119,48,1900,394,25,15,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,120,122,119,100,0,0,22,0,192,0,-1--1--1,,1|(1900,468)|
-1,121,122,20,4,0,0,22,0,192,0,-1--1--1,,1|(1900,594)|
-11,122,0,1900,533,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,123,demand change steel,1945,533,37,16,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,119,48,2250,561,25,15,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,120,122,119,100,0,0,22,0,192,0,-1--1--1,,1|(2250,635)|
+1,121,122,20,4,0,0,22,0,192,0,-1--1--1,,1|(2250,761)|
+11,122,0,2250,700,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,123,demand change steel,2295,700,37,16,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,124,115,123,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,125,k i,2127,161,22,13,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,126,k p,2104,342,25,13,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,125,k i,2477,328,22,13,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,126,k p,2454,509,25,13,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,127,126,115,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,128,125,114,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-12,129,0,1411,1153,80,40,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+12,129,0,1761,1320,80,40,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 Point of comparison is $/t of steel. BF CCS is currently excluded for lack of clear choice.
-10,130,foundry lifetime,1187,595,42,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,130,foundry lifetime,1537,762,42,24,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,131,130,31,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,132,130,27,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,133,130,23,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,134,BF Coal cost,983,1045,42,24,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,135,BF CCS cost,1404,1051,43,24,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,136,HDRI cost,1785,1057,57,13,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,134,BF Coal cost,1333,1212,42,24,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,135,BF CCS cost,1754,1218,43,24,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,136,HDRI cost,2135,1224,57,13,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,137,134,76,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,138,134,72,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,139,135,72,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
@@ -2828,100 +3369,100 @@ Point of comparison is $/t of steel. BF CCS is currently excluded for lack of cl
 V300  Do not put anything below this section - it will be ignored
 *Light Duty RT demand
 $-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,82,2
-10,1,LD RT consumption,613,-100,54,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,2,LD BEV consumption,957,68,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,3,LD FCEV consumption,1271,67,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,4,LD Fossil consumption,615,66,67,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,1,LD RT consumption,423,-135,54,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,LD BEV consumption,767,33,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,LD FCEV consumption,1081,32,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,LD Fossil consumption,425,31,67,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,5,1,4,0,0,0,0,0,192,1,-1--1--1,,1|(0,0)|
-10,6,Car Lifetime,951,221,42,42,11,3,2,0,-1,0,0,0,0,0,0,0,0,0
-10,7,LD RT reinvestment,1584,388,67,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,8,10,3,100,0,0,22,0,192,0,-1--1--1,,1|(1219,104)|
-1,9,10,7,4,0,0,22,0,192,0,-1--1--1,,1|(1219,388)|
-11,10,0,1219,119,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,11,LD FCEV decay,1261,119,34,25,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,12,14,2,100,0,0,22,0,192,0,-1--1--1,,1|(903,105)|
-1,13,14,7,4,0,0,22,0,192,0,-1--1--1,,1|(903,388)|
-11,14,0,903,120,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,15,LD BEV decay,944,120,33,24,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,16,18,4,100,0,0,22,0,192,0,-1--1--1,,1|(572,106)|
-1,17,18,7,4,0,0,22,0,192,0,-1--1--1,,1|(572,388)|
-11,18,0,572,123,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,19,LD Fossil decay,614,123,34,25,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,20,6,19,1,2,0,0,0,192,0,-1--1--1,,1|(631,205)|
+10,6,Car Lifetime,761,186,42,42,11,3,2,0,-1,0,0,0,0,0,0,0,0,0
+10,7,LD RT reinvestment,1394,353,67,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,8,10,3,100,0,0,22,0,192,0,-1--1--1,,1|(1029,69)|
+1,9,10,7,4,0,0,22,0,192,0,-1--1--1,,1|(1029,353)|
+11,10,0,1029,84,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,11,LD FCEV decay,1071,84,34,25,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,12,14,2,100,0,0,22,0,192,0,-1--1--1,,1|(713,70)|
+1,13,14,7,4,0,0,22,0,192,0,-1--1--1,,1|(713,353)|
+11,14,0,713,85,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,15,LD BEV decay,754,85,33,24,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,16,18,4,100,0,0,22,0,192,0,-1--1--1,,1|(382,71)|
+1,17,18,7,4,0,0,22,0,192,0,-1--1--1,,1|(382,353)|
+11,18,0,382,88,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,19,LD Fossil decay,424,88,34,25,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,20,6,19,1,2,0,0,0,192,0,-1--1--1,,1|(441,170)|
 1,21,4,19,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,22,6,14,1,2,0,0,0,192,0,-1--1--1,,1|(893,164)|
+1,22,6,14,1,2,0,0,0,192,0,-1--1--1,,1|(703,129)|
 1,23,2,14,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,24,3,10,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,25,6,10,1,2,0,0,0,192,0,-1--1--1,,1|(1042,114)|
+1,25,6,10,1,2,0,0,0,192,0,-1--1--1,,1|(852,79)|
 1,26,1,7,0,1,0,0,0,192,1,-1--1--1,,1|(0,0)|
 1,27,1,7,0,1,0,0,0,192,1,-1--1--1,,1|(0,0)|
-1,28,30,7,100,0,0,22,0,192,0,-1--1--1,,1|(1325,388)|
-1,29,30,3,4,0,0,22,0,192,0,-1--1--1,,1|(1325,130)|
-11,30,0,1325,171,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,31,LD FCEV investment,1379,171,46,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,32,34,7,100,0,0,22,0,192,0,-1--1--1,,1|(1003,388)|
-1,33,34,2,4,0,0,22,0,192,0,-1--1--1,,1|(1003,131)|
-11,34,0,1003,172,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,35,LD BEV investment,1050,172,39,16,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,36,38,7,100,0,0,22,0,192,0,-1--1--1,,1|(673,388)|
-1,37,38,4,4,0,0,22,0,192,0,-1--1--1,,1|(673,125)|
-11,38,0,673,162,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,39,LD Fossil investment,715,162,34,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,40,7,39,1,1,0,0,0,192,0,-1--1--1,,1|(1065,342)|
-10,41,error int LD RT,1738,-128,62,22,3,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,42,ctrl LD RT,1742,7,50,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,28,30,7,100,0,0,22,0,192,0,-1--1--1,,1|(1135,353)|
+1,29,30,3,4,0,0,22,0,192,0,-1--1--1,,1|(1135,95)|
+11,30,0,1135,136,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,31,LD FCEV investment,1189,136,46,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,32,34,7,100,0,0,22,0,192,0,-1--1--1,,1|(813,353)|
+1,33,34,2,4,0,0,22,0,192,0,-1--1--1,,1|(813,96)|
+11,34,0,813,137,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,35,LD BEV investment,860,137,39,16,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,36,38,7,100,0,0,22,0,192,0,-1--1--1,,1|(483,353)|
+1,37,38,4,4,0,0,22,0,192,0,-1--1--1,,1|(483,90)|
+11,38,0,483,127,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,39,LD Fossil investment,525,127,34,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,40,7,39,1,1,0,0,0,192,0,-1--1--1,,1|(875,307)|
+10,41,error int LD RT,1548,-163,62,22,3,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,42,ctrl LD RT,1552,-28,50,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,43,41,42,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,44,error LD RT,1551,-137,57,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-1,45,1,44,1,2,0,0,0,192,0,-1--1--1,,1|(1098,-164)|
+10,44,error LD RT,1361,-172,57,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,45,1,44,1,2,0,0,0,192,0,-1--1--1,,1|(908,-199)|
 1,46,44,41,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,47,44,42,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,48,6,7,0,2,0,0,0,192,1,-1--1--1,,1|(0,0)|
-12,49,48,1582,57,25,15,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,50,52,49,100,0,0,22,0,192,0,-1--1--1,,1|(1582,108)|
-1,51,52,7,4,0,0,22,0,192,0,-1--1--1,,1|(1582,261)|
-11,52,0,1582,151,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,53,demand change LD RT,1649,151,59,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,54,42,52,1,1,0,0,0,192,0,-1--1--1,,1|(1644,59)|
-10,55,LD FCEV innovators,1380,250,45,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,56,LD BEV imitators,1165,179,32,13,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,57,LD FCEV imitators,1499,171,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,58,innovators,1230,295,47,10,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+12,49,48,1392,22,25,15,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,50,52,49,100,0,0,22,0,192,0,-1--1--1,,1|(1392,73)|
+1,51,52,7,4,0,0,22,0,192,0,-1--1--1,,1|(1392,226)|
+11,52,0,1392,116,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,53,demand change LD RT,1459,116,59,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,54,42,52,1,1,0,0,0,192,0,-1--1--1,,1|(1454,24)|
+10,55,LD FCEV innovators,1190,215,45,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,56,LD BEV imitators,975,144,32,13,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,57,LD FCEV imitators,1309,136,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,58,innovators,1040,260,47,10,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,59,7,56,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,60,7,57,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,61,7,55,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,62,56,35,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,63,55,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,64,57,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,65,LD FCEV inno switch,1370,505,50,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,65,LD FCEV inno switch,1180,470,50,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,66,65,55,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,67,58,55,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,68,check LD RT,1424,-83,46,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,68,check LD RT,1234,-118,46,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,69,4,68,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,70,2,68,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,71,3,68,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,72,LD BEV competitiveness,1136,664,67,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,73,LD FCEV competitiveness,1505,668,67,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-1,74,73,65,1,1,0,0,0,192,0,-1--1--1,,1|(1394,605)|
-10,75,LD Fossil competitiveness,719,648,67,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,76,LD FCEV level,1505,596,54,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,77,LD Fossil level,719,575,62,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,78,LD BEV level,1138,597,50,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,72,LD BEV competitiveness,946,629,67,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,73,LD FCEV competitiveness,1315,633,67,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,74,73,65,1,1,0,0,0,192,0,-1--1--1,,1|(1204,570)|
+10,75,LD Fossil competitiveness,529,613,67,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,76,LD FCEV level,1315,561,54,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,77,LD Fossil level,529,540,62,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,78,LD BEV level,948,562,50,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,79,73,76,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,80,75,77,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,81,72,78,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,82,LD RT equalizer,932,564,70,22,8,3,2,0,-1,0,0,0,0,0,0,0,0,0
+10,82,LD RT equalizer,742,529,70,22,8,3,2,0,-1,0,0,0,0,0,0,0,0,0
 1,83,76,82,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,84,77,82,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,85,78,82,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,86,LD FCEV investment level,1505,506,65,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,87,LD Fossil investment level,719,499,59,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,88,LD BEV investment level,1158,501,58,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,86,LD FCEV investment level,1315,471,65,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,87,LD Fossil investment level,529,464,59,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,88,LD BEV investment level,968,466,58,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,89,82,87,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,90,77,87,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,91,76,86,1,1,0,0,0,192,0,-1--1--1,,1|(1528,544)|
+1,91,76,86,1,1,0,0,0,192,0,-1--1--1,,1|(1338,509)|
 1,92,82,86,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,93,82,88,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,94,78,88,1,1,0,0,0,192,0,-1--1--1,,1|(1171,556)|
+1,94,78,88,1,1,0,0,0,192,0,-1--1--1,,1|(981,521)|
 1,95,86,57,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,96,87,39,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,97,88,56,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
@@ -2934,28 +3475,28 @@ $-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,82,2
 1,104,4,77,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,105,2,77,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,106,3,77,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-12,107,0,1074,-253,194,52,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+12,107,0,884,-288,194,52,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 View, which simulates the European light duty (LD) road transport (RT) consumption split between technologies. 
 1,108,68,44,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-12,109,0,1128,853,80,40,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+12,109,0,938,818,80,40,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 Point of comparison is €/car - calculated as lifetime expected cost.
-1,110,1,41,1,2,0,0,0,192,1,-1--1--1,,1|(1198,-187)|
-10,111,RT energy demand,270,-222,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,112,Light duty fraction,395,-218,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,113,Time,270,-297,26,8,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,110,1,41,1,2,0,0,0,192,1,-1--1--1,,1|(1008,-222)|
+10,111,RT energy demand,80,-257,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,112,Light duty fraction,205,-253,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,113,Time,80,-332,26,8,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,114,113,111,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,115,k i,1862,-125,22,8,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,116,k p,1856,5,22,8,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,115,k i,1672,-160,22,8,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,116,k p,1666,-30,22,8,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,117,116,42,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,118,115,41,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,119,light duty hydrogen demand,1271,-87,56,23,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,119,light duty hydrogen demand,1081,-122,56,23,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,120,3,119,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,121,111,1,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,122,112,1,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,123,1,2,0,0,0,0,0,192,1,-1--1--1,,1|(0,0)|
-10,124,LD ownership cost diesel,721,760,54,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,125,LD ownership cost BEV,1140,772,54,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,126,LD ownership cost FCEV,1513,771,54,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,124,LD ownership cost diesel,531,725,54,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,125,LD ownership cost BEV,950,737,54,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,126,LD ownership cost FCEV,1323,736,54,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,127,124,75,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,128,124,72,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,129,124,73,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
@@ -2965,108 +3506,108 @@ Point of comparison is €/car - calculated as lifetime expected cost.
 1,133,126,73,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,134,126,72,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,135,126,75,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,136,FCEV efficiency,1095,-88,62,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,136,FCEV efficiency,905,-123,62,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,137,136,119,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,138,LHV H2,1088,-59,34,8,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,138,LHV H2,898,-94,34,8,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,139,138,119,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
 *Heavy Duty RT demand
 $-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
-10,1,HD RT consumption,318,-150,54,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,2,HD BEV consumption,662,18,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,3,HD FCEV consumption,976,17,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,4,HD Fossil consumption,320,16,67,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,1,HD RT consumption,538,391,54,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,HD BEV consumption,882,559,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,HD FCEV consumption,1196,558,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,HD Fossil consumption,540,557,67,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,5,1,4,0,0,0,0,0,192,1,-1--1--1,,1|(0,0)|
-10,6,Truck Lifetime,656,171,42,42,11,3,2,0,-1,0,0,0,0,0,0,0,0,0
-10,7,HD RT reinvestment,1289,338,67,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,8,10,3,100,0,0,22,0,192,0,-1--1--1,,1|(924,54)|
-1,9,10,7,4,0,0,22,0,192,0,-1--1--1,,1|(924,338)|
-11,10,0,924,69,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,11,HD FCEV decay,986,69,54,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,12,14,2,100,0,0,22,0,192,0,-1--1--1,,1|(608,55)|
-1,13,14,7,4,0,0,22,0,192,0,-1--1--1,,1|(608,338)|
-11,14,0,608,70,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,15,HD BEV decay,666,70,50,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,16,18,4,100,0,0,22,0,192,0,-1--1--1,,1|(277,56)|
-1,17,18,7,4,0,0,22,0,192,0,-1--1--1,,1|(277,338)|
-11,18,0,277,73,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,19,HD Fossil decay,347,73,62,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,20,6,19,1,2,0,0,0,192,0,-1--1--1,,1|(336,155)|
+10,6,Truck Lifetime,876,712,42,42,11,3,2,0,-1,0,0,0,0,0,0,0,0,0
+10,7,HD RT reinvestment,1509,879,67,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,8,10,3,100,0,0,22,0,192,0,-1--1--1,,1|(1144,595)|
+1,9,10,7,4,0,0,22,0,192,0,-1--1--1,,1|(1144,879)|
+11,10,0,1144,610,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,11,HD FCEV decay,1206,610,54,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,12,14,2,100,0,0,22,0,192,0,-1--1--1,,1|(828,596)|
+1,13,14,7,4,0,0,22,0,192,0,-1--1--1,,1|(828,879)|
+11,14,0,828,611,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,15,HD BEV decay,886,611,50,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,16,18,4,100,0,0,22,0,192,0,-1--1--1,,1|(497,597)|
+1,17,18,7,4,0,0,22,0,192,0,-1--1--1,,1|(497,879)|
+11,18,0,497,614,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,19,HD Fossil decay,567,614,62,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,20,6,19,1,2,0,0,0,192,0,-1--1--1,,1|(556,696)|
 1,21,4,19,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,22,6,14,1,2,0,0,0,192,0,-1--1--1,,1|(598,114)|
+1,22,6,14,1,2,0,0,0,192,0,-1--1--1,,1|(818,655)|
 1,23,2,14,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,24,3,10,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,25,6,10,1,2,0,0,0,192,0,-1--1--1,,1|(747,64)|
+1,25,6,10,1,2,0,0,0,192,0,-1--1--1,,1|(967,605)|
 1,26,1,7,0,1,0,0,0,192,1,-1--1--1,,1|(0,0)|
 1,27,1,7,0,1,0,0,0,192,1,-1--1--1,,1|(0,0)|
-1,28,30,7,100,0,0,22,0,192,0,-1--1--1,,1|(1030,338)|
-1,29,30,3,4,0,0,22,0,192,0,-1--1--1,,1|(1030,80)|
-11,30,0,1030,121,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,31,HD FCEV investment,1084,121,46,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,32,34,7,100,0,0,22,0,192,0,-1--1--1,,1|(708,338)|
-1,33,34,2,4,0,0,22,0,192,0,-1--1--1,,1|(708,81)|
-11,34,0,708,122,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,35,HD BEV investment,755,122,46,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,36,38,7,100,0,0,22,0,192,0,-1--1--1,,1|(378,338)|
-1,37,38,4,4,0,0,22,0,192,0,-1--1--1,,1|(378,75)|
-11,38,0,378,112,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,39,HD Fossil investment,420,112,46,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,40,7,39,1,1,0,0,0,192,0,-1--1--1,,1|(770,292)|
-10,41,error int HD RT,1443,-178,62,22,3,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,42,ctrl HD RT,1447,-43,43,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,28,30,7,100,0,0,22,0,192,0,-1--1--1,,1|(1250,879)|
+1,29,30,3,4,0,0,22,0,192,0,-1--1--1,,1|(1250,621)|
+11,30,0,1250,662,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,31,HD FCEV investment,1304,662,46,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,32,34,7,100,0,0,22,0,192,0,-1--1--1,,1|(928,879)|
+1,33,34,2,4,0,0,22,0,192,0,-1--1--1,,1|(928,622)|
+11,34,0,928,663,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,35,HD BEV investment,975,663,46,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,36,38,7,100,0,0,22,0,192,0,-1--1--1,,1|(598,879)|
+1,37,38,4,4,0,0,22,0,192,0,-1--1--1,,1|(598,616)|
+11,38,0,598,653,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,39,HD Fossil investment,640,653,46,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,40,7,39,1,1,0,0,0,192,0,-1--1--1,,1|(990,833)|
+10,41,error int HD RT,1663,363,62,22,3,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,42,ctrl HD RT,1667,498,43,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,43,41,42,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,44,error HD RT,1256,-187,50,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-1,45,1,44,1,2,0,0,0,192,0,-1--1--1,,1|(803,-214)|
+10,44,error HD RT,1476,354,50,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,45,1,44,1,2,0,0,0,192,0,-1--1--1,,1|(1023,327)|
 1,46,44,41,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,47,44,42,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,48,6,7,0,2,0,0,0,192,1,-1--1--1,,1|(0,0)|
-12,49,48,1287,7,25,15,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,50,52,49,100,0,0,22,0,192,0,-1--1--1,,1|(1287,58)|
-1,51,52,7,4,0,0,22,0,192,0,-1--1--1,,1|(1287,211)|
-11,52,0,1287,101,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
-10,53,demand change HD RT,1354,101,59,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,54,42,52,1,1,0,0,0,192,0,-1--1--1,,1|(1349,9)|
-10,55,HD FCEV innovators,1085,200,45,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,56,HD BEV imitators,870,129,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,57,HD FCEV imitators,1204,121,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,58,innovators,935,245,47,10,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+12,49,48,1507,548,25,15,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,50,52,49,100,0,0,22,0,192,0,-1--1--1,,1|(1507,599)|
+1,51,52,7,4,0,0,22,0,192,0,-1--1--1,,1|(1507,752)|
+11,52,0,1507,642,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,53,demand change HD RT,1574,642,59,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,54,42,52,1,1,0,0,0,192,0,-1--1--1,,1|(1569,550)|
+10,55,HD FCEV innovators,1305,741,45,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,56,HD BEV imitators,1090,670,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,57,HD FCEV imitators,1424,662,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,58,innovators,1155,786,47,10,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,59,7,56,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,60,7,57,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,61,7,55,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,62,56,35,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,63,55,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,64,57,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,65,HD FCEV inno switch,1075,455,54,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,65,HD FCEV inno switch,1295,996,54,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,66,65,55,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,67,58,55,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,68,check HD RT,1129,-133,54,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,68,check HD RT,1349,408,54,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,69,4,68,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,70,2,68,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,71,3,68,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,72,HD BEV competitiveness,841,614,67,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,73,HD FCEV competitiveness,1210,618,67,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-1,74,73,65,1,1,0,0,0,192,0,-1--1--1,,1|(1099,555)|
-10,75,HD Fossil competitiveness,424,598,67,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,76,HD FCEV level,1210,546,54,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,77,HD Fossil level,424,525,62,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,78,HD BEV level,843,547,55,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,72,HD BEV competitiveness,1061,1155,67,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,73,HD FCEV competitiveness,1430,1159,67,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,74,73,65,1,1,0,0,0,192,0,-1--1--1,,1|(1319,1096)|
+10,75,HD Fossil competitiveness,644,1139,67,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,76,HD FCEV level,1430,1087,54,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,77,HD Fossil level,644,1066,62,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,78,HD BEV level,1063,1088,55,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
 1,79,73,76,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,80,75,77,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,81,72,78,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,82,HD RT equalizer,637,514,62,22,8,3,2,0,-1,0,0,0,0,0,0,0,0,0
+10,82,HD RT equalizer,857,1055,62,22,8,3,2,0,-1,0,0,0,0,0,0,0,0,0
 1,83,76,82,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,84,77,82,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,85,78,82,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,86,HD FCEV investment level,1210,456,65,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,87,HD Fossil investment level,424,449,65,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,88,HD BEV investment level,863,451,65,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,86,HD FCEV investment level,1430,997,65,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,87,HD Fossil investment level,644,990,65,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,88,HD BEV investment level,1083,992,65,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,89,82,87,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,90,77,87,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,91,76,86,1,1,0,0,0,192,0,-1--1--1,,1|(1233,494)|
+1,91,76,86,1,1,0,0,0,192,0,-1--1--1,,1|(1453,1035)|
 1,92,82,86,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,93,82,88,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,94,78,88,1,1,0,0,0,192,0,-1--1--1,,1|(876,506)|
+1,94,78,88,1,1,0,0,0,192,0,-1--1--1,,1|(1096,1047)|
 1,95,86,57,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,96,87,39,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,97,88,56,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
@@ -3079,37 +3620,37 @@ $-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
 1,104,4,77,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,105,2,77,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,106,3,77,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
-12,107,0,779,-303,194,52,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+12,107,0,999,238,194,52,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 View, which simulates the European heavy duty (HD) road transport (RT) consumption split between technologies. 
 1,108,68,44,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-12,109,0,833,803,80,40,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+12,109,0,1053,1344,80,40,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
 Point of comparison is €/truck - calculated as lifetime expected cost.
-1,110,1,41,1,2,0,0,0,192,1,-1--1--1,,1|(903,-237)|
-10,111,Heavy duty fraction,100,-268,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
-10,112,k i,1567,-175,19,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,113,k p,1561,-45,22,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,110,1,41,1,2,0,0,0,192,1,-1--1--1,,1|(1123,304)|
+10,111,Heavy duty fraction,320,273,42,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,112,k i,1787,366,19,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,113,k p,1781,496,22,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,114,113,42,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,115,112,41,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,116,heavy duty hydrogen demand,976,-137,68,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,116,heavy duty hydrogen demand,1196,404,68,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,117,3,116,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,118,111,1,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,119,LHV H2,793,-109,39,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,119,LHV H2,1013,432,39,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,120,119,116,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,121,RT energy demand,-29,-271,42,15,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,121,RT energy demand,191,270,42,15,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,122,121,1,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,123,Light duty fraction,99,-336,46,15,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,123,Light duty fraction,319,205,46,15,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,124,123,111,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,125,FCEV efficiency,798,-142,46,15,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,125,FCEV efficiency,1018,399,46,15,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,126,125,116,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,127,HD ownership cost diesel,429,697,54,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,128,HD ownership cost BEV,843,709,50,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,129,HD ownership cost FCEV,1220,717,54,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,130,HD BEV innovators,759,195,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,127,HD ownership cost diesel,649,1238,54,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,128,HD ownership cost BEV,1063,1250,50,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,129,HD ownership cost FCEV,1440,1258,54,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,130,HD BEV innovators,979,736,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,131,130,35,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,132,7,130,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,133,58,130,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,134,HD BEV inno switch,739,450,46,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,135,72,134,1,1,0,0,0,192,0,-1--1--1,,1|(756,561)|
+10,134,HD BEV inno switch,959,991,46,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,135,72,134,1,1,0,0,0,192,0,-1--1--1,,1|(976,1102)|
 1,136,134,130,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,137,127,75,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,138,127,72,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
@@ -3122,97 +3663,219 @@ Point of comparison is €/truck - calculated as lifetime expected cost.
 1,145,129,75,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
-*Aviation, domestic shipping and rail
+*Refinery demand
+$192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,61,2
+10,1,Refinery consumption,897,160,54,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,Blue refinery,1241,328,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,Green refinery,1555,327,62,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,Grey refinery,899,326,67,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,5,1,4,0,0,0,0,0,192,1,-1--1--1,,1|(0,0)|
+10,6,Green H2 price,1750,1043,41,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,7,Refinery reinvestment,1868,656,67,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,8,10,3,100,0,0,22,0,192,0,-1--1--1,,1|(1517,366)|
+1,9,10,7,4,0,0,22,0,192,0,-1--1--1,,1|(1517,656)|
+11,10,0,1517,383,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,11,Green refinery decay,1564,383,53,10,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,12,14,2,100,0,0,22,0,192,0,-1--1--1,,1|(1186,364)|
+1,13,14,7,4,0,0,22,0,192,0,-1--1--1,,1|(1186,656)|
+11,14,0,1186,377,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,15,Blue refinery decay,1241,377,47,10,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,16,18,4,100,0,0,22,0,192,0,-1--1--1,,1|(856,364)|
+1,17,18,7,4,0,0,22,0,192,0,-1--1--1,,1|(856,656)|
+11,18,0,856,380,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,19,Grey refinery decay,891,380,48,10,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,20,4,19,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,21,2,14,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,22,3,10,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,23,1,7,0,1,0,0,0,192,1,-1--1--1,,1|(0,0)|
+10,24,refinery hydrogen demand,1556,170,65,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,25,3,24,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,26,1,7,0,1,0,0,0,192,1,-1--1--1,,1|(0,0)|
+1,27,29,7,100,0,0,22,0,192,0,-1--1--1,,1|(1602,656)|
+1,28,29,3,4,0,0,22,0,192,0,-1--1--1,,1|(1602,390)|
+11,29,0,1602,431,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,30,Green refinery investment,1658,431,48,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,31,33,7,100,0,0,22,0,192,0,-1--1--1,,1|(1277,656)|
+1,32,33,2,4,0,0,22,0,192,0,-1--1--1,,1|(1277,392)|
+11,33,0,1277,433,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,34,Blue refinery investment,1311,433,46,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,35,37,7,100,0,0,22,0,192,0,-1--1--1,,1|(951,656)|
+1,36,37,4,4,0,0,22,0,192,0,-1--1--1,,1|(951,384)|
+11,37,0,951,420,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,38,Grey refinery investment,984,420,46,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,39,7,38,1,1,0,0,0,192,0,-1--1--1,,1|(1337,604)|
+10,40,Blue refinery innovators,1326,516,45,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,41,Green refinery innovators,1651,511,48,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,42,Blue refinery imitators,1450,431,56,10,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,43,Green refinery imitators,1783,431,48,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,44,innovators,1514,555,47,10,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,45,7,42,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,46,7,43,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,47,7,40,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,48,7,41,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,49,42,34,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,50,40,34,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,51,41,30,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,52,43,30,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,53,Blue refinery inno switch,1285,764,57,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,54,Green refinery inno switch,1605,765,48,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,55,53,40,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,56,54,41,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,57,44,40,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,58,44,41,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,59,check refining,1052,161,47,10,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,60,4,59,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,61,2,59,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,62,3,59,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,63,Blue refinery competitiveness,1402,924,67,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,64,Green refinery competitiveness,1729,928,67,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,65,64,54,1,1,0,0,0,192,0,-1--1--1,,1|(1625,863)|
+1,66,63,53,1,1,0,0,0,192,0,-1--1--1,,1|(1320,853)|
+10,67,Grey refinery competitiveness,1072,925,67,18,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,68,Green refinery level,1729,856,48,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,69,Grey refinery level,1075,838,60,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,70,Blue refinery level,1402,857,58,22,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,71,64,68,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,72,67,69,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,73,63,70,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,74,Refinery equalizer,1216,824,59,22,8,3,2,0,-1,0,0,0,0,0,0,0,0,0
+1,75,68,74,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,76,69,74,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,77,70,74,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,78,Green refinery investment level,1729,766,65,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,79,Grey refinery investment level,1073,759,59,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,80,Blue refinery investment level,1402,761,58,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,81,74,79,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,82,69,79,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,83,68,78,1,1,0,0,0,192,0,-1--1--1,,1|(1752,804)|
+1,84,74,78,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,85,74,80,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,86,70,80,1,1,0,0,0,192,0,-1--1--1,,1|(1425,812)|
+1,87,78,43,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,88,79,38,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,89,80,42,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,90,4,68,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,91,2,68,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,92,3,68,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,93,3,70,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,94,2,70,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,95,4,70,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,96,4,69,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,97,2,69,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,98,3,69,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,99,electrolyser lifetime,1688,325,47,18,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,100,99,11,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,101,electrolyser average working hours,1806,327,61,27,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,102,101,11,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,103,SMR lifetime,768,708,56,10,8,2,2,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,104,103,19,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,105,103,15,0,2,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,106,103,7,0,2,0,0,0,192,1,-1--1--1,,1|(0,0)|
+1,107,6,64,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,108,6,63,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,109,6,67,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,110,Blue H2 price,1391,1043,58,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,111,Grey H2 price,1070,1043,59,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,112,111,67,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,113,111,63,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,114,111,64,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,115,110,63,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,116,110,67,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,117,110,64,0,1,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,118,MeOH H2 usage,1269,85,42,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,119,NH3 H2 usage,1407,87,34,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+12,120,0,1311,59,194,52,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+View, which simulates the European Oil Refining considering three different sources of H2.
+12,121,0,1386,1128,80,40,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+Point of comparison is €/kg of hydrogen.
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*--------- MISSING SECTORS ---------
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
+12,1,0,924,409,101,101,11,7,0,0,-1,0,0,0,0,0,0,0,0,0
+INSERT DESCRIPTION
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Aviation, domestic shipping and rail - Needs Work
 $192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,56,2
-10,1,Time,706,874,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,2,Time,297,601,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,3,Time,594,632,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,4,Time,1014,653,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,5,"dom. navigation energy consumption",1494,666,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,6,Time,1395,752,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,7,6,5,1,0,0,0,0,192,0,-1--1--1,,1|(1467,710)|
-10,8,ICE efficiency,1723,629,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,9,"dom. navigation energy demand",1575,580,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,10,8,9,1,0,0,0,0,192,0,-1--1--1,,1|(1653,588)|
-1,11,5,9,1,0,0,0,0,192,0,-1--1--1,,1|(1541,635)|
-10,12,BEV implementation curve,1472,547,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,13,"dom. navigation fossil fuel demand",1568,462,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,14,9,13,1,0,0,0,0,192,0,-1--1--1,,1|(1609,533)|
-1,15,12,13,1,0,0,0,0,192,0,-1--1--1,,1|(1530,530)|
-10,16,Time,1362,625,33,14,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,17,16,12,1,0,0,0,0,192,0,-1--1--1,,1|(1427,626)|
-10,18,rail energy demand,2335,639,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,19,Time,2335,719,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,20,rail electricity share,2530,545,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,21,fossil energy demand,2248,556,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,22,fossil energy consumption from rail,2179,435,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,23,biofuels share,2031,587,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,24,diesel locomotive efficiency,2004,476,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,1,Time,382,1218,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,2,Time,-27,945,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,3,Time,270,976,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,4,Time,690,997,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,5,"dom. navigation energy consumption",1170,1010,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,6,Time,1071,1096,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,7,6,5,1,0,0,0,0,192,0,-1--1--1,,1|(1143,1054)|
+10,8,ICE efficiency,1399,973,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,9,"dom. navigation energy demand",1251,924,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,10,8,9,1,0,0,0,0,192,0,-1--1--1,,1|(1329,932)|
+1,11,5,9,1,0,0,0,0,192,0,-1--1--1,,1|(1217,979)|
+10,12,BEV implementation curve,1148,891,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,13,"dom. navigation fossil fuel demand",1244,806,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,14,9,13,1,0,0,0,0,192,0,-1--1--1,,1|(1285,877)|
+1,15,12,13,1,0,0,0,0,192,0,-1--1--1,,1|(1206,874)|
+10,16,Time,1038,969,33,14,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,17,16,12,1,0,0,0,0,192,0,-1--1--1,,1|(1103,970)|
+10,18,rail energy demand,2011,983,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,19,Time,2011,1063,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,20,rail electricity share,2206,889,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,21,fossil energy demand,1924,900,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,22,fossil energy consumption from rail,1855,779,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,23,biofuels share,1707,931,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,24,diesel locomotive efficiency,1680,820,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,25,19,18,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,26,19,20,1,0,0,0,0,192,0,-1--1--1,,1|(2443,647)|
+1,26,19,20,1,0,0,0,0,192,0,-1--1--1,,1|(2119,991)|
 1,27,18,21,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,28,20,21,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,29,23,21,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,30,19,23,1,0,0,0,0,192,0,-1--1--1,,1|(2167,681)|
+1,30,19,23,1,0,0,0,0,192,0,-1--1--1,,1|(1843,1025)|
 1,31,24,22,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,32,21,22,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,33,20,23,1,0,0,0,0,192,0,-1--1--1,,1|(2331,778)|
-10,34,"HYDROGEN F. AVIATON",765,327,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,35,"bio kerosene - hydrogen rate",854,242,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,36,"syn kerosene - hydrogen rate",666,245,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,33,20,23,1,0,0,0,0,192,0,-1--1--1,,1|(2007,1122)|
+10,34,"HYDROGEN F. AVIATON",441,671,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,35,"bio kerosene - hydrogen rate",530,586,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,36,"syn kerosene - hydrogen rate",342,589,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,37,36,34,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,38,35,34,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,39,"dom. navigation fossil energy consumption",1605,376,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,40,13,39,1,0,0,0,0,192,0,-1--1--1,,1|(1590,430)|
-1,41,8,39,1,0,0,0,0,192,0,-1--1--1,,1|(1689,500)|
-10,42,"int. aviation energy consumption",491,795,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,43,"dom. aviation energy consumption",957,816,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,39,"dom. navigation fossil energy consumption",1281,720,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,40,13,39,1,0,0,0,0,192,0,-1--1--1,,1|(1266,774)|
+1,41,8,39,1,0,0,0,0,192,0,-1--1--1,,1|(1365,844)|
+10,42,"int. aviation energy consumption",167,1139,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,43,"dom. aviation energy consumption",633,1160,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,44,1,42,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,45,1,43,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,46,"decarbonization curve int. aviation",482,575,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,47,"synthetic kerosene energy consumption int. aviation",339,680,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,48,"bio-kerosene energy consumption int. aviation",638,683,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,49,42,47,1,0,0,0,0,192,0,-1--1--1,,1|(416,771)|
-1,50,42,48,1,0,0,0,0,192,0,-1--1--1,,1|(582,758)|
-1,51,46,47,1,0,0,0,0,192,0,-1--1--1,,1|(386,611)|
-1,52,46,48,1,0,0,0,0,192,0,-1--1--1,,1|(589,608)|
-10,53,Time,482,486,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,46,"decarbonization curve int. aviation",158,919,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,47,"synthetic kerosene energy consumption int. aviation",15,1024,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,48,"bio-kerosene energy consumption int. aviation",314,1027,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,49,42,47,1,0,0,0,0,192,0,-1--1--1,,1|(92,1115)|
+1,50,42,48,1,0,0,0,0,192,0,-1--1--1,,1|(258,1102)|
+1,51,46,47,1,0,0,0,0,192,0,-1--1--1,,1|(62,955)|
+1,52,46,48,1,0,0,0,0,192,0,-1--1--1,,1|(265,952)|
+10,53,Time,158,830,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,54,53,46,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,55,"hydrogen energy consumption dom. aviation",962,713,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,56,"decarbonization curve dom. aviation",954,449,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,57,"hydrogen penetration in dom. aviation",960,630,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,58,Time,952,535,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,55,"hydrogen energy consumption dom. aviation",638,1057,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,56,"decarbonization curve dom. aviation",630,793,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,57,"hydrogen penetration in dom. aviation",636,974,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,58,Time,628,879,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,59,58,56,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,60,"synthetic kerosene energy consumption dom. aviation",777,680,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,61,"bio-kerosene energy consumption dom. aviation",1152,685,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,62,43,60,1,0,0,0,0,192,0,-1--1--1,,1|(866,781)|
-1,63,43,61,1,0,0,0,0,192,0,-1--1--1,,1|(1069,785)|
-1,64,43,55,1,0,0,0,0,192,0,-1--1--1,,1|(963,779)|
-1,65,56,60,1,0,0,0,0,192,0,-1--1--1,,1|(801,539)|
-1,66,56,61,1,0,0,0,0,192,0,-1--1--1,,1|(1123,539)|
+10,60,"synthetic kerosene energy consumption dom. aviation",453,1024,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,61,"bio-kerosene energy consumption dom. aviation",828,1029,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,62,43,60,1,0,0,0,0,192,0,-1--1--1,,1|(542,1125)|
+1,63,43,61,1,0,0,0,0,192,0,-1--1--1,,1|(745,1129)|
+1,64,43,55,1,0,0,0,0,192,0,-1--1--1,,1|(639,1123)|
+1,65,56,60,1,0,0,0,0,192,0,-1--1--1,,1|(477,883)|
+1,66,56,61,1,0,0,0,0,192,0,-1--1--1,,1|(799,883)|
 1,67,57,55,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,68,55,60,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,69,55,61,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,70,58,57,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,71,47,34,1,0,0,0,0,192,0,-1--1--1,,1|(464,468)|
-1,72,48,34,1,0,0,0,0,192,0,-1--1--1,,1|(654,497)|
-1,73,60,34,1,0,0,0,0,192,0,-1--1--1,,1|(730,512)|
+1,71,47,34,1,0,0,0,0,192,0,-1--1--1,,1|(140,812)|
+1,72,48,34,1,0,0,0,0,192,0,-1--1--1,,1|(330,841)|
+1,73,60,34,1,0,0,0,0,192,0,-1--1--1,,1|(406,856)|
 1,74,55,34,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,75,61,34,1,0,0,0,0,192,0,-1--1--1,,1|(1133,520)|
+1,75,61,34,1,0,0,0,0,192,0,-1--1--1,,1|(809,864)|
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
-*Refinery
-$192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,100,2
-10,1,heavy duty fossil energy consumption,483,517,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,2,"HYDROGEN F. REFINERY",562,163,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,3,fossil energy consumption from rail,760,438,75,30,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-10,4,decarbonization curve refinery,560,253,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,5,4,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,6,Time,562,319,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,7,6,4,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-\\\---/// Sketch information - do not modify anything except names
-V300  Do not put anything below this section - it will be ignored
-*Industrial heat
+*Industrial heat - Needs Work
 $192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,100,2
 10,1,"Natural gas consumption f. industrial heat",376,320,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 10,2,"Hydrogen implementation curve f. industrial heat",188,270,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
@@ -3223,71 +3886,213 @@ $192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,
 1,7,2,3,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
-*Road transport
+*Olefins - Needs Work
 $192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,79,2
-10,1,total energy demand,1140,229,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,2,heavy duty energy demand,1510,298,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,3,Time,1129,159,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,4,3,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,5,1,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,6,potential heavy duty energy switch,1600,423,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,7,heavy duty vehicle renovation rate,1721,326,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,8,2,6,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,9,7,6,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,10,ownership cost FCEV long haul,1867,679,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,11,Green H2 price,2036,683,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,12,11,10,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,13,ownership cost diesel long haul,1872,550,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,14,heavy duty efficiency,1670,620,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,15,heavy duty fossil energy demand,1603,538,60,27,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,16,heavy duty FCEV energy demand,1596,710,63,27,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,17,heavy duty fossil energy consumption,1403,539,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,18,heavy duty FCEV enery consumption,1410,714,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,19,13,14,1,0,0,0,0,192,0,-1--1--1,,1|(1759,558)|
-1,20,10,14,1,0,0,0,0,192,0,-1--1--1,,1|(1771,680)|
-1,21,14,15,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,22,14,16,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,23,15,17,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,24,16,18,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,25,6,15,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-1,26,2,15,1,0,0,0,0,192,1,-1--1--1,,1|(1829,329)|
-1,27,6,16,1,0,0,0,0,192,0,-1--1--1,,1|(1209,603)|
-1,28,2,18,1,0,0,0,0,192,0,-1--1--1,,1|(1297,520)|
-10,29,"HYDROGEN F. HEAVY DUTY ROAD TRANSPORT",1396,855,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,30,18,29,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,31,ownerhip cost BEV long haul,1881,796,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,32,ELECTRICITY PRICE,2034,786,71,24,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,33,32,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-\\\---/// Sketch information - do not modify anything except names
-V300  Do not put anything below this section - it will be ignored
-*Olefins
-$192-192-192,0,Arial Unicode MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,100,2
-10,1,Olefin production,684,588,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,2,"bio-naphfta demand for olefin production",490,426,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,3,"naphta-olefin rate",671,501,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,4,decarbonization curve for olefin production,679,421,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,5,synthetic naphfta demand for olefin production,869,428,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,1,Olefin production,67,660,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,"bio-naphfta demand for olefin production",-127,498,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,"naphta-olefin rate",54,573,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,decarbonization curve for olefin production,62,493,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,5,synthetic naphfta demand for olefin production,252,500,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,6,1,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,7,3,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,8,4,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,9,4,5,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,10,1,5,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,11,Time,676,340,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,11,Time,59,412,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,12,11,4,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,13,"HYDROGEN F. OLEFIN",662,249,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,14,Time,802,617,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,13,"HYDROGEN F. OLEFIN",45,321,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,14,Time,185,689,75,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
 1,15,14,1,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,16,3,5,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
-10,17,"hydrogen-bionaphfta rate",412,250,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,18,"hydrogen-syntheticnaphfta rate",913,249,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,17,hydrogen bio naphfta rate,-205,322,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,18,hydrogen synthetic naphfta rate,296,321,75,30,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,19,2,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,20,5,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,21,17,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
 1,22,18,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+12,23,0,587,143,325,91,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+From EHB:|<<NnN>>|"This study therefore assumes an end-state in 2050 with an even three-way split|<<NnN>>|between the process decarbonisation options (cracking, methanol-to-olefins and|<<NnN>>|conventional steam cracking with a decarbonised energy carrier) and the three|<<NnN>>|naphtha or methanol feedstock decarbonisation options (synthetic, bio-based and chemically recycled).|<<NnN>>|Hydrogen demand is forecasted at 67 TWh in 2030, 164 TWh in 2040 and 291 TWh. The hydrogen demand for the feedstock is assumed to be located at fuel production sites, as it is today and thus it is included in the fuel production section (see 2.1.4)."
+10,24,primary sector 0,1202,231,58,10,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,25,H2 to steel 0,1696,323,46,10,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,26,steel hydrogen demand 0,1867,330,54,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,27,25,26,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,28,Gas BF BOF CCS 0,1505,462,70,35,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,29,HDRI EAF 0,1867,466,62,36,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,30,Coal BF BOF 0,1211,463,67,34,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,31,foundry reinvestment 0,2239,775,67,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,32,34,29,100,0,0,22,0,192,0,-1--1--1,,1|(1813,523)|
+1,33,34,31,4,0,0,22,0,192,0,-1--1--1,,1|(1813,775)|
+11,34,0,1813,550,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,35,HDRI EAF decay 0,1860,550,39,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,36,38,28,100,0,0,22,0,192,0,-1--1--1,,1|(1447,521)|
+1,37,38,31,4,0,0,22,0,192,0,-1--1--1,,1|(1447,775)|
+11,38,0,1447,552,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,39,BF CCS decay 0,1487,552,32,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,40,42,30,100,0,0,22,0,192,0,-1--1--1,,1|(1160,517)|
+1,41,42,31,4,0,0,22,0,192,0,-1--1--1,,1|(1160,775)|
+11,42,0,1160,544,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,43,BF Coal decay 0,1199,544,31,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,44,30,43,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,45,28,38,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,46,29,34,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,47,49,31,100,0,0,22,0,192,0,-1--1--1,,1|(1920,775)|
+1,48,49,29,4,0,0,22,0,192,0,-1--1--1,,1|(1920,519)|
+11,49,0,1920,543,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,50,HDRI EAF investment 0,1974,543,46,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,51,53,31,100,0,0,22,0,192,0,-1--1--1,,1|(1561,775)|
+1,52,53,28,4,0,0,22,0,192,0,-1--1--1,,1|(1561,514)|
+11,53,0,1561,538,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,54,BF CCS investment 0,1615,538,46,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,55,57,31,100,0,0,22,0,192,0,-1--1--1,,1|(1266,775)|
+1,56,57,30,4,0,0,22,0,192,0,-1--1--1,,1|(1266,508)|
+11,57,0,1266,526,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,58,BF Coal investment 0,1320,526,46,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,59,31,58,1,0,0,0,0,192,0,-1--1--1,,1|(1684,718)|
+10,60,BF CCS innovators 0,1607,625,45,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,61,HDRI EAF innovators 0,1976,620,45,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,62,BF CCS imitators 0,1724,539,39,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,63,HDRI EAF imitators 0,2102,543,39,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,64,innovators,1819,623,47,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,65,31,62,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,66,31,63,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,67,31,60,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,68,31,61,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,69,62,54,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,70,60,54,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,71,61,50,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,72,63,50,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,73,BF CCS inno switch 0,1613,861,49,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,74,HDRI EAF inno switch 0,1986,865,56,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,75,73,60,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,76,74,61,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,77,64,60,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,78,64,61,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,79,check steel 0,1542,267,48,10,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,80,30,79,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,81,28,79,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,82,29,79,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,83,BF CCS competitiveness 0,1734,1056,67,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,84,HDRI EAF competitiveness 0,2109,1062,67,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,85,84,74,1,0,0,0,0,192,0,-1--1--1,,1|(1997,975)|
+1,86,83,73,1,0,0,0,0,192,0,-1--1--1,,1|(1646,965)|
+10,87,BF Coal competitiveness 0,1309,1035,67,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,88,HDRI EAF level 0,2109,980,39,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,89,BF Coal level 0,1309,968,55,10,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,90,BF CCS level 0,1734,978,56,10,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,91,84,88,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,92,87,89,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,93,83,90,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,94,steel equalizer 0,1528,925,59,10,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,95,88,94,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,96,89,94,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,97,90,94,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,98,HDRI EAF investment level 0,2109,867,65,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,99,BF Coal investment level 0,1309,864,65,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,100,BF CCS investment level 0,1734,862,65,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,101,94,99,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,102,89,99,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,103,88,98,1,0,0,0,0,192,0,-1--1--1,,1|(2136,917)|
+1,104,94,98,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,105,94,100,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,106,90,100,1,0,0,0,0,192,0,-1--1--1,,1|(1763,924)|
+1,107,98,63,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,108,99,58,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,109,100,62,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,110,30,88,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,111,28,88,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,112,29,88,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,113,29,90,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,114,28,90,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,115,30,90,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,116,30,89,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,117,28,89,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,118,29,89,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,119,24,30,0,0,0,0,0,192,1,-1--1--1,,1|(0,0)|
+1,120,24,31,0,0,0,0,0,192,1,-1--1--1,,1|(0,0)|
+1,121,29,26,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,122,error steel 0,2083,266,44,10,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,123,24,122,1,0,0,0,0,192,0,-1--1--1,,1|(1656,191)|
+1,124,79,122,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,125,error int steel 0,2304,270,42,23,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,126,ctrl steel 0,2307,448,37,10,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,127,125,126,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,128,122,125,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,129,122,126,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+12,130,48,2227,498,25,15,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,131,133,130,100,0,0,22,0,192,0,-1--1--1,,1|(2227,572)|
+1,132,133,31,4,0,0,22,0,192,0,-1--1--1,,1|(2227,698)|
+11,133,0,2227,637,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,134,demand change steel 0,2294,637,59,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,135,126,134,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,136,k i,2454,265,19,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,137,k p,2431,446,22,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,138,137,126,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,139,136,125,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+12,140,0,1738,1257,80,40,3,7,0,0,-1,0,0,0,0,0,0,0,0,0
+Point of comparison is $/t of steel. BF CCS is currently excluded for lack of clear choice.
+10,141,foundry lifetime 0,1514,699,34,18,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,142,141,42,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,143,141,38,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,144,141,34,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,145,BF Coal cost,1310,1149,57,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,146,BF CCS cost,1731,1155,58,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,147,HDRI cost,2112,1161,46,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,148,145,87,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,149,145,83,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,150,146,83,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,151,146,87,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,152,145,84,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,153,147,83,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,154,147,84,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,155,146,84,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,156,147,87,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,157,141,31,0,0,0,0,0,192,1,-1--1--1,,1|(0,0)|
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
-*View 18
+*Alternative Aviation - Needs Work
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,56,2
+10,1,aviation,1087,907,34,8,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,Time,1084,955,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,3,2,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,4,biofuel,764,724,30,8,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,5,biofuel curve,808,839,55,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,6,5,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,7,medium long range,682,838,52,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,8,7,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,9,"commuter/regional",965,813,70,8,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,10,1,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,11,electric aircraft,965,714,34,15,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,12,9,11,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,13,electric aircraft curve,1095,716,59,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,14,13,11,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,15,fossil substitution aviation,1004,554,50,21,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,16,4,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,17,11,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,18,hydrogen aircraft,1138,452,39,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,19,18,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,20,synfuel,707,598,35,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,21,20,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,22,short range,1096,821,46,8,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,23,1,22,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,24,kerosene,1312,818,34,8,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,25,1,24,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,26,15,24,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,27,short hydrogen aircraft curve,1270,893,58,15,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,28,Time,1267,953,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,29,28,27,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,30,synfuel curve,705,552,54,8,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,31,Time,699,487,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,32,31,30,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Power and Electricity - Needs Work
 $-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Cement and Glass - Needs Work
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
+12,1,0,915,404,101,101,11,7,0,0,-1,0,0,0,0,0,0,0,0,0
+Potentially the same as industrial heat
 ///---\\\
 :TABLE 1
 :TITLE 1
@@ -3296,13 +4101,15 @@ $-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
 :VAR Time
 :DATASET 
 :L<%^E!@
+1:base.vdfx
 4:Time
-5:HD FCEV competitiveness
+5:Electricity Taxes
 9:base
-19:100,11
-24:0
-25:100
-26:100
+19:100,1
+24:2019
+25:2050
+26:2050
+31:0,ReferenceMode
 23:0
 15:0,0,0,0,0,0
 27:0,
