@@ -1,0 +1,249 @@
+"""
+Module carbon_capture_and_storage
+Translated using PySD version 3.14.0
+"""
+
+@component.add(
+    name="Carbon Storage costs",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "cs_capex": 1,
+        "cs_decommisioning": 1,
+        "cs_fixed_opex": 1,
+        "cs_other_expenditures": 1,
+        "cs_variable_cost": 1,
+    },
+)
+def carbon_storage_costs():
+    return (
+        cs_capex()
+        + cs_decommisioning()
+        + cs_fixed_opex()
+        + cs_other_expenditures()
+        + cs_variable_cost()
+    )
+
+
+@component.add(
+    name="CC AF",
+    units="percent",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"discount_rate": 2, "cc_lifetime": 1},
+)
+def cc_af():
+    return 1 / ((1 - (1 + discount_rate()) ** -cc_lifetime()) / discount_rate())
+
+
+@component.add(
+    name="CC Capacity Factor",
+    units="percent",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def cc_capacity_factor():
+    """
+    CF = 1 - Planned Outage - Forced Outage
+    """
+    return 1 - 0.05 - 3 / 52
+
+
+@component.add(
+    name="CC CAPEX",
+    units="M€/(tCO2/h)",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time": 1},
+)
+def cc_capex():
+    """
+    Taken from Technology Catalogue Table. Learning rate is assumed based on time, but is highly relevant for size of unit installed as well.
+    """
+    return np.interp(
+        time(), [2019.0, 2025.0, 2030.0, 2040.0, 2050.0], [4.1, 2.9, 2.3, 2.0, 1.9]
+    )
+
+
+@component.add(
+    name="CC Capture Rate", units="percent", comp_type="Constant", comp_subtype="Normal"
+)
+def cc_capture_rate():
+    """
+    Assumes a capture rate of 90% for retrofitted CC units.
+    """
+    return 0.9
+
+
+@component.add(
+    name="CC ELECTRICITY USAGE",
+    units="MWh/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time": 1},
+)
+def cc_electricity_usage():
+    """
+    Taken from Technology Catalogue Table. Learning rate is assumed based on time.
+    """
+    return np.interp(
+        time(),
+        [2019.0, 2025.0, 2030.0, 2040.0, 2050.0],
+        [0.03, 0.03, 0.025, 0.023, 0.02],
+    )
+
+
+@component.add(
+    name="CC FIXED OPEX", units="percent", comp_type="Constant", comp_subtype="Normal"
+)
+def cc_fixed_opex():
+    """
+    Percent of CAPEX
+    """
+    return 0.03
+
+
+@component.add(
+    name="CC HEAT USAGE",
+    units="MWh/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time": 1},
+)
+def cc_heat_usage():
+    """
+    Taken from Technology Catalogue Table. Learning rate is assumed based on time.
+    """
+    return np.interp(
+        time(), [2019.0, 2025.0, 2030.0, 2040.0, 2050.0], [0.83, 0.83, 0.72, 0.66, 0.66]
+    )
+
+
+@component.add(
+    name="CC Lifetime", units="years", comp_type="Constant", comp_subtype="Normal"
+)
+def cc_lifetime():
+    return 25
+
+
+@component.add(
+    name="CC VARIABLE COST", units="€/tCO2", comp_type="Constant", comp_subtype="Normal"
+)
+def cc_variable_cost():
+    """
+    2.0 € for amine. 0.5 € for other chemicals.
+    """
+    return 2.5
+
+
+@component.add(
+    name="CCS cost",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"ps_cc_cost": 1, "carbon_storage_costs": 1},
+)
+def ccs_cost():
+    return ps_cc_cost() + carbon_storage_costs()
+
+
+@component.add(
+    name="CS CAPEX",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time": 1},
+)
+def cs_capex():
+    return np.interp(
+        time(), [2019.0, 2025.0, 2030.0, 2040.0, 2050.0], [3.89, 3.7, 3.52, 3.18, 3.18]
+    )
+
+
+@component.add(
+    name="CS decommisioning",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time": 1},
+)
+def cs_decommisioning():
+    return np.interp(
+        time(), [2019.0, 2025.0, 2030.0, 2040.0, 2050.0], [0.84, 0.8, 0.76, 0.69, 0.69]
+    )
+
+
+@component.add(
+    name="CS FIXED OPEX",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time": 1},
+)
+def cs_fixed_opex():
+    return np.interp(
+        time(), [2019.0, 2025.0, 2030.0, 2040.0, 2050.0], [1.46, 1.39, 1.32, 1.19, 1.19]
+    )
+
+
+@component.add(
+    name="CS OTHER EXPENDITURES",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time": 1},
+)
+def cs_other_expenditures():
+    return np.interp(
+        time(), [2019.0, 2025.0, 2030.0, 2040.0, 2050.0], [0.73, 0.7, 0.66, 0.6, 0.6]
+    )
+
+
+@component.add(
+    name="CS VARIABLE COST",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time": 1},
+)
+def cs_variable_cost():
+    return np.interp(
+        time(), [2019.0, 2025.0, 2030.0, 2040.0, 2050.0], [10.18, 9.68, 9.2, 8.33, 8.33]
+    )
+
+
+@component.add(
+    name="HEAT COST", units="€/MWh", comp_type="Constant", comp_subtype="Normal"
+)
+def heat_cost():
+    """
+    Normal assumption for value of waste heat (cheap heat assumption).
+    """
+    return 20
+
+
+@component.add(
+    name="PS CC Cost",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "cc_capex": 1,
+        "cc_capacity_factor": 1,
+        "cc_af": 1,
+        "cc_fixed_opex": 1,
+        "cc_electricity_usage": 1,
+        "electricity_price": 1,
+        "cc_heat_usage": 1,
+        "heat_cost": 1,
+        "cc_variable_cost": 1,
+    },
+)
+def ps_cc_cost():
+    return (
+        cc_capex() * 10**6 / (8760 * cc_capacity_factor()) * (cc_fixed_opex() + cc_af())
+        + cc_electricity_usage() * electricity_price() * 1000
+        + cc_heat_usage() * heat_cost()
+        + cc_variable_cost()
+    )

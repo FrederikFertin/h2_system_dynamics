@@ -21,25 +21,24 @@ def sigmoid(x, L, k, x0):
     float
         Value of the sigmoid function at x.
     """
-    return L / (1 + np.exp(k*(x-x0)))
-"""
+    return L / (1 + np.exp(k*(x0-x)))
+
 # Run the sigmoid function with some parameters
 x = np.linspace(0.0, 2.2, 100)
 L = 1
 k = 10
 x0 = 0.9
 y = sigmoid(x, L, k, x0)
-y2 = sigmoid(x, L, 5, 1.1)
-y3 = y + y2
+y2 = sigmoid(x, L, 10, 1.1)
 
 # Plot the sigmoid function
-plt.plot(x, y2, label="Sigmoid function MeOH/NH3")
-plt.plot(x, y, label="Sigmoid function HFO")
-plt.title("Sigmoid function")
+plt.plot(x, y, label="New")
+plt.plot(x, y2, label="Conventional")
+plt.title("Sigmoid curves for new and conventional technologies")
 plt.xlabel("Competitiveness")
-plt.ylabel("Level of adoption")
+plt.ylabel("Investment Level")
 plt.legend(loc='best')
-plt.show()"""
+plt.show()
 
 print(2000/33.33)
 print(1/15.7*1000)
