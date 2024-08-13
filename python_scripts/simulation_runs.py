@@ -1,3 +1,4 @@
+### This script runs the hydrogen model under different scenarios ###
 import pysd
 import os
 import pandas as pd
@@ -7,19 +8,25 @@ import data_loading
 #from IPython.parallel import Client
 from time import time
 
-# Load the model
-### ------- Load model from Vensim mdl file ------- ###
+## ----------------- Load the model ----------------- ##
 cwd = os.getcwd()
+model_name = "hydrogen_model"
+model_short_path = "vensim_models/" + model_name
 
-# Specify the file path of the Vensim model
-model_file = os.path.join(cwd,"vensim_models/hydrogen_model_modularized.mdl")
+model_loaded = True # Set to True if the model is loaded from a Python file
 
-# Load the model using the `load` function from `pysd`
 start = time()
-model = pysd.read_vensim(model_file, split_views = True)
+if model_loaded: # Load the model from the Python file
+    model_file = os.path.join(cwd, model_short_path + ".py")
+    model = pysd.load(model_file)
+else: # Read the model from the Vensim mdl file
+    model_file = os.path.join(cwd, model_short_path + ".mdl")
+    model = pysd.read_vensim(model_file, split_views = True)
+
 print("Model loaded in {} seconds".format(time()-start))
 
-stocks_of_interest = ["TOTAL GREEN HYDROGEN DEMAND", "Green H2 price", "total subsidies"]
+## ----------------- Setup/modify model ----------------- ##
+stocks_of_interest = ["TOTAL GREEN HYDROGEN DEMAND", "Green H2 cost", "TOTAL SUBSIDIES"]
 
 model.set_components({"SEED": 12, "pulse size": 0.3, "SYSTEM NOISE": 0.1})
 
@@ -32,6 +39,7 @@ def new_subsidy_pulse():
 
 model.components.pulse_h2_subsidy = new_subsidy_pulse
 
+## ----------------- Run the model ----------------- ##
 runs_demand = []
 runs_price = []
 runs_subsidy = []
@@ -45,6 +53,7 @@ for subsidy in subsidies:
     runs_price.append(run[stocks_of_interest[1]])
     runs_subsidy.append(run[stocks_of_interest[2]].iloc[-1])
 
+## ----------------- Plot the results ----------------- ##
 # Plot the total subsidy values in a bar plot
 fig, ax = plt.subplots()
 plt.bar(subsidies, runs_subsidy, width=0.4)

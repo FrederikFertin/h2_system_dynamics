@@ -40,6 +40,7 @@ class data_loading_class:
             self.carbon_taxes = pd.Series(index=self.carbon_tax["Year"].values, data=self.carbon_tax["EUR2015/tCO2"].values, dtype=float)
 
         if "sensitivity" in kwargs:
+            print(kwargs["sensitivity"])
             self.carbon_taxes = self.carbon_taxes * kwargs["sensitivity"]
         
         return self._pad_data(self.carbon_taxes)
