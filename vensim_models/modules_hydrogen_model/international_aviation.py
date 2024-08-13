@@ -41,10 +41,10 @@ _integ_bio_kerosene_consumption = Integ(
     name="Bio kerosene decay",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"bio_kerosene_consumption": 1, "jetfuel_fuel_lockin_period": 1},
+    depends_on={"bio_kerosene_consumption": 1, "jetfuel_lockin_period": 1},
 )
 def bio_kerosene_decay():
-    return bio_kerosene_consumption() / jetfuel_fuel_lockin_period()
+    return bio_kerosene_consumption() / jetfuel_lockin_period()
 
 
 @component.add(
@@ -481,7 +481,7 @@ def international_aviation_hydrogen_demand():
         "_integ_international_aviation_reinvestment": {
             "initial": {
                 "international_aviation_consumption": 1,
-                "jetfuel_fuel_lockin_period": 1,
+                "jetfuel_lockin_period": 1,
             },
             "step": {
                 "demand_change_international_aviation": 1,
@@ -507,7 +507,7 @@ _integ_international_aviation_reinvestment = Integ(
     - jetfuel_investment()
     - bio_kerosene_investment()
     - syn_kerosene_investment(),
-    lambda: international_aviation_consumption() / jetfuel_fuel_lockin_period(),
+    lambda: international_aviation_consumption() / jetfuel_lockin_period(),
     "_integ_international_aviation_reinvestment",
 )
 
@@ -550,17 +550,10 @@ _integ_jetfuel_consumption = Integ(
     name="Jetfuel decay",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"jetfuel_consumption": 1, "jetfuel_fuel_lockin_period": 1},
+    depends_on={"jetfuel_consumption": 1, "jetfuel_lockin_period": 1},
 )
 def jetfuel_decay():
-    return jetfuel_consumption() / jetfuel_fuel_lockin_period()
-
-
-@component.add(
-    name="jetfuel fuel lockin period", comp_type="Constant", comp_subtype="Normal"
-)
-def jetfuel_fuel_lockin_period():
-    return 10
+    return jetfuel_consumption() / jetfuel_lockin_period()
 
 
 @component.add(
@@ -606,6 +599,16 @@ def jetfuel_level():
         * jetfuel_consumption()
         / sum_international_aviation()
     )
+
+
+@component.add(
+    name="jetfuel lockin period",
+    units="years",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def jetfuel_lockin_period():
+    return 10
 
 
 @component.add(
@@ -663,10 +666,10 @@ _integ_syn_kerosene_consumption = Integ(
     name="Syn kerosene decay",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"syn_kerosene_consumption": 1, "jetfuel_fuel_lockin_period": 1},
+    depends_on={"syn_kerosene_consumption": 1, "jetfuel_lockin_period": 1},
 )
 def syn_kerosene_decay():
-    return syn_kerosene_consumption() / jetfuel_fuel_lockin_period()
+    return syn_kerosene_consumption() / jetfuel_lockin_period()
 
 
 @component.add(

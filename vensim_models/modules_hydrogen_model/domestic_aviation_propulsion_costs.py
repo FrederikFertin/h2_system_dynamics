@@ -67,7 +67,7 @@ def jetfuel_propulsion_cost():
     name="OPEX jet engine", units="€/MJ", comp_type="Constant", comp_subtype="Normal"
 )
 def opex_jet_engine():
-    return 0.005
+    return 0
 
 
 @component.add(

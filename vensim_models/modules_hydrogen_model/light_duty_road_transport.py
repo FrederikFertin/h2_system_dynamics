@@ -269,16 +269,6 @@ def ld_bev_level():
 
 
 @component.add(
-    name="LD EV efficiency",
-    units="percent",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def ld_ev_efficiency():
-    return 0.85
-
-
-@component.add(
     name="LD FCEV competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -320,19 +310,6 @@ _integ_ld_fcev_consumption = Integ(
 )
 def ld_fcev_decay():
     return ld_fcev_consumption() / ld_lifetime()
-
-
-@component.add(
-    name="LD FCEV efficiency",
-    units="percent",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def ld_fcev_efficiency():
-    """
-    60% efficiency from energy content of H2 to energy delivered to the electric motor. 95% efficient electric motor.
-    """
-    return 0.57
 
 
 @component.add(

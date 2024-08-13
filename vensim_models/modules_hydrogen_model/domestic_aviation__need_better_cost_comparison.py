@@ -52,10 +52,10 @@ _integ_bio_kerosene_consumption_dom = Integ(
     name="Bio kerosene decay dom",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"bio_kerosene_consumption_dom": 1, "plane_lifetime_dom": 1},
+    depends_on={"bio_kerosene_consumption_dom": 1, "jetfuel_lockin_period": 1},
 )
 def bio_kerosene_decay_dom():
-    return bio_kerosene_consumption_dom() / plane_lifetime_dom()
+    return bio_kerosene_consumption_dom() / jetfuel_lockin_period()
 
 
 @component.add(
@@ -479,7 +479,7 @@ def domestic_aviation_hydrogen_demand():
     depends_on={"_integ_domestic_aviation_reinvestment": 1},
     other_deps={
         "_integ_domestic_aviation_reinvestment": {
-            "initial": {"domestic_aviation_consumption": 1, "plane_lifetime_dom": 1},
+            "initial": {"domestic_aviation_consumption": 1, "jetfuel_lockin_period": 1},
             "step": {
                 "bio_kerosene_decay_dom": 1,
                 "demand_change_domestic_aviation": 1,
@@ -508,7 +508,7 @@ _integ_domestic_aviation_reinvestment = Integ(
     - hydrogen_investment_dom()
     - jetfuel_investment_dom()
     - syn_kerosene_investment_dom(),
-    lambda: domestic_aviation_consumption() / plane_lifetime_dom(),
+    lambda: domestic_aviation_consumption() / jetfuel_lockin_period(),
     "_integ_domestic_aviation_reinvestment",
 )
 
@@ -597,10 +597,10 @@ _integ_hydrogen_consumption_dom = Integ(
     name="Hydrogen decay dom",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hydrogen_consumption_dom": 1, "plane_lifetime_dom": 1},
+    depends_on={"hydrogen_consumption_dom": 1, "jetfuel_lockin_period": 1},
 )
 def hydrogen_decay_dom():
-    return hydrogen_consumption_dom() / plane_lifetime_dom()
+    return hydrogen_consumption_dom() / jetfuel_lockin_period()
 
 
 @component.add(
@@ -773,10 +773,10 @@ _integ_jetfuel_consumption_dom = Integ(
     name="Jetfuel decay dom",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"jetfuel_consumption_dom": 1, "plane_lifetime_dom": 1},
+    depends_on={"jetfuel_consumption_dom": 1, "jetfuel_lockin_period": 1},
 )
 def jetfuel_decay_dom():
-    return jetfuel_consumption_dom() / plane_lifetime_dom()
+    return jetfuel_consumption_dom() / jetfuel_lockin_period()
 
 
 @component.add(
@@ -819,11 +819,6 @@ def jetfuel_level_dom():
         * jetfuel_consumption_dom()
         / sum_domestic_aviation()
     )
-
-
-@component.add(name="plane lifetime dom", comp_type="Constant", comp_subtype="Normal")
-def plane_lifetime_dom():
-    return 25
 
 
 @component.add(
@@ -896,10 +891,10 @@ _integ_syn_kerosene_consumption_dom = Integ(
     name="Syn kerosene decay dom",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"syn_kerosene_consumption_dom": 1, "plane_lifetime_dom": 1},
+    depends_on={"syn_kerosene_consumption_dom": 1, "jetfuel_lockin_period": 1},
 )
 def syn_kerosene_decay_dom():
-    return syn_kerosene_consumption_dom() / plane_lifetime_dom()
+    return syn_kerosene_consumption_dom() / jetfuel_lockin_period()
 
 
 @component.add(

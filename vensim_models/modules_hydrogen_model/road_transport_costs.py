@@ -190,6 +190,19 @@ def hd_electric_motor_cost():
 
 
 @component.add(
+    name="HD EV efficiency",
+    units="percent",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def hd_ev_efficiency():
+    """
+    Assumed on the higher range as opposed to light duty, which are assumed to do more urban driving.
+    """
+    return 0.85
+
+
+@component.add(
     name="HD FC CAPEX",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -289,6 +302,19 @@ def hd_fc_storage_capex():
     A constant cost of the 700 bar hydrogen tank is assumed of 42000 € in line with the used source for all cost numbers. Furthermore an additional (small) battery storage is included 1/17th the capacity of the hydrogen fuel tank
     """
     return 42000 + battery_cost() * (hd_fc_storage_capacity() * h2_lhv()) / 17
+
+
+@component.add(
+    name="HD FCEV efficiency",
+    units="percent",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def hd_fcev_efficiency():
+    """
+    New assumption: Efficiency of FCEV truck is 57% like the FCEV car Builds on the assumption that the EV truck has an efficiency of 85% and the fuel economy is determined by the fits found by Noll et al. (https://doi.org/10.1016/j.apenergy.2021.118079) - old assumption.
+    """
+    return 0.57
 
 
 @component.add(
@@ -581,6 +607,16 @@ def ld_electric_motor_cost():
 
 
 @component.add(
+    name="LD EV efficiency",
+    units="percent",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def ld_ev_efficiency():
+    return 0.85
+
+
+@component.add(
     name="LD FC CAPEX",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -691,6 +727,19 @@ def ld_fc_storage_capex():
         ld_fc_storage_capacity() * h2_tank_cost()
         + battery_cost() * (ld_fc_storage_capacity() * h2_lhv()) / 11.5
     )
+
+
+@component.add(
+    name="LD FCEV efficiency",
+    units="percent",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def ld_fcev_efficiency():
+    """
+    60% efficiency from energy content of H2 to energy delivered to the electric motor. 95% efficient electric motor.
+    """
+    return 0.57
 
 
 @component.add(

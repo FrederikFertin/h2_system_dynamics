@@ -257,19 +257,6 @@ def hd_bev_level():
 
 
 @component.add(
-    name="HD EV efficiency",
-    units="percent",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def hd_ev_efficiency():
-    """
-    Assumed on the higher range as opposed to light duty, which are assumed to do more urban driving.
-    """
-    return 0.85
-
-
-@component.add(
     name="HD FCEV competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -311,19 +298,6 @@ _integ_hd_fcev_consumption = Integ(
 )
 def hd_fcev_decay():
     return hd_fcev_consumption() / truck_lifetime()
-
-
-@component.add(
-    name="HD FCEV efficiency",
-    units="percent",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def hd_fcev_efficiency():
-    """
-    New assumption: Efficiency of FCEV truck is 57% like the FCEV car Builds on the assumption that the EV truck has an efficiency of 85% and the fuel economy is determined by the fits found by Noll et al. (https://doi.org/10.1016/j.apenergy.2021.118079) - old assumption.
-    """
-    return 0.57
 
 
 @component.add(

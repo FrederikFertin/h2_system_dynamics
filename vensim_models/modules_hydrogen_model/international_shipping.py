@@ -393,16 +393,6 @@ def international_shipping_hydrogen_demand():
     )
 
 
-@component.add(name="k i", comp_type="Constant", comp_subtype="Normal")
-def k_i():
-    return 0.2 / 4
-
-
-@component.add(name="k p", comp_type="Constant", comp_subtype="Normal")
-def k_p():
-    return 1
-
-
 @component.add(
     name="MeOH competitiveness",
     comp_type="Auxiliary",
