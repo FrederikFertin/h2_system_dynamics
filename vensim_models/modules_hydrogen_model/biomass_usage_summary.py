@@ -50,7 +50,6 @@ def biomass_price_scaler():
         "international_shipping_biomass_demand": 1,
         "domestic_aviation_biomass_demand": 1,
         "international_aviation_biomass_demand": 1,
-        "meoh_biomass_demand": 1,
         "high_temperature_biomass_demand": 1,
         "naphtha_biomass_demand": 1,
     },
@@ -61,7 +60,6 @@ def biomass_used():
         + international_shipping_biomass_demand()
         + domestic_aviation_biomass_demand()
         + international_aviation_biomass_demand()
-        + meoh_biomass_demand()
         + high_temperature_biomass_demand()
         + naphtha_biomass_demand()
     )

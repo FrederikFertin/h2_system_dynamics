@@ -1,0 +1,51 @@
+Scenario;Type of unit;Year data;Location;Profile;Fuel;Electrolyser;CO2 capture;CO2 tax level upstream (Eur/kgCO2);CO2 tax level operational(Eur/kgCO2);Weight costs vs emissions;Max yearly emission treshhold;Renewable criterion;Criterion application;Installed capacity(MW or t/h);Total investment(MEuros);Annualised investment(MEuros);Fixed O&M(MEuros);Variable O&M(MEuros);CO2 tax infrastructure (MEuros);CO2 tax process (MEuros);Fuel cost(MEuros);Cost per unit(MEuros);Production(kton or GWh);Sale (MEuros);Electricity consumption(GWh);Production cost fuel (Euros/kgfuel);Production cost fuel (Euros/GJfuel);Production cost fuel (Euros/MWhfuel);Production cost per unit (Euros/kg or kWh output);Load average;Full load hours;CO2e per unit total (kgCO2e/GJfuel);CO2e per unit counted (kgCO2e/GJfuel);CO2e total all system (kg CO2e/GJfuel);CO2e counted all system (kg CO2e/GJfuel);Land use per unit (km2);Land use per unit (km2/GJfuel);Land use total system (km2/GJfuel);Av electricity cost(Euros/MWh)
+Ceduna;CO2 capture DAC;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;111.7125592;670.275355;65.69878452;33.51376775;0;0;0;0;99.21255227;824.4;0;1401.48;0;0;0;0.120345163;0.875923287;7379.653695;0.392176884;0.392176884;0;0;89.37004734;0.007484929;0;34.69379715
+Ceduna;CO2 syngas mixer;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;81.30462822;0;0;0;0;0;0;0;0;600;0;189.6;1.110567638;55.80741899;200.9067084;0;0.875923287;7379.653695;0.125802002;0;21.29813684;0.392176884;1.300874051;0.000108951;0.026169014;34.69379715
+Ceduna;MeOH reactor;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;81.30462822;843.842066;75.63356438;33.75368264;0;0;0;0;109.387247;600;0;0;0;0;0;0.182312078;0.875923287;7379.653695;0.125802002;0;0;0;1.300874051;0.000108951;0;34.69379715
+Ceduna;Syngas pipeline to MeOH reactor;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;81.30462822;0;0;0;0;0;0;0;0;600;0;0;0;0;0;0;0.875923287;7379.653695;0;0;0;0;0;0;0;34.69379715
+Ceduna;Desalination plant;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;252.8832268;33.99610371;3.971749326;1.019883111;0;0;0;0;4.991632437;1283.725303;0;8.665145794;0;0;0;0.003888396;0.602534845;5076.356068;0;0;0;0;0;0;0;34.69379715
+Ceduna;Electrolysers SOEC alone;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;22.47850905;889.7888101;79.75177105;76.07694326;0;0;0;0;155.8287143;114.1089158;0;4929.505163;0;0;0;1.365613837;0.602534845;5076.356068;0.227313795;0;0;0;0.35821752;3.00E-05;0;34.69379715
+Ceduna;H2 pipeline to MeOH CO2;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;15.45715365;0;0;0;0;0;0;0;0;114.0684411;0;0;0;0;0;0;0.875923287;7379.653695;0;0;0;0;0;0;0;34.69379715
+Ceduna;Heat from district heating;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;34.69379715
+Ceduna;Heat sent to district heating;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;55.28714719;0;0;0;0;0;0;0;0;408;0;0;0;0;0;0;0.875923287;7379.653695;0;0;0;0;0;0;0;34.69379715
+Ceduna;Heat sent to other process;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;34.69379715
+Ceduna;Sale of oxygen;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;179.8280724;0;0;0;0;0;0;0;0;912.8713265;0;0;0;0;0;0;0.602534845;5076.356068;0;0;0;0;0;0;0;34.69379715
+Ceduna;H2 pipes compressor;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;1453.097313;0;0;0;0;0;0;0;0;92.53020188;0;86.97838976;0;0;0;0;0.007558209;63.67791134;0;0;0;0;0;0;0;34.69379715
+Ceduna;H2 pipes valve;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;1468.554467;0;0;0;0;0;0;0;0;92.48972713;0;0;0;0;0;0;0.007475384;62.98011359;0;0;0;0;0;0;0;34.69379715
+Ceduna;H2 buried pipes;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;371.7043139;92.92607847;7.153449521;2.787782354;0;0;0;0;9.941231875;1769.04823;0;0;0;0;0;0.005619537;0.564900764;4759.288939;0.000193824;0;0;0;0.371704314;3.11E-05;0;34.69379715
+Ceduna;Solar tracking;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;2004.332918;919.6432624;72.93690714;18.60187508;0;0;0;0;91.53878222;4214.296363;0;0;0;0;0;0.021721012;0.249565935;2102.593;15.20620495;0;0;0;31.92902339;0.002674123;0;34.69379715
+Ceduna;ON_SP198-HH100;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;1092.13642;1783.525065;150.8683853;14.34974861;4.675364472;0;0;0;169.8934983;3321.122126;0;0;0;0;0;0.05115545;0.36094252;3040.940735;5.041958662;0;0;0;187.8037787;0.01572896;0;34.69379715
+Ceduna;ON_SP198-HH150;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;34.69379715
+Ceduna;ON_SP237-HH100;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;34.69379715
+Ceduna;ON_SP237-HH150;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;34.69379715
+Ceduna;ON_SP277-HH100;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;34.69379715
+Ceduna;ON_SP277-HH150;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;34.69379715
+Ceduna;ON_SP321-HH100;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;34.69379715
+Ceduna;ON_SP321-HH150;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;34.69379715
+Ceduna;OFF_SP379-HH100;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;34.69379715
+Ceduna;OFF_SP379-HH150;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;34.69379715
+Ceduna;OFF_SP450-HH100;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;34.69379715
+Ceduna;OFF_SP450-HH150;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;34.69379715
+Ceduna;Electricity from the grid;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;34.69379715
+Ceduna;Curtailment;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;1844.093545;0;0;0;0;0;0;0;0;878.5820644;0;0;0;0;0;0;0.056549592;476.4303127;0;0;0;0;0;0;0;34.69379715
+Ceduna;Charge batteries;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;1356.469055;0;0;0;0;0;0;0;0;402.5159455;0;20.12579727;0;0;0;0;0.03522113;296.738023;0;0;0;0;0;0;0;34.69379715
+Ceduna;Discharge batteries;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;930.2386106;0;0;0;0;0;0;0;0;402.1410694;0;20.10705347;0;0;0;0;0.051311435;432.2988369;0;0;0;0;0;0;0;34.69379715
+Ceduna;Batteries;2030 bench;Ceduna;2020ma;MeOH;SOEC;DAC;0;0;C1_E0;-1;None;0;1356.469055;244.1644298;21.88445785;3.662466447;0;0;0;0;25.54692429;5058.991844;0;0;0;0;0;0.005049805;0.442674167;3729.529861;0.178684713;0;0;0;0.02351213;1.97E-06;0;34.69379715
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;7379.653695;;7535.41849;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;0.021721012;7379.653695;;6656.461549;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;34.69379715;0.05115545;7379.653695;;878.9569405;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;39.27496293;;7379.653695;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;5076.356068;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;5076.356068;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;7379.653695;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;#DIV/0!;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;7379.653695;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;#DIV/0!;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;5076.356068;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;63.67791134;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;62.98011359;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;4759.288939;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;2102.593;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;3040.940735;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;#DIV/0!;;;;;;;;;;;;;;;;

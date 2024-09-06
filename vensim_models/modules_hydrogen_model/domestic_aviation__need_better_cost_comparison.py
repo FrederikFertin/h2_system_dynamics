@@ -169,8 +169,8 @@ def bio_kerosene_investment_level_dom():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "bio_kerosene_competitiveness_dom": 1,
         "cross_innovation": 1,
+        "bio_kerosene_competitiveness_dom": 1,
         "bio_kerosene_consumption_dom": 1,
         "sum_domestic_aviation": 1,
     },
@@ -246,8 +246,8 @@ def dom_aviation_equalizer_dom():
         "bio_kerosene_consumption_dom": 1,
         "jetfuel_consumption_dom": 1,
         "jetfuel_propulsion_cost": 1,
-        "syn_kerosene_consumption_dom": 1,
         "synkero_propulsion_cost": 1,
+        "syn_kerosene_consumption_dom": 1,
         "jet_engine_efficiency": 1,
         "sum_domestic_aviation": 1,
     },
@@ -452,9 +452,9 @@ def domestic_aviation_emissions():
         "synkero_h2_usage": 1,
         "syn_kerosene_consumption_dom": 1,
         "h2_lhv": 2,
-        "jet_engine_efficiency": 1,
-        "hydrogen_consumption_dom": 1,
         "hydrogen_fuel_cell_efficiency": 1,
+        "hydrogen_consumption_dom": 1,
+        "jet_engine_efficiency": 1,
     },
 )
 def domestic_aviation_hydrogen_demand():
@@ -773,10 +773,26 @@ _integ_jetfuel_consumption_dom = Integ(
     name="Jetfuel decay dom",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"jetfuel_consumption_dom": 1, "jetfuel_lockin_period": 1},
+    depends_on={
+        "jetfuel_consumption_dom": 1,
+        "jetfuel_early_decommission_rate_dom": 1,
+        "jetfuel_lockin_period": 1,
+    },
 )
 def jetfuel_decay_dom():
-    return jetfuel_consumption_dom() / jetfuel_lockin_period()
+    return jetfuel_consumption_dom() * (
+        jetfuel_early_decommission_rate_dom() + 1 / jetfuel_lockin_period()
+    )
+
+
+@component.add(
+    name="Jetfuel early decommission rate dom",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"jetfuel_competitiveness_dom": 1},
+)
+def jetfuel_early_decommission_rate_dom():
+    return 1 / (1 + np.exp(-5 * -jetfuel_competitiveness_dom()))
 
 
 @component.add(

@@ -1,0 +1,33 @@
+Scenario;Type of unit;Year data;Location;Profile;Fuel;Electrolyser;CO2 capture;CO2 tax level upstream (Eur/kgCO2);CO2 tax level operational(Eur/kgCO2);Weight costs vs emissions;Max yearly emission treshhold;Renewable criterion;Criterion application;Installed capacity(MW or t/h);Total investment(MEuros);Annualised investment(MEuros);Fixed O&M(MEuros);Variable O&M(MEuros);CO2 tax infrastructure (MEuros);CO2 tax process (MEuros);Fuel cost(MEuros);Cost per unit(MEuros);Production(kton or GWh);Sale (MEuros);Electricity consumption(GWh);Production cost fuel (Euros/kgfuel);Production cost fuel (Euros/GJfuel);Production cost fuel (Euros/MWhfuel);Production cost per unit (Euros/kg or kWh output);Load average;Full load hours;CO2e per unit total (kgCO2e/GJfuel);CO2e per unit counted (kgCO2e/GJfuel);CO2e total all system (kg CO2e/GJfuel);CO2e counted all system (kg CO2e/GJfuel);Land use per unit (km2);Land use per unit (km2/GJfuel);Land use total system (km2/GJfuel);Av electricity cost(Euros/MWh)
+Base-case;Biomass wheat 2;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;6.075538444;0;0;0;0;0;0;4.127744;4.127744;44.48;0;0;0;0;0;0.0928;0.86898063;7321.161805;0.030734081;0;0;0;0;0;0;50.92752065
+Base-case;Sale of biochar;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;1.168372778;0;0;0;0;0;0;0;-1.013630769;8.553846154;-1.013630769;0;0;0;0;-0.1185;0.86898063;7321.161805;0;0;0;0;0;0;0;50.92752065
+Base-case;Wheat2-stage-SOEC;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;3.338207936;40.43841668;3.788221502;3.895855572;0.098964877;0;0;0;7.783041951;24.43956044;0;15.64131868;0.978698233;33.98257755;122.3372792;0.318460799;0.86898063;7321.161805;0.087620175;0;8.233349204;0;0;0;0.0078944;50.92752065
+Base-case;Waste water plant;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;8.167192754;0.878400529;0.102623134;0.026352016;0;0;0;0.002721735;0.131696885;41.87285032;0;0.104682126;0;0;0;0.003145162;0.608540952;5126.957522;0;0;0;0;0;0;0;50.92752065
+Base-case;Electrolysers SOEC heat integrated;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;0.725972689;28.73688704;2.543087349;2.457003842;0;0;0;0;5.000091191;3.72203114;0;127.293465;0;0;0;1.343377044;0.608540952;5126.957522;0.124536605;0;0;0;0.011569101;1.64E-05;0;50.92752065
+Base-case;H2 pipeline to Wheat-2;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;0.50809862;0;0;0;0;0;0;0;0;3.719872213;0;0;0;0;0;0;0.86898063;7321.161805;0;0;0;0;0;0;0;50.92752065
+Base-case;Heat from district heating;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;50.92752065
+Base-case;Heat sent to district heating;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;5.541425174;0;0;0;0;0;0;0;-0.811393407;40.56967033;-0.811393407;0;0;0;0;-0.02;0.86898063;7321.161805;0;0;0;0;0;0;0;50.92752065
+Base-case;Heat sent to other process;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;3.67202873;0;0;0;0;0;0;0;-0.900597802;26.88351648;-0.900597802;0;0;0;0;-0.0335;0.86898063;7321.161805;0;0;0;0;0;0;0;50.92752065
+Base-case;Sale of oxygen;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;5.807781514;0;0;0;0;0;0;0;0;29.77624912;0;0;0;0;0;0;0.608540952;5126.957522;0;0;0;0;0;0;0;50.92752065
+Base-case;H2 pipes compressor;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;30.55395045;0;0;0;0;0;0;0;0;2.130543326;0;2.002710726;0;0;0;0;0.008276621;69.73053547;0;0;0;0;0;0;0;50.92752065
+Base-case;H2 pipes valve;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;31.06204907;0;0;0;0;0;0;0;0;2.128384399;0;0;0;0;0;0;0.008132987;68.52041197;0;0;0;0;0;0;0;50.92752065
+Base-case;H2 buried pipes;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;23.98807291;5.997018228;0.49021341;0.179910547;0;0;0;0;0.670123957;109.4478987;0;0;0;0;0;0.006122767;0.541554487;4562.59655;0.000212189;0;0;0;0.023988073;3.41E-05;0;50.92752065
+Base-case;Solar tracking;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;45.3089143;20.78898041;1.743367254;0.420504376;0;0;0;0;2.163871631;67.52677476;0;0;0;0;0;0.032044647;0.176897804;1490.364;5.831134847;0;0;0;0.721771005;0.001025448;0;50.92752065
+Base-case;OFF_SP379-HH100;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;50.92752065
+Base-case;OFF_SP379-HH150;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;50.92752065
+Base-case;OFF_SP450-HH100;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;50.92752065
+Base-case;OFF_SP450-HH150;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;27.90726947;57.2880846;5.088753519;1.049193551;0.284575804;0;0;0;6.422522873;101.0735104;0;0;0;0;0;0.063543087;0.429882825;3621.7628;2.122407203;0;0;0;4.798934058;0.00681803;0;50.92752065
+Base-case;Electricity from the grid;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;50.92752065
+Base-case;Curtailment;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;43.0047767;0;0;0;0;0;0;0;0;23.16219394;0;0;0;0;0;0;0.06392829;538.5958425;0;0;0;0;0;0;0;50.92752065
+Base-case;Charge batteries;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;16.42550218;0;0;0;0;0;0;0;0;3.803105065;0;0.190155253;0;0;0;0;0.02748209;231.5366084;0;0;0;0;0;0;0;50.92752065
+Base-case;Discharge batteries;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;16.42550218;0;0;0;0;0;0;0;0;3.786679563;0;0.189333978;0;0;0;0;0.027363396;230.5366084;0;0;0;0;0;0;0;50.92752065
+Base-case;Batteries;2030 bench;Bornholm;2019;DME;SOEC;W2;0;0;C1_E0;-1;None;0;16.42550218;2.956590392;0.301135262;0.044348856;0;0;0;0;0.345484118;48.75416928;0;0;0;0;0;0.007086248;0.35230856;2968.199617;0.036704103;0;0;0;0.000284709;4.04E-07;0;50.92752065
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;0.835749064;7321.161805;;;;;;;;;;;;;;;;;;;;;;;;

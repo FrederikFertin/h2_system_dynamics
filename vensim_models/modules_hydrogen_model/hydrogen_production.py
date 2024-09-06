@@ -20,8 +20,8 @@ def aec_af():
     comp_subtype="Normal",
     depends_on={
         "electrolyser_capacity": 3,
-        "learning_rate": 1,
         "one_gw_aec_capex": 2,
+        "learning_rate": 1,
         "initial_gw_aec_capex": 2,
     },
 )
@@ -90,10 +90,10 @@ def aec_opex():
     comp_subtype="Normal",
     depends_on={
         "grey_h2_cost": 1,
+        "smr_emission_factor": 1,
         "ccs_cost": 1,
         "cc_capture_rate": 1,
         "carbon_tax": 1,
-        "smr_emission_factor": 1,
     },
 )
 def blue_h2_cost():
@@ -165,8 +165,8 @@ def green_h2_cost():
     depends_on={
         "yearly_total_subsidies_limit": 1,
         "total_subsidies_ytd": 1,
-        "pulse_h2_subsidy": 1,
         "green_h2_subsidy_size": 1,
+        "pulse_h2_subsidy": 1,
     },
 )
 def green_h2_subsidy():
@@ -195,7 +195,7 @@ def green_h2_subsidy_actual():
     comp_subtype="Normal",
 )
 def green_h2_subsidy_size():
-    return 2
+    return 0
 
 
 @component.add(
@@ -205,13 +205,13 @@ def green_h2_subsidy_size():
     comp_subtype="Normal",
     depends_on={
         "smr_capex": 1,
-        "smr_af": 1,
         "smr_opex": 1,
+        "smr_af": 1,
         "smr_operating_hours": 1,
-        "smr_efficiency": 1,
         "gas_price": 1,
-        "carbon_tax": 1,
+        "smr_efficiency": 1,
         "smr_emission_factor": 1,
+        "carbon_tax": 1,
     },
 )
 def grey_h2_cost():
@@ -274,7 +274,7 @@ def pilot_plant_capacity():
     depends_on={"time": 1},
 )
 def pulse_h2_subsidy():
-    return pulse(__data["time"], 2025, width=20)
+    return pulse(__data["time"], 2025, width=10)
 
 
 @component.add(
@@ -289,7 +289,7 @@ def pulse_h2_subsidy():
         "electrolyser_operating_hours": 1,
         "aec_efficiency": 2,
         "capex_multiplier": 1,
-        "electricity_price": 1,
+        "renewable_electricity_price": 1,
         "h2_lhv": 1,
     },
 )
@@ -300,7 +300,7 @@ def raw_green_h2_cost():
         / electrolyser_operating_hours()
         / aec_efficiency()
         * capex_multiplier()
-        + electricity_price() / aec_efficiency()
+        + renewable_electricity_price() / aec_efficiency()
     ) * h2_lhv()
 
 

@@ -1,0 +1,47 @@
+Scenario;Type of unit;Year data;Location;Profile;Fuel;Electrolyser;CO2 capture;CO2 tax level upstream (Eur/kgCO2);CO2 tax level operational(Eur/kgCO2);Weight costs vs emissions;Max yearly emission treshhold;Renewable criterion;Criterion application;Installed capacity(MW or t/h);Total investment(MEuros);Annualised investment(MEuros);Fixed O&M(MEuros);Variable O&M(MEuros);CO2 tax infrastructure (MEuros);CO2 tax process (MEuros);Fuel cost(MEuros);Cost per unit(MEuros);Production(kton or GWh);Sale (MEuros);Electricity consumption(GWh);Production cost fuel (Euros/kgfuel);Production cost fuel (Euros/GJfuel);Production cost fuel (Euros/MWhfuel);Production cost per unit (Euros/kg or kWh output);Load average;Full load hours;CO2e per unit total (kgCO2e/GJfuel);CO2e per unit counted (kgCO2e/GJfuel);CO2e total all system (kg CO2e/GJfuel);CO2e counted all system (kg CO2e/GJfuel);Land use per unit (km2);Land use per unit (km2/GJfuel);Land use total system (km2/GJfuel);Av electricity cost(Euros/MWh)
+Bornholm;Electrical reformer;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;10.25159869;65.00071654;5.846814453;2.600028662;0;0;0;0;8.446843114;75.27230726;0;98.64435866;1.690155445;84.93243441;305.7567639;0.112217141;0.871512703;7342.494523;0;0;6.016963446;0;0;0;0.01087092;52.73425079
+Bornholm;Biogas;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;8.754865285;0;0;0;0;0;0;25.9589652;25.9589652;64.2825504;0;0;0;0;0;0.403826;0.871512703;7342.494523;0;0;0;0;0;0;0;52.73425079
+Bornholm;Gasifier;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;5.536430424;95.12999317;8.556942886;3.805199727;0;0;0;0;12.36214261;46.63539759;0;29.70674826;2.728011479;137.086004;493.5096143;0.265080674;0.999806435;8423.369214;0.028809956;0;9.711737108;0;0;0;0.017546312;52.73425079
+Bornholm;Wood chips;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;6.476030982;0;0;0;0;0;0;4.85495;4.85495;54.55;0;0;0;0;0;0.089;0.999806435;8423.369214;0;0;0;0;0;0;0;52.73425079
+Bornholm;MeOH reactor;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;15.78802912;275.3420468;24.76701711;11.01368187;0;0;0;0;35.78069899;121.9077048;0;0;0;0;0;0.293506461;0.916501809;7721.527743;0.120232063;0;0;0;0.252608466;0.000104127;0;52.73425079
+Bornholm;Syngas pipeline to MeOH reactor;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;15.78802912;0;0;0;0;0;0;0;0;121.9077048;0;0;0;0;0;0;0.916501809;7721.527743;0;0;0;0;0;0;0;52.73425079
+Bornholm;Waste water plant;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;17.01868104;1.830398629;0.213844639;0.054911959;0;0;0;0.004682158;0.273438756;72.03320738;0;0.180083018;0;0;0;0.00379601;0.502385324;4232.596357;0;0;0;0;0;0;0;52.73425079
+Bornholm;Electrolysers SOEC alone;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;1.512771648;59.88151981;5.386342707;5.119869943;0;0;0;0;10.50621265;6.402951767;0;276.6075163;0;0;0;1.640838949;0.502385324;4232.596357;0.075292508;0;0;0;0.024107529;9.94E-06;0;52.73425079
+Bornholm;H2 pipeline to MeOH biogas;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;0.465558524;0;0;0;0;0;0;0;0;3.418360911;0;0;0;0;0;0;0.871512703;7342.494523;0;0;0;0;0;0;0;52.73425079
+Bornholm;H2 pipeline to MeOH biomass;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;0.35263888;0;0;0;0;0;0;0;0;2.97040749;0;0;0;0;0;0;0.999806435;8423.369214;0;0;0;0;0;0;0;52.73425079
+Bornholm;Heat from district heating;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;52.73425079
+Bornholm;Heat sent to district heating;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;14.99956181;0;0;0;0;0;0;0;0;112.6954327;0;0;0;0;0;0;0.891780217;7513.248328;0;0;0;0;0;0;0;52.73425079
+Bornholm;Heat sent to other process;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;52.73425079
+Bornholm;Sale of oxygen;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;12.10217318;0;0;0;0;0;0;0;0;51.22361414;0;0;0;0;0;0;0.502385324;4232.596357;0;0;0;0;0;0;0;52.73425079
+Bornholm;H2 pipes compressor;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;75.35957211;0;0;0;0;0;0;0;0;9.852864791;0;9.261692903;0;0;0;0;0.015518659;130.7447019;0;0;0;0;0;0;0;52.73425079
+Bornholm;H2 pipes valve;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;76.17776951;0;0;0;0;0;0;0;0;9.838681424;0;0;0;0;0;0;0.015329879;129.1542334;0;0;0;0;0;0;0;52.73425079
+Bornholm;H2 buried pipes;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;157.5929645;39.39824113;3.047453951;1.181947234;0;0;0;0;4.229401185;665.8556818;0;0;0;0;0;0.006351829;0.501502815;4225.161218;0.000404452;0;0;0;0.157592965;6.50E-05;0;52.73425079
+Bornholm;Solar tracking;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;40;18.353104;1.462191796;0.37123324;0;0;0;0;1.833425036;59.61456;0;0;0;0;0;0.030754652;0.176897804;1490.364;1.493588866;0;0;0;0.6372;0.000262659;0;52.73425079
+Bornholm;OFF_SP379-HH150;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;88.45687354;203.1514614;17.2516221;3.325598777;1.086699385;0;0;0;21.66392026;385.9657781;0;0;0;0;0;0.056129122;0.517901662;4363.3215;1.951841724;0;0;0;15.21104397;0.006270105;0;52.73425079
+Bornholm;Electricity from the grid;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;NaN;NaN;0;0;0;0;0;0;0;52.73425079
+Bornholm;Curtailment;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;114.5380436;0;0;0;0;0;0;0;0;29.93273195;0;0;0;0;0;0;0.031018921;261.3344091;0;0;0;0;0;0;0;52.73425079
+Bornholm;Charge batteries;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;66.54533676;0;0;0;0;0;0;0;0;11.99943683;0;0.599971841;0;0;0;0;0.021402935;180.3197251;0;0;0;0;0;0;0;52.73425079
+Bornholm;Discharge batteries;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;69.44588165;0;0;0;0;0;0;0;0;11.94968599;0;0.597484299;0;0;0;0;0.020423966;172.071917;0;0;0;0;0;0;0;52.73425079
+Bornholm;Batteries;2030 bench;Bornholm;2020;MeOH;SOEC;Combination2;0;0;C1_E0;-1;None;0;69.44588165;12.5002587;1.12439827;0.18750388;0;0;0;0;1.31190215;231.6359545;0;0;0;0;0;0.005663638;0.395903705;3335.488714;0.045024003;0;0;0;0.001203729;4.96E-07;0;52.73425079
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;7342.494523;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;7342.494523;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;8423.369214;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;8423.369214;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;7721.527743;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;7721.527743;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;4232.596357;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;4232.596357;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;7342.494523;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;8423.369214;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;#DIV/0!;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;7513.248328;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;#DIV/0!;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;4232.596357;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;130.7447019;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;129.1542334;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;4225.161218;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;1490.364;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;4363.3215;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;#DIV/0!;;;;;;;;;;;;;;;;

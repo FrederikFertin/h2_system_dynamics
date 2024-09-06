@@ -80,10 +80,26 @@ def hfo_competitiveness():
     name="HFO decay",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hfo_shipping_consumption": 1, "ship_lifetime": 1},
+    depends_on={
+        "hfo_shipping_consumption": 1,
+        "ship_lifetime": 1,
+        "hfo_early_decommission_rate": 1,
+    },
 )
 def hfo_decay():
-    return hfo_shipping_consumption() / ship_lifetime()
+    return hfo_shipping_consumption() * (
+        hfo_early_decommission_rate() + 1 / ship_lifetime()
+    )
+
+
+@component.add(
+    name="HFO early decommission rate",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"hfo_competitiveness": 1},
+)
+def hfo_early_decommission_rate():
+    return 1 / (1 + np.exp(-5 * -hfo_competitiveness()))
 
 
 @component.add(
@@ -316,10 +332,10 @@ def int_shipping_consumption_forecast():
     depends_on={
         "hfo_shipping_consumption": 1,
         "hfo_containership_cost": 1,
-        "meoh_shipping_consumption": 1,
         "meoh_containership_cost": 1,
-        "nh3_containership_cost": 1,
+        "meoh_shipping_consumption": 1,
         "nh3_shipping_consumption": 1,
+        "nh3_containership_cost": 1,
         "yearly_containership_consumption": 1,
         "sum_int_shipping": 1,
     },
@@ -345,17 +361,13 @@ def international_shipping_average_cost():
     units="GWh Biomass",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "meoh_shipping_consumption": 1,
-        "meoh_biomass_usage": 1,
-        "green_biomeoh_weight": 1,
-    },
+    depends_on={"meoh_shipping_consumption": 1, "meoh_biomass_usage": 1},
 )
 def international_shipping_biomass_demand():
     """
     Convert from GWh MeOH to GWh biomass
     """
-    return meoh_shipping_consumption() * meoh_biomass_usage() * green_biomeoh_weight()
+    return meoh_shipping_consumption() * meoh_biomass_usage()
 
 
 @component.add(
@@ -378,9 +390,9 @@ def international_shipping_emissions():
         "meoh_shipping_consumption": 1,
         "meoh_lhv": 1,
         "meoh_h2_usage": 1,
+        "nh3_shipping_consumption": 1,
         "nh3_lhv": 1,
         "nh3_h2_usage": 1,
-        "nh3_shipping_consumption": 1,
     },
 )
 def international_shipping_hydrogen_demand():
@@ -653,8 +665,8 @@ _smooth_nh3_inno_switch = Smooth(
         "shipping_reinvestment": 1,
         "innovators": 1,
         "nh3_inno_switch": 1,
-        "sum_int_shipping": 2,
         "nh3_shipping_consumption": 1,
+        "sum_int_shipping": 2,
     },
 )
 def nh3_innovators():
@@ -694,8 +706,8 @@ def nh3_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "nh3_competitiveness": 1,
         "cross_innovation": 1,
+        "nh3_competitiveness": 1,
         "nh3_shipping_consumption": 1,
         "sum_int_shipping": 1,
     },

@@ -40,10 +40,10 @@ def bf_coal_capex():
     depends_on={
         "carbon_tax": 1,
         "bf_coal_emission_factor": 1,
-        "coal_price": 1,
         "coal_lhv": 1,
+        "coal_price": 1,
         "coal_to_steel": 1,
-        "electricity_price": 1,
+        "grid_electricity_price": 1,
         "el_to_steel_bf_coal": 1,
         "bf_coal_capex": 1,
         "foundry_proxy_af": 1,
@@ -56,7 +56,7 @@ def bf_coal_cost():
     return (
         carbon_tax() * bf_coal_emission_factor()
         + coal_price() * (coal_to_steel() * coal_lhv())
-        + electricity_price() * el_to_steel_bf_coal()
+        + grid_electricity_price() * el_to_steel_bf_coal()
         + bf_coal_capex() * foundry_proxy_af()
     )
 
@@ -150,6 +150,26 @@ def hdri_capex():
 
 
 @component.add(
+    name="HDRI CAPEX subsidy pulse",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"time": 1},
+)
+def hdri_capex_subsidy_pulse():
+    return pulse(__data["time"], 2022, width=10)
+
+
+@component.add(
+    name="HDRI CAPEX subsidy size",
+    units="percent",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def hdri_capex_subsidy_size():
+    return 0.2
+
+
+@component.add(
     name="HDRI cost",
     units="€/tsteel",
     comp_type="Auxiliary",
@@ -158,18 +178,45 @@ def hdri_capex():
         "green_h2_cost": 1,
         "steel_subsidy_removal": 1,
         "h2_to_steel": 1,
-        "electricity_price": 1,
+        "renewable_electricity_price": 1,
         "el_to_steel_hdri": 1,
-        "foundry_proxy_af": 1,
+        "hdri_learning_curve": 1,
+        "hdri_capex_subsidy_pulse": 1,
         "hdri_capex": 1,
+        "hdri_capex_subsidy_size": 1,
+        "foundry_proxy_af": 1,
     },
 )
 def hdri_cost():
     return (
         ((green_h2_cost() + steel_subsidy_removal()) * 1000) * h2_to_steel()
-        + (electricity_price() * 1000) * (el_to_steel_hdri() / 3.6)
-        + hdri_capex() * foundry_proxy_af()
+        + (renewable_electricity_price() * 1000) * (el_to_steel_hdri() / 3.6)
+        + hdri_learning_curve()
+        * hdri_capex()
+        * foundry_proxy_af()
+        * (1 - hdri_capex_subsidy_size() * hdri_capex_subsidy_pulse())
     )
+
+
+@component.add(
+    name="HDRI learning curve",
+    units="percent",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"hdri_eaf": 1, "hdri_learning_rate": 1},
+)
+def hdri_learning_curve():
+    return np.maximum(1, hdri_eaf()) ** (np.log(1 - hdri_learning_rate()) / np.log(2))
+
+
+@component.add(
+    name="HDRI learning rate",
+    units="percent",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def hdri_learning_rate():
+    return 0.15
 
 
 @component.add(
@@ -197,4 +244,4 @@ def steel_subsidy_removal():
     comp_subtype="Normal",
 )
 def yearly_steel_subsidy_limit():
-    return 200
+    return 200000

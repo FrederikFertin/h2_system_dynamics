@@ -77,10 +77,10 @@ def ice_car_ban():
     depends_on={
         "ld_bev_consumption": 1,
         "ld_be_lco": 1,
-        "ld_fcev_consumption": 1,
         "ld_fc_lco": 1,
-        "ld_ice_lco": 1,
+        "ld_fcev_consumption": 1,
         "ld_fossil_consumption": 1,
+        "ld_ice_lco": 1,
         "diesel_lhv": 1,
         "ld_ice_energy_usage": 1,
         "sum_ld_rt": 1,
@@ -212,8 +212,8 @@ _smooth_ld_bev_inno_switch = Smooth(
         "ld_rt_reinvestment": 1,
         "innovators": 1,
         "ld_bev_inno_switch": 1,
-        "sum_ld_rt": 2,
         "ld_bev_consumption": 1,
+        "sum_ld_rt": 2,
     },
 )
 def ld_bev_innovators():
@@ -472,10 +472,26 @@ _integ_ld_fossil_consumption = Integ(
     name="LD Fossil decay",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"ld_fossil_consumption": 1, "ld_lifetime": 1},
+    depends_on={
+        "ld_fossil_consumption": 1,
+        "ld_lifetime": 1,
+        "ld_fossil_early_decommission_rate": 1,
+    },
 )
 def ld_fossil_decay():
-    return ld_fossil_consumption() / ld_lifetime()
+    return ld_fossil_consumption() * (
+        ld_fossil_early_decommission_rate() + 1 / ld_lifetime()
+    )
+
+
+@component.add(
+    name="LD Fossil early decommission rate",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"ld_fossil_competitiveness": 1},
+)
+def ld_fossil_early_decommission_rate():
+    return 1 / (1 + np.exp(-5 * -ld_fossil_competitiveness()))
 
 
 @component.add(
@@ -506,10 +522,10 @@ def ld_fossil_investment_level():
     depends_on={
         "ice_car_ban": 1,
         "ld_fossil_competitiveness": 1,
-        "cross_conventional": 1,
-        "sum_ld_rt": 1,
         "slope": 1,
+        "sum_ld_rt": 1,
         "ld_fossil_consumption": 1,
+        "cross_conventional": 1,
     },
 )
 def ld_fossil_level():
@@ -603,11 +619,11 @@ _integ_ld_rt_reinvestment = Integ(
     depends_on={
         "ld_fossil_consumption": 1,
         "diesel_emission_factor": 1,
-        "ld_bev_consumption": 1,
         "ld_ev_efficiency": 1,
-        "charging_efficiency": 1,
         "ld_ice_efficiency": 1,
         "electricity_emission_factor": 1,
+        "ld_bev_consumption": 1,
+        "charging_efficiency": 1,
     },
 )
 def light_duty_emissions():

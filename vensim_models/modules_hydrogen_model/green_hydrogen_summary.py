@@ -42,8 +42,8 @@ _integ_domestic_aviation_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "domestic_aviation_hydrogen_demand": 1,
                 "green_h2_subsidy_actual": 1,
+                "domestic_aviation_hydrogen_demand": 1,
                 "domestic_aviation_subsidy_ytd": 1,
             },
         }
@@ -103,8 +103,8 @@ _integ_domestic_shipping_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "domestic_shipping_hydrogen_demand": 1,
                 "green_h2_subsidy_actual": 1,
+                "domestic_shipping_hydrogen_demand": 1,
                 "domestic_shipping_subsidy_ytd": 1,
             },
         }
@@ -161,8 +161,8 @@ _integ_fertilizer_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "fertilizer_hydrogen_demand": 1,
                 "green_h2_subsidy_actual": 1,
+                "fertilizer_hydrogen_demand": 1,
                 "fertilizer_subsidy_ytd": 1,
             },
         }
@@ -230,8 +230,8 @@ _integ_heavy_duty_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "heavy_duty_hydrogen_demand": 1,
                 "green_h2_subsidy_actual": 1,
+                "heavy_duty_hydrogen_demand": 1,
                 "heavy_duty_subsidy_ytd": 1,
             },
         }
@@ -291,8 +291,8 @@ _integ_high_temperature_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "high_temperature_hydrogen_demand": 1,
                 "green_h2_subsidy_actual": 1,
+                "high_temperature_hydrogen_demand": 1,
                 "high_temperature_subsidy_ytd": 1,
             },
         }
@@ -324,7 +324,6 @@ _integ_high_temperature_subsidy_ytd = Integ(
         "high_temperature_hydrogen_demand": 1,
         "refinery_hydrogen_demand": 1,
         "steel_hydrogen_demand": 1,
-        "meoh_hydrogen_demand": 1,
     },
 )
 def industry_hydrogen_demand():
@@ -334,7 +333,6 @@ def industry_hydrogen_demand():
         + high_temperature_hydrogen_demand()
         + refinery_hydrogen_demand()
         + steel_hydrogen_demand()
-        + meoh_hydrogen_demand()
     )
 
 
@@ -511,8 +509,8 @@ _integ_light_duty_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "light_duty_hydrogen_demand": 1,
                 "green_h2_subsidy_actual": 1,
+                "light_duty_hydrogen_demand": 1,
                 "light_duty_subsidy_ytd": 1,
             },
         }
@@ -627,8 +625,8 @@ _integ_naphtha_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "naphtha_hydrogen_demand": 1,
                 "green_h2_subsidy_actual": 1,
+                "naphtha_hydrogen_demand": 1,
                 "naphtha_subsidy_ytd": 1,
             },
         }
@@ -685,8 +683,8 @@ _integ_power_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "power_hydrogen_demand": 1,
                 "green_h2_subsidy_actual": 1,
+                "power_hydrogen_demand": 1,
                 "power_subsidy_ytd": 1,
             },
         }
@@ -754,8 +752,8 @@ _integ_refinery_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "refinery_hydrogen_demand": 1,
                 "green_h2_subsidy_actual": 1,
+                "refinery_hydrogen_demand": 1,
                 "refinery_subsidy_ytd": 1,
             },
         }
@@ -818,9 +816,9 @@ _integ_steel_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "steel_hydrogen_demand": 1,
-                "steel_subsidy_removal": 1,
                 "green_h2_subsidy_actual": 1,
+                "steel_subsidy_removal": 1,
+                "steel_hydrogen_demand": 1,
                 "steel_subsidy_ytd": 1,
             },
         }
@@ -875,7 +873,6 @@ def total_green_hydrogen_demand():
         "international_aviation_subsidy": 1,
         "international_shipping_subsidy": 1,
         "light_duty_subsidy": 1,
-        "meoh_subsidy": 1,
         "naphtha_subsidy": 1,
         "high_temperature_subsidy": 1,
         "refinery_subsidy": 1,
@@ -892,7 +889,6 @@ def total_subsidies():
         + international_aviation_subsidy()
         + international_shipping_subsidy()
         + light_duty_subsidy()
-        + meoh_subsidy()
         + naphtha_subsidy()
         + high_temperature_subsidy()
         + refinery_subsidy()
@@ -914,7 +910,6 @@ def total_subsidies():
         "international_shipping_subsidy_ytd": 1,
         "international_aviation_subsidy_ytd": 1,
         "light_duty_subsidy_ytd": 1,
-        "meoh_subsidy_ytd": 1,
         "naphtha_subsidy_ytd": 1,
         "high_temperature_subsidy_ytd": 1,
         "power_subsidy_ytd": 1,
@@ -931,7 +926,6 @@ def total_subsidies_ytd():
         + international_shipping_subsidy_ytd()
         + international_aviation_subsidy_ytd()
         + light_duty_subsidy_ytd()
-        + meoh_subsidy_ytd()
         + naphtha_subsidy_ytd()
         + high_temperature_subsidy_ytd()
         + power_subsidy_ytd()

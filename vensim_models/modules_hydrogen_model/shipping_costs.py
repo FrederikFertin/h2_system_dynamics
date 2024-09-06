@@ -65,10 +65,10 @@ def battery_pack_lifetime():
         "battery_capacity": 1,
         "battery_cost": 1,
         "electric_motor_cost": 1,
-        "ship_motor_capacity": 1,
-        "rest_of_ship_cost": 1,
         "ship_engine_af": 1,
-        "electricity_price": 1,
+        "rest_of_ship_cost": 1,
+        "ship_motor_capacity": 1,
+        "grid_electricity_price": 1,
         "yearly_electricity_bought": 1,
         "usd_to_eur": 1,
         "charging_infrastructure_cost": 1,
@@ -82,7 +82,10 @@ def be_ship_cost():
         + (opex_electric_ship() + ship_engine_af())
         * (ship_motor_capacity() * electric_motor_cost() + rest_of_ship_cost())
         + yearly_electricity_bought()
-        * (electricity_price() * 1000 + charging_infrastructure_cost() * usd_to_eur())
+        * (
+            grid_electricity_price() * 1000
+            + charging_infrastructure_cost() * usd_to_eur()
+        )
     )
 
 
@@ -197,18 +200,18 @@ def fc_lifetime():
     depends_on={
         "auxilliary_battery_capacity": 1,
         "battery_cost": 1,
-        "ship_battery_af": 1,
         "opex_electric_ship": 4,
-        "ship_motor_capacity": 1,
-        "fc_af": 1,
+        "ship_battery_af": 1,
         "electric_motor_cost": 1,
-        "ship_engine_af": 2,
+        "ship_motor_capacity": 1,
         "fc_cost": 1,
-        "h2_capacity": 1,
+        "ship_engine_af": 2,
+        "fc_af": 1,
         "rest_of_ship_cost": 1,
         "h2_storage_cost": 1,
-        "yearly_h2_consumption": 1,
+        "h2_capacity": 1,
         "green_h2_cost": 1,
+        "yearly_h2_consumption": 1,
     },
 )
 def fc_ship_cost():
@@ -280,11 +283,11 @@ def hfo_capacity():
     comp_subtype="Normal",
     depends_on={
         "containership_opex": 1,
-        "ship_engine_af": 1,
         "hfo_ship_capex": 1,
-        "hfo_cost": 1,
-        "yearly_containership_consumption": 1,
+        "ship_engine_af": 1,
         "scrubber_cost": 1,
+        "yearly_containership_consumption": 1,
+        "hfo_cost": 1,
     },
 )
 def hfo_containership_cost():
@@ -312,17 +315,17 @@ def hfo_ship_capex():
     depends_on={
         "opex_ice_ship": 2,
         "ship_engine_af": 1,
-        "oil_tank_cost": 1,
+        "hfo_capacity": 1,
         "ship_motor_capacity": 1,
         "ship_ice_cost": 1,
-        "hfo_capacity": 1,
+        "oil_tank_cost": 1,
         "rest_of_ship_cost": 1,
+        "ship_battery_af": 1,
         "battery_cost": 1,
         "auxilliary_battery_capacity": 1,
-        "ship_battery_af": 1,
-        "hfo_cost": 1,
-        "yearly_hfo_consumption": 1,
         "scrubber_cost": 1,
+        "yearly_hfo_consumption": 1,
+        "hfo_cost": 1,
     },
 )
 def hfo_ship_cost():
@@ -373,14 +376,14 @@ def ice_efficiency():
         "ship_engine_af": 1,
         "meoh_ship_capex": 1,
         "yearly_containership_consumption": 1,
-        "green_meoh_av_cost": 1,
+        "green_biomeoh_cost": 1,
     },
 )
 def meoh_containership_cost():
     return (
         containership_opex()
         + meoh_ship_capex() * ship_engine_af()
-        + (green_meoh_av_cost() * 3600) * yearly_containership_consumption() / 1000
+        + (green_biomeoh_cost() * 3600) * yearly_containership_consumption() / 1000
     )
 
 
@@ -399,17 +402,17 @@ def meoh_ship_capex():
     depends_on={
         "opex_ice_ship": 2,
         "ship_engine_af": 1,
-        "oil_tank_cost": 1,
+        "hfo_capacity": 1,
         "ship_motor_capacity": 1,
         "ship_ice_cost": 1,
-        "hfo_capacity": 1,
+        "oil_tank_cost": 1,
         "rest_of_ship_cost": 1,
+        "ship_battery_af": 1,
         "battery_cost": 1,
         "auxilliary_battery_capacity": 1,
-        "ship_battery_af": 1,
         "hfo_vs_meoh_capex": 1,
-        "green_meoh_av_cost": 1,
         "yearly_hfo_consumption": 1,
+        "green_biomeoh_cost": 1,
     },
 )
 def meoh_ship_cost():
@@ -423,7 +426,7 @@ def meoh_ship_cost():
         + (opex_ice_ship() + ship_battery_af())
         * auxilliary_battery_capacity()
         * battery_cost()
-    ) * hfo_vs_meoh_capex() + yearly_hfo_consumption() * (green_meoh_av_cost() * 3600)
+    ) * hfo_vs_meoh_capex() + yearly_hfo_consumption() * (green_biomeoh_cost() * 3600)
 
 
 @component.add(
@@ -435,8 +438,8 @@ def meoh_ship_cost():
         "containership_opex": 1,
         "ship_engine_af": 1,
         "nh3_ship_capex": 1,
-        "yearly_containership_consumption": 1,
         "green_nh3_cost": 1,
+        "yearly_containership_consumption": 1,
     },
 )
 def nh3_containership_cost():

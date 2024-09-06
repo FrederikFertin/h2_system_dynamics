@@ -229,8 +229,8 @@ def demand_change_olefin():
     depends_on={
         "e_cracking_cost": 3,
         "fossil_cracking_cost": 1,
-        "mto_cost": 1,
         "bf_cracking_cost": 1,
+        "mto_cost": 1,
     },
 )
 def e_cracking_competitiveness():

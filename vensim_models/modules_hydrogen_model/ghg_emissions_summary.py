@@ -130,7 +130,6 @@ _integ_high_temperature_ct_revenue = Integ(
     comp_subtype="Normal",
     depends_on={
         "fertilizer_ct_revenue": 1,
-        "meoh_ct_revenue": 1,
         "naphtha_ct_revenue": 1,
         "high_temperature_ct_revenue": 1,
         "refinery_ct_revenue": 1,
@@ -140,7 +139,6 @@ _integ_high_temperature_ct_revenue = Integ(
 def industry_ct_revenue():
     return (
         fertilizer_ct_revenue()
-        + meoh_ct_revenue()
         + naphtha_ct_revenue()
         + high_temperature_ct_revenue()
         + refinery_ct_revenue()
@@ -155,7 +153,6 @@ def industry_ct_revenue():
     comp_subtype="Normal",
     depends_on={
         "fertilizer_emissions": 1,
-        "meoh_emissions": 1,
         "naphtha_emissions": 1,
         "high_temperature_emissions": 1,
         "refinery_emissions": 1,
@@ -165,7 +162,6 @@ def industry_ct_revenue():
 def industry_emissions():
     return (
         fertilizer_emissions()
-        + meoh_emissions()
         + naphtha_emissions()
         + high_temperature_emissions()
         + refinery_emissions()

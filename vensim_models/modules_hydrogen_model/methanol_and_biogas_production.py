@@ -48,12 +48,13 @@ def biogas_capex():
         "biogas_af": 1,
         "biogas_capex": 1,
         "biogas_opex": 1,
-        "electricity_price": 1,
+        "biogas_operating_hours": 1,
+        "renewable_electricity_price": 1,
         "biogas_electricity_usage": 1,
-        "heat_cost": 1,
         "biogas_heat_usage": 1,
-        "biogas_biomass_usage": 1,
+        "heat_cost": 1,
         "biomass_price": 1,
+        "biogas_biomass_usage": 1,
     },
 )
 def biogas_cost():
@@ -63,9 +64,9 @@ def biogas_cost():
     return (
         (biogas_af() * biogas_capex() * 1000 + biogas_opex() * 2.28 / 3.42)
         * 1000
-        / 8500
+        / biogas_operating_hours()
         / 3.6
-        + biogas_electricity_usage() * electricity_price() * 1000 / 3.6
+        + biogas_electricity_usage() * renewable_electricity_price() * 1000 / 3.6
         + biogas_heat_usage() * heat_cost() / 3.6
         + biogas_biomass_usage() * biomass_price()
     )
@@ -109,6 +110,16 @@ def biogas_lifetime():
 
 
 @component.add(
+    name="biogas operating hours",
+    units="hours",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def biogas_operating_hours():
+    return 8000
+
+
+@component.add(
     name="biogas OPEX",
     units="k€/MW/yr",
     comp_type="Auxiliary",
@@ -130,16 +141,16 @@ def biogas_opex():
     comp_subtype="Normal",
     depends_on={
         "meoh_capex": 1,
-        "meoh_opex": 1,
         "meoh_af": 1,
-        "meoh_lhv": 2,
+        "meoh_opex": 1,
         "meoh_operating_hours": 1,
+        "meoh_lhv": 2,
+        "renewable_electricity_price": 1,
+        "heat_cost": 1,
         "meoh_electricity_usage": 1,
         "meoh_excess_heat": 1,
-        "electricity_price": 1,
-        "heat_cost": 1,
-        "meoh_biomass_usage": 1,
         "biomass_price": 1,
+        "meoh_biomass_usage": 1,
     },
 )
 def biomeoh_cost_without_hydrogen():
@@ -149,7 +160,7 @@ def biomeoh_cost_without_hydrogen():
     return (
         meoh_capex() * (meoh_af() + meoh_opex()) / (meoh_operating_hours() * meoh_lhv())
         + (
-            electricity_price() * meoh_electricity_usage()
+            renewable_electricity_price() * meoh_electricity_usage()
             - heat_cost() / 1000 * meoh_excess_heat()
         )
         / meoh_lhv()
@@ -164,9 +175,9 @@ def biomeoh_cost_without_hydrogen():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_cost_without_hydrogen": 1,
+        "meoh_h2_usage": 1,
         "blue_h2_cost": 1,
         "meoh_lhv": 1,
-        "meoh_h2_usage": 1,
     },
 )
 def blue_biomeoh_cost():
@@ -218,11 +229,11 @@ def convmeoh_capex():
     comp_subtype="Normal",
     depends_on={
         "convmeoh_electricity_usage": 1,
-        "electricity_price": 1,
+        "grid_electricity_price": 1,
         "convmeoh_emission_factor": 1,
         "carbon_tax": 1,
-        "gas_price": 1,
         "convmeoh_gas_usage": 1,
+        "gas_price": 1,
         "convmeoh_opex": 1,
         "convmeoh_af": 1,
         "convmeoh_capex": 1,
@@ -232,7 +243,7 @@ def convmeoh_capex():
 def convmeoh_cost():
     return (
         (
-            convmeoh_electricity_usage() * electricity_price() * 1000
+            convmeoh_electricity_usage() * grid_electricity_price() * 1000
             + convmeoh_emission_factor() * carbon_tax()
             + convmeoh_gas_usage() * gas_price()
             + convmeoh_opex()
@@ -335,13 +346,13 @@ def emeoh_co2_usage():
         "emeoh_af": 1,
         "emeoh_operating_hours": 1,
         "meoh_lhv": 2,
+        "renewable_electricity_price": 1,
         "emeoh_excess_heat": 1,
         "heat_cost": 1,
-        "electricity_price": 1,
-        "cc_capture_rate": 1,
         "emeoh_electricity_usage": 1,
-        "ps_cc_cost": 1,
+        "cc_capture_rate": 1,
         "emeoh_co2_usage": 1,
+        "ps_cc_cost": 1,
     },
 )
 def emeoh_cost_without_hydrogen():
@@ -354,7 +365,7 @@ def emeoh_cost_without_hydrogen():
         / (emeoh_operating_hours() * meoh_lhv())
         + (
             emeoh_co2_usage() * (ps_cc_cost() / cc_capture_rate() / 1000)
-            + electricity_price() * emeoh_electricity_usage()
+            + renewable_electricity_price() * emeoh_electricity_usage()
             - heat_cost() / 1000 * emeoh_excess_heat()
         )
         / meoh_lhv()
@@ -429,8 +440,8 @@ def emeoh_opex():
     depends_on={
         "biomeoh_cost_without_hydrogen": 1,
         "green_h2_cost": 1,
-        "meoh_lhv": 1,
         "meoh_h2_usage": 1,
+        "meoh_lhv": 1,
     },
 )
 def green_biomeoh_cost():
@@ -464,9 +475,9 @@ def green_emeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_cost_without_hydrogen": 1,
-        "grey_h2_cost": 1,
-        "meoh_lhv": 1,
         "meoh_h2_usage": 1,
+        "meoh_lhv": 1,
+        "grey_h2_cost": 1,
     },
 )
 def grey_biomeoh_cost():
@@ -482,9 +493,9 @@ def grey_biomeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "emeoh_cost_without_hydrogen": 1,
-        "grey_h2_cost": 1,
         "emeoh_h2_usage": 1,
         "meoh_lhv": 1,
+        "grey_h2_cost": 1,
     },
 )
 def grey_emeoh_cost():

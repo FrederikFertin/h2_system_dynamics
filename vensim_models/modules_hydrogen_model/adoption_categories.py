@@ -24,7 +24,7 @@ def early_majority():
     comp_subtype="Normal",
 )
 def early_switch_level():
-    return 0.75
+    return 3
 
 
 @component.add(

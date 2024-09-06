@@ -86,8 +86,8 @@ _smooth_bf_ccs_inno_switch = Smooth(
         "foundry_reinvestment": 1,
         "innovators": 1,
         "bf_ccs_inno_switch": 1,
-        "coal_bf_bof_ccs": 1,
         "sum_steel": 2,
+        "coal_bf_bof_ccs": 1,
     },
 )
 def bf_ccs_innovators():
@@ -156,10 +156,24 @@ def bf_coal_competitiveness():
     name="BF Coal decay",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"coal_bf_bof": 1, "foundry_lifetime": 1},
+    depends_on={
+        "coal_bf_bof": 1,
+        "bf_coal_early_decommission_rate": 1,
+        "foundry_lifetime": 1,
+    },
 )
 def bf_coal_decay():
-    return coal_bf_bof() / foundry_lifetime()
+    return coal_bf_bof() * (bf_coal_early_decommission_rate() + 1 / foundry_lifetime())
+
+
+@component.add(
+    name="BF Coal early decommission rate",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"bf_coal_competitiveness": 1},
+)
+def bf_coal_early_decommission_rate():
+    return 1 / (1 + np.exp(-5 * -bf_coal_competitiveness()))
 
 
 @component.add(
@@ -189,8 +203,8 @@ def bf_coal_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "bf_coal_competitiveness": 1,
         "cross_conventional": 1,
+        "bf_coal_competitiveness": 1,
         "coal_bf_bof": 1,
         "sum_steel": 1,
     },
@@ -302,7 +316,7 @@ _integ_errorint_steel = Integ(
 
 @component.add(name="foundry lifetime", comp_type="Constant", comp_subtype="Normal")
 def foundry_lifetime():
-    return 10
+    return 25
 
 
 @component.add(
@@ -404,47 +418,22 @@ def hdri_eaf_imitators():
 
 @component.add(
     name="HDRI EAF inno switch",
-    comp_type="Stateful",
-    comp_subtype="Smooth",
-    depends_on={"_smooth_hdri_eaf_inno_switch": 1},
-    other_deps={
-        "_smooth_hdri_eaf_inno_switch": {
-            "initial": {
-                "hdri_eaf_competitiveness": 2,
-                "inno_switch_level": 1,
-                "early_switch_level": 1,
-            },
-            "step": {
-                "hdri_eaf_competitiveness": 2,
-                "inno_switch_level": 1,
-                "early_switch_level": 1,
-            },
-        }
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "hdri_eaf_competitiveness": 2,
+        "inno_switch_level": 1,
+        "early_switch_level": 1,
     },
 )
 def hdri_eaf_inno_switch():
-    return _smooth_hdri_eaf_inno_switch()
-
-
-_smooth_hdri_eaf_inno_switch = Smooth(
-    lambda: if_then_else(
+    return if_then_else(
         hdri_eaf_competitiveness() > inno_switch_level(),
         lambda: if_then_else(
             hdri_eaf_competitiveness() > early_switch_level(), lambda: 3, lambda: 1
         ),
         lambda: 0,
-    ),
-    lambda: 2,
-    lambda: if_then_else(
-        hdri_eaf_competitiveness() > inno_switch_level(),
-        lambda: if_then_else(
-            hdri_eaf_competitiveness() > early_switch_level(), lambda: 3, lambda: 1
-        ),
-        lambda: 0,
-    ),
-    lambda: 3,
-    "_smooth_hdri_eaf_inno_switch",
-)
+    )
 
 
 @component.add(

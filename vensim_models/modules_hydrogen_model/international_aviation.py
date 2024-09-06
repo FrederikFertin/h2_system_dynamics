@@ -452,8 +452,8 @@ def international_aviation_equalizer():
     depends_on={
         "bio_kerosene_consumption": 1,
         "biokero_h2_usage": 1,
-        "synkero_h2_usage": 1,
         "syn_kerosene_consumption": 1,
+        "synkero_h2_usage": 1,
         "h2_lhv": 1,
     },
 )
@@ -550,10 +550,26 @@ _integ_jetfuel_consumption = Integ(
     name="Jetfuel decay",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"jetfuel_consumption": 1, "jetfuel_lockin_period": 1},
+    depends_on={
+        "jetfuel_consumption": 1,
+        "jetfuel_early_decommission_rate": 1,
+        "jetfuel_lockin_period": 1,
+    },
 )
 def jetfuel_decay():
-    return jetfuel_consumption() / jetfuel_lockin_period()
+    return jetfuel_consumption() * (
+        jetfuel_early_decommission_rate() + 1 / jetfuel_lockin_period()
+    )
+
+
+@component.add(
+    name="Jetfuel early decommission rate",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"jetfuel_competitiveness": 1},
+)
+def jetfuel_early_decommission_rate():
+    return 1 / (1 + np.exp(-5 * -jetfuel_competitiveness()))
 
 
 @component.add(
@@ -586,8 +602,8 @@ def jetfuel_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_conventional": 1,
         "jetfuel_competitiveness": 1,
+        "cross_conventional": 1,
         "jetfuel_consumption": 1,
         "sum_international_aviation": 1,
     },
@@ -738,8 +754,8 @@ _smooth_syn_kerosene_inno_switch = Smooth(
         "international_aviation_reinvestment": 1,
         "innovators": 1,
         "syn_kerosene_inno_switch": 1,
-        "sum_international_aviation": 2,
         "syn_kerosene_consumption": 1,
+        "sum_international_aviation": 2,
     },
 )
 def syn_kerosene_innovators():
@@ -779,8 +795,8 @@ def syn_kerosene_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "syn_kerosene_competitiveness": 1,
         "cross_innovation": 1,
+        "syn_kerosene_competitiveness": 1,
         "syn_kerosene_consumption": 1,
         "sum_international_aviation": 1,
     },

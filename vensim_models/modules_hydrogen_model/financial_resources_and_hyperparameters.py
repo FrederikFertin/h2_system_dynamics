@@ -139,29 +139,7 @@ def electricity_emission_factor():
     """
     https://ens.dk/en/our-services/statistics-data-key-figures-and-energy-maps/ key-figures
     """
-    return 0 / 10**6
-
-
-@component.add(
-    name="ELECTRICITY PRICE",
-    units="€/kWh",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "time": 1,
-        "electricity_price_lookup": 1,
-        "electricity_emission_factor": 1,
-        "carbon_tax": 1,
-        "electricity_sensitivity": 1,
-    },
-)
-def electricity_price():
-    """
-    €/kWh
-    """
-    return (
-        electricity_price_lookup(time()) + electricity_emission_factor() * carbon_tax()
-    ) * electricity_sensitivity()
+    return 207 / 10**6
 
 
 @component.add(
@@ -195,7 +173,7 @@ _hardcodedlookup_electricity_price_lookup = HardcodedLookups(
     comp_subtype="Normal",
 )
 def electricity_sensitivity():
-    return 1
+    return 0.5
 
 
 @component.add(
@@ -231,6 +209,28 @@ _hardcodedlookup_gas_price_lookup = HardcodedLookups(
     {},
     "_hardcodedlookup_gas_price_lookup",
 )
+
+
+@component.add(
+    name="GRID ELECTRICITY PRICE",
+    units="€/kWh",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "time": 1,
+        "electricity_price_lookup": 1,
+        "electricity_emission_factor": 1,
+        "carbon_tax": 1,
+        "electricity_sensitivity": 1,
+    },
+)
+def grid_electricity_price():
+    """
+    €/kWh
+    """
+    return (
+        electricity_price_lookup(time()) + electricity_emission_factor() * carbon_tax()
+    ) * electricity_sensitivity()
 
 
 @component.add(name="k i", comp_type="Constant", comp_subtype="Normal")
@@ -314,6 +314,17 @@ _hardcodedlookup_oil_price_lookup = HardcodedLookups(
     {},
     "_hardcodedlookup_oil_price_lookup",
 )
+
+
+@component.add(
+    name="RENEWABLE ELECTRICITY PRICE",
+    units="€/kWh",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"time": 1, "electricity_price_lookup": 1, "electricity_sensitivity": 1},
+)
+def renewable_electricity_price():
+    return electricity_price_lookup(time()) * electricity_sensitivity()
 
 
 @component.add(name="SEED", comp_type="Constant", comp_subtype="Normal")

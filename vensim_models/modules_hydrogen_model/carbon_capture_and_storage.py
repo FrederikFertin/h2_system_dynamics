@@ -4,7 +4,7 @@ Translated using PySD version 3.14.0
 """
 
 @component.add(
-    name="Carbon Storage costs",
+    name="Carbon Storage cost",
     units="€/tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -17,13 +17,34 @@ Translated using PySD version 3.14.0
         "cs_variable_cost": 1,
     },
 )
-def carbon_storage_costs():
+def carbon_storage_cost():
     return (
         cs_capex() * cs_proxy_af()
         + cs_decommisioning()
         + cs_fixed_opex()
         + cs_other_expenditures()
         + cs_variable_cost()
+    )
+
+
+@component.add(
+    name="Carbon Transportation cost",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "ct_distance": 1,
+        "ct_opex": 1,
+        "ct_capex": 1,
+        "ct_af": 1,
+        "ct_capacity_factor": 1,
+    },
+)
+def carbon_transportation_cost():
+    return (
+        ct_distance()
+        * (ct_capex() * ct_af() + ct_opex())
+        / (8760 * ct_capacity_factor())
     )
 
 
@@ -143,10 +164,14 @@ def cc_variable_cost():
     units="€/tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"ps_cc_cost": 1, "carbon_storage_costs": 1},
+    depends_on={
+        "ps_cc_cost": 1,
+        "carbon_transportation_cost": 1,
+        "carbon_storage_cost": 1,
+    },
 )
 def ccs_cost():
-    return ps_cc_cost() + carbon_storage_costs()
+    return ps_cc_cost() + carbon_transportation_cost() + carbon_storage_cost()
 
 
 @component.add(
@@ -235,6 +260,61 @@ def cs_variable_cost():
 
 
 @component.add(
+    name="CT AF",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"discount_rate": 2, "ct_lifetime": 1},
+)
+def ct_af():
+    return 1 / ((1 - (1 + discount_rate()) ** -ct_lifetime()) / discount_rate())
+
+
+@component.add(name="CT Capacity Factor", comp_type="Constant", comp_subtype="Normal")
+def ct_capacity_factor():
+    """
+    Own Assumption
+    """
+    return 0.9
+
+
+@component.add(
+    name="CT CAPEX", units="€/(tCO2/h)/km", comp_type="Constant", comp_subtype="Normal"
+)
+def ct_capex():
+    """
+    Technology Catalogue for Carbon Capture and Storage (ENS). Depends on pipeline location/size. Ranges from 13 - 18 - 33 - 53 - 130 €/(tCO2/h)/m
+    """
+    return 33 * 1000
+
+
+@component.add(
+    name="CT distance", units="km", comp_type="Constant", comp_subtype="Normal"
+)
+def ct_distance():
+    """
+    Could be anything.
+    """
+    return 100
+
+
+@component.add(
+    name="CT lifetime", units="years", comp_type="Constant", comp_subtype="Normal"
+)
+def ct_lifetime():
+    return 50
+
+
+@component.add(
+    name="CT OPEX",
+    units="€/(tCO2/h)/km/Year",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def ct_opex():
+    return 20
+
+
+@component.add(
     name="HEAT COST", units="€/MWh", comp_type="Constant", comp_subtype="Normal"
 )
 def heat_cost():
@@ -245,7 +325,7 @@ def heat_cost():
 
 
 @component.add(
-    name="PS CC Cost",
+    name="PS CC cost",
     units="€/tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -255,16 +335,16 @@ def heat_cost():
         "cc_af": 1,
         "cc_fixed_opex": 1,
         "cc_electricity_usage": 1,
-        "electricity_price": 1,
-        "cc_heat_usage": 1,
+        "grid_electricity_price": 1,
         "heat_cost": 1,
+        "cc_heat_usage": 1,
         "cc_variable_cost": 1,
     },
 )
 def ps_cc_cost():
     return (
         cc_capex() * 10**6 / (8760 * cc_capacity_factor()) * (cc_fixed_opex() + cc_af())
-        + cc_electricity_usage() * electricity_price() * 1000
+        + cc_electricity_usage() * grid_electricity_price() * 1000
         + cc_heat_usage() * heat_cost()
         + cc_variable_cost()
     )

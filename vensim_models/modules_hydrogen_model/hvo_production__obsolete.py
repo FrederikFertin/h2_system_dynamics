@@ -10,23 +10,23 @@ Translated using PySD version 3.14.0
     comp_subtype="Normal",
     depends_on={
         "hvo_electricity_usage": 1,
-        "electricity_price": 1,
+        "grid_electricity_price": 1,
         "lpg_fraction_hvo": 1,
-        "blue_ng_cost": 1,
         "hvo_gas_usage": 1,
+        "blue_ng_cost": 1,
         "biomass_price": 1,
         "hvo_biomass_usage": 1,
+        "green_h2_cost": 1,
         "hvo_h2_usage": 1,
         "h2_lhv": 1,
-        "green_h2_cost": 1,
         "heat_cost": 1,
         "hvo_excess_heat": 1,
         "hvo_fraction": 1,
-        "hvo_capex": 1,
-        "hvo_opex": 1,
-        "hvo_variable": 1,
-        "hvo_af": 1,
         "hvo_operating_hours": 1,
+        "hvo_opex": 1,
+        "hvo_af": 1,
+        "hvo_variable": 1,
+        "hvo_capex": 1,
     },
 )
 def biodiesel_cost():
@@ -36,7 +36,7 @@ def biodiesel_cost():
     return (
         (
             (
-                hvo_electricity_usage() * electricity_price() * 1000
+                hvo_electricity_usage() * grid_electricity_price() * 1000
                 + (hvo_gas_usage() - lpg_fraction_hvo()) * blue_ng_cost() * 3.6
                 + hvo_biomass_usage() * (biomass_price() * 3) * 3.6
                 + hvo_h2_usage() * green_h2_cost() / h2_lhv() * 1000

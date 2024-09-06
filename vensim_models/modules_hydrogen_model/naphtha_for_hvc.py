@@ -41,8 +41,8 @@ _integ_bio_naphtha = Integ(
     depends_on={
         "naphtha_cost": 1,
         "bionaphtha_cost": 3,
-        "synnaphtha_cost": 1,
         "pyrolysisnaphtha_cost": 1,
+        "synnaphtha_cost": 1,
     },
 )
 def bio_naphtha_competitiveness():
@@ -128,8 +128,8 @@ _smooth_bio_naphtha_inno_switch = Smooth(
         "bio_naphtha_inno_switch": 1,
         "naphtha_feedstock_reinvestment": 1,
         "innovators": 1,
-        "bio_naphtha": 1,
         "sum_naphtha": 2,
+        "bio_naphtha": 1,
     },
 )
 def bio_naphtha_innovators():
@@ -246,8 +246,8 @@ _integ_errorint_naphtha = Integ(
     depends_on={
         "bionaphtha_cost": 1,
         "naphtha_cost": 3,
-        "synnaphtha_cost": 1,
         "pyrolysisnaphtha_cost": 1,
+        "synnaphtha_cost": 1,
     },
 )
 def f_naphtha_competitiveness():
@@ -263,10 +263,26 @@ def f_naphtha_competitiveness():
     name="F naphtha decay",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"fossil_naphtha": 1, "feedstock_lockin": 1},
+    depends_on={
+        "fossil_naphtha": 1,
+        "feedstock_lockin": 1,
+        "f_naphtha_early_decommission_rate": 1,
+    },
 )
 def f_naphtha_decay():
-    return fossil_naphtha() / feedstock_lockin()
+    return fossil_naphtha() * (
+        f_naphtha_early_decommission_rate() + 1 / feedstock_lockin()
+    )
+
+
+@component.add(
+    name="F naphtha early decommission rate",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"f_naphtha_competitiveness": 1},
+)
+def f_naphtha_early_decommission_rate():
+    return 1 / (1 + np.exp(-5 * -f_naphtha_competitiveness()))
 
 
 @component.add(
@@ -490,8 +506,8 @@ _integ_naphtha_feedstock_reinvestment = Integ(
     depends_on={
         "bio_naphtha": 1,
         "hydrogen_bio_naphtha_rate": 1,
-        "hydrogen_synthetic_naphtha_rate": 1,
         "synthetic_naphtha": 1,
+        "hydrogen_synthetic_naphtha_rate": 1,
     },
 )
 def naphtha_hydrogen_demand():
@@ -521,8 +537,8 @@ def naphtha_lhv():
         "olefin_production": 1,
         "mto": 1,
         "naphta_olefin_rate": 1,
-        "pulse_size": 1,
         "pulse_naphtha": 1,
+        "pulse_size": 1,
     },
 )
 def naphtha_production():
@@ -569,8 +585,8 @@ def pyrolysisnaphtha_cost():
     depends_on={
         "naphtha_cost": 1,
         "pyrolysisnaphtha_cost": 3,
-        "synnaphtha_cost": 1,
         "bionaphtha_cost": 1,
+        "synnaphtha_cost": 1,
     },
 )
 def recycled_competitiveness():
@@ -697,8 +713,8 @@ def recycled_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "recycled_competitiveness": 1,
         "cross_innovation": 1,
+        "recycled_competitiveness": 1,
         "recycled_naphtha": 1,
         "sum_naphtha": 1,
     },
@@ -759,8 +775,8 @@ def sum_naphtha():
     depends_on={
         "naphtha_cost": 1,
         "synnaphtha_cost": 3,
-        "pyrolysisnaphtha_cost": 1,
         "bionaphtha_cost": 1,
+        "pyrolysisnaphtha_cost": 1,
     },
 )
 def syn_naphtha_competitiveness():
