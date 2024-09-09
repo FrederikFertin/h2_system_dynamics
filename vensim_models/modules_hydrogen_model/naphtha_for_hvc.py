@@ -396,8 +396,8 @@ def naphta_olefin_rate():
     depends_on={
         "bio_naphtha": 1,
         "bionaphtha_cost": 1,
-        "naphtha_cost": 1,
         "fossil_naphtha": 1,
+        "naphtha_cost": 1,
         "pyrolysisnaphtha_cost": 1,
         "recycled_naphtha": 1,
         "synthetic_naphtha": 1,
@@ -585,8 +585,8 @@ def pyrolysisnaphtha_cost():
     depends_on={
         "naphtha_cost": 1,
         "pyrolysisnaphtha_cost": 3,
-        "bionaphtha_cost": 1,
         "synnaphtha_cost": 1,
+        "bionaphtha_cost": 1,
     },
 )
 def recycled_competitiveness():
@@ -672,8 +672,8 @@ _smooth_recycled_inno_switch = Smooth(
         "naphtha_feedstock_reinvestment": 1,
         "innovators": 1,
         "recycled_inno_switch": 1,
-        "sum_naphtha": 2,
         "recycled_naphtha": 1,
+        "sum_naphtha": 2,
     },
 )
 def recycled_innovators():
@@ -775,8 +775,8 @@ def sum_naphtha():
     depends_on={
         "naphtha_cost": 1,
         "synnaphtha_cost": 3,
-        "bionaphtha_cost": 1,
         "pyrolysisnaphtha_cost": 1,
+        "bionaphtha_cost": 1,
     },
 )
 def syn_naphtha_competitiveness():
@@ -903,8 +903,8 @@ def syn_naphtha_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "syn_naphtha_competitiveness": 1,
         "cross_innovation": 1,
+        "syn_naphtha_competitiveness": 1,
         "synthetic_naphtha": 1,
         "sum_naphtha": 1,
     },

@@ -20,8 +20,8 @@ def aec_af():
     comp_subtype="Normal",
     depends_on={
         "electrolyser_capacity": 3,
-        "one_gw_aec_capex": 2,
         "learning_rate": 1,
+        "one_gw_aec_capex": 2,
         "initial_gw_aec_capex": 2,
     },
 )
@@ -90,10 +90,10 @@ def aec_opex():
     comp_subtype="Normal",
     depends_on={
         "grey_h2_cost": 1,
-        "smr_emission_factor": 1,
         "ccs_cost": 1,
-        "cc_capture_rate": 1,
         "carbon_tax": 1,
+        "cc_capture_rate": 1,
+        "smr_emission_factor": 1,
     },
 )
 def blue_h2_cost():
@@ -205,13 +205,13 @@ def green_h2_subsidy_size():
     comp_subtype="Normal",
     depends_on={
         "smr_capex": 1,
-        "smr_opex": 1,
         "smr_af": 1,
+        "smr_opex": 1,
         "smr_operating_hours": 1,
-        "gas_price": 1,
         "smr_efficiency": 1,
-        "smr_emission_factor": 1,
+        "gas_price": 1,
         "carbon_tax": 1,
+        "smr_emission_factor": 1,
     },
 )
 def grey_h2_cost():
@@ -284,8 +284,8 @@ def pulse_h2_subsidy():
     comp_subtype="Normal",
     depends_on={
         "aec_capex": 1,
-        "aec_af": 1,
         "aec_opex": 1,
+        "aec_af": 1,
         "electrolyser_operating_hours": 1,
         "aec_efficiency": 2,
         "capex_multiplier": 1,

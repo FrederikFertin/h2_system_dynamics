@@ -386,8 +386,8 @@ _integ_international_aviation_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "international_aviation_hydrogen_demand": 1,
                 "green_h2_subsidy_actual": 1,
+                "international_aviation_hydrogen_demand": 1,
                 "international_aviation_subsidy_ytd": 1,
             },
         }
@@ -449,8 +449,8 @@ _integ_international_shipping_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "international_shipping_hydrogen_demand": 1,
                 "green_h2_subsidy_actual": 1,
+                "international_shipping_hydrogen_demand": 1,
                 "international_shipping_subsidy_ytd": 1,
             },
         }
@@ -567,8 +567,8 @@ _integ_meoh_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "meoh_hydrogen_demand": 1,
                 "green_h2_subsidy_actual": 1,
+                "meoh_hydrogen_demand": 1,
                 "meoh_subsidy_ytd": 1,
             },
         }

@@ -10,10 +10,10 @@ Translated using PySD version 3.14.0
     comp_subtype="Normal",
     depends_on={
         "bf_coal_cost": 1,
-        "ccs_cost": 1,
         "bf_coal_emission_factor": 1,
-        "cc_capture_rate": 1,
         "carbon_tax": 1,
+        "cc_capture_rate": 1,
+        "ccs_cost": 1,
     },
 )
 def bf_ccs_cost():
@@ -40,13 +40,13 @@ def bf_coal_capex():
     depends_on={
         "carbon_tax": 1,
         "bf_coal_emission_factor": 1,
-        "coal_lhv": 1,
         "coal_price": 1,
+        "coal_lhv": 1,
         "coal_to_steel": 1,
         "grid_electricity_price": 1,
         "el_to_steel_bf_coal": 1,
-        "bf_coal_capex": 1,
         "foundry_proxy_af": 1,
+        "bf_coal_capex": 1,
     },
 )
 def bf_coal_cost():
@@ -166,7 +166,7 @@ def hdri_capex_subsidy_pulse():
     comp_subtype="Normal",
 )
 def hdri_capex_subsidy_size():
-    return 0.2
+    return 0
 
 
 @component.add(
@@ -178,23 +178,35 @@ def hdri_capex_subsidy_size():
         "green_h2_cost": 1,
         "steel_subsidy_removal": 1,
         "h2_to_steel": 1,
-        "renewable_electricity_price": 1,
-        "el_to_steel_hdri": 1,
-        "hdri_learning_curve": 1,
-        "hdri_capex_subsidy_pulse": 1,
-        "hdri_capex": 1,
-        "hdri_capex_subsidy_size": 1,
-        "foundry_proxy_af": 1,
+        "hdri_cost_without_h2": 1,
     },
 )
 def hdri_cost():
     return (
-        ((green_h2_cost() + steel_subsidy_removal()) * 1000) * h2_to_steel()
-        + (renewable_electricity_price() * 1000) * (el_to_steel_hdri() / 3.6)
-        + hdri_learning_curve()
-        * hdri_capex()
-        * foundry_proxy_af()
-        * (1 - hdri_capex_subsidy_size() * hdri_capex_subsidy_pulse())
+        (green_h2_cost() + steel_subsidy_removal()) * 1000
+    ) * h2_to_steel() + hdri_cost_without_h2()
+
+
+@component.add(
+    name="HDRI cost without H2",
+    units="€/tsteel",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "renewable_electricity_price": 1,
+        "el_to_steel_hdri": 1,
+        "hdri_capex_subsidy_pulse": 1,
+        "foundry_proxy_af": 1,
+        "hdri_capex": 1,
+        "hdri_learning_curve": 1,
+        "hdri_capex_subsidy_size": 1,
+    },
+)
+def hdri_cost_without_h2():
+    return (renewable_electricity_price() * 1000) * (
+        el_to_steel_hdri() / 3.6
+    ) + hdri_learning_curve() * hdri_capex() * foundry_proxy_af() * (
+        1 - hdri_capex_subsidy_size() * hdri_capex_subsidy_pulse()
     )
 
 

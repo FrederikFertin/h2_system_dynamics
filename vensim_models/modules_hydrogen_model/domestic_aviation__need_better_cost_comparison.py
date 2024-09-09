@@ -449,12 +449,12 @@ def domestic_aviation_emissions():
     depends_on={
         "bio_kerosene_consumption_dom": 1,
         "biokero_h2_usage": 1,
-        "synkero_h2_usage": 1,
         "syn_kerosene_consumption_dom": 1,
+        "synkero_h2_usage": 1,
         "h2_lhv": 2,
-        "hydrogen_fuel_cell_efficiency": 1,
-        "hydrogen_consumption_dom": 1,
         "jet_engine_efficiency": 1,
+        "hydrogen_consumption_dom": 1,
+        "hydrogen_fuel_cell_efficiency": 1,
     },
 )
 def domestic_aviation_hydrogen_demand():
@@ -822,8 +822,8 @@ def jetfuel_investment_level_dom():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "jetfuel_competitiveness_dom": 1,
         "cross_conventional": 1,
+        "jetfuel_competitiveness_dom": 1,
         "jetfuel_consumption_dom": 1,
         "sum_domestic_aviation": 1,
     },
@@ -1024,8 +1024,8 @@ def syn_kerosene_investment_level_dom():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "syn_kerosene_competitiveness_dom": 1,
         "cross_innovation": 1,
+        "syn_kerosene_competitiveness_dom": 1,
         "syn_kerosene_consumption_dom": 1,
         "sum_domestic_aviation": 1,
     },

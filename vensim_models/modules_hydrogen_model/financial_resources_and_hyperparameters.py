@@ -32,7 +32,7 @@ def biomass_price_lookup(x, final_subs=None):
 
 
 _hardcodedlookup_biomass_price_lookup = HardcodedLookups(
-    [2022.0, 2030.0, 2040.0, 2050.0],
+    [2020.0, 2030.0, 2040.0, 2050.0],
     [12.0, 11.0, 10.5, 8.0],
     {},
     "interpolate",
@@ -114,12 +114,12 @@ _hardcodedlookup_coal_price_lookup = HardcodedLookups(
 
 @component.add(name="CROSS CONVENTIONAL", comp_type="Constant", comp_subtype="Normal")
 def cross_conventional():
-    return 1.1
+    return 1
 
 
 @component.add(name="CROSS INNOVATION", comp_type="Constant", comp_subtype="Normal")
 def cross_innovation():
-    return 0.9
+    return 1
 
 
 @component.add(
@@ -137,7 +137,7 @@ def discount_rate():
 )
 def electricity_emission_factor():
     """
-    https://ens.dk/en/our-services/statistics-data-key-figures-and-energy-maps/ key-figures
+    https://ens.dk/en/our-services/statistics-data-key-figures-and-energy-maps/key-figure s 207 gCO2/kWh
     """
     return 207 / 10**6
 
@@ -219,8 +219,8 @@ _hardcodedlookup_gas_price_lookup = HardcodedLookups(
     depends_on={
         "time": 1,
         "electricity_price_lookup": 1,
-        "electricity_emission_factor": 1,
         "carbon_tax": 1,
+        "electricity_emission_factor": 1,
         "electricity_sensitivity": 1,
     },
 )

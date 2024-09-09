@@ -530,8 +530,8 @@ _smooth_h2_nm_inno_switch = Smooth(
         "nm_reinvestment": 1,
         "innovators": 1,
         "h2_nm_inno_switch": 1,
-        "h2_nm": 1,
         "sum_nm": 2,
+        "h2_nm": 1,
     },
 )
 def h2_nm_innovators():
@@ -598,8 +598,8 @@ def h2_nm_level():
         "blue_ng_nm": 1,
         "grey_ng_cost": 1,
         "ng_nm": 1,
-        "h2_nm": 1,
         "green_h2_nm_cost": 1,
+        "h2_nm": 1,
         "sum_nm": 1,
     },
 )
@@ -713,7 +713,7 @@ def ng_nm_competitiveness():
     name="NG NM decay",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"ng_nm": 1, "ng_nm_early_decommission_rate": 1, "gas_lockin_factor": 1},
+    depends_on={"ng_nm": 1, "gas_lockin_factor": 1, "ng_nm_early_decommission_rate": 1},
 )
 def ng_nm_decay():
     return ng_nm() * (ng_nm_early_decommission_rate() + 1 / gas_lockin_factor())
@@ -756,8 +756,8 @@ def ng_nm_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "ng_nm_competitiveness": 1,
         "cross_conventional": 1,
+        "ng_nm_competitiveness": 1,
         "ng_nm": 1,
         "sum_nm": 1,
     },
@@ -794,6 +794,21 @@ def nm_gas_consumption():
     207 TWh/year - assumed constant moving forward.
     """
     return 207000
+
+
+@component.add(
+    name="NM H2 price break",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"biogas_cost": 1, "blue_ng_cost": 1, "grey_ng_cost": 1},
+)
+def nm_h2_price_break():
+    return (
+        np.minimum(np.minimum(biogas_cost(), blue_ng_cost()), grey_ng_cost())
+        * 120
+        / 1000
+    )
 
 
 @component.add(

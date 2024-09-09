@@ -93,7 +93,7 @@ def sector_emissions():
     other_deps={
         "_integ_technology_activity": {
             "initial": {},
-            "step": {"investment_flow": 1, "fuel_2_cost": 1, "fuel_1_cost": 1},
+            "step": {"investment_flow": 1, "fuel_1_cost": 1, "fuel_2_cost": 1},
         }
     },
 )

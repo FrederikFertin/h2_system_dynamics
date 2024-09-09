@@ -110,8 +110,8 @@ _smooth_blue_refinery_inno_switch = Smooth(
         "refinery_reinvestment": 1,
         "innovators": 1,
         "blue_refinery_inno_switch": 1,
-        "blue_refinery": 1,
         "sum_refining": 2,
+        "blue_refinery": 1,
     },
 )
 def blue_refinery_innovators():
@@ -335,8 +335,8 @@ _smooth_green_refinery_inno_switch = Smooth(
         "refinery_reinvestment": 1,
         "innovators": 1,
         "green_refinery_inno_switch": 1,
-        "green_refinery": 1,
         "sum_refining": 2,
+        "green_refinery": 1,
     },
 )
 def green_refinery_innovators():
@@ -434,8 +434,8 @@ def grey_refinery_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "grey_refinery": 1,
-        "grey_refinery_early_decommission_rate": 1,
         "smr_lifetime": 1,
+        "grey_refinery_early_decommission_rate": 1,
     },
 )
 def grey_refinery_decay():
@@ -481,8 +481,8 @@ def grey_refinery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "grey_refinery_competitiveness": 1,
         "cross_conventional": 1,
+        "grey_refinery_competitiveness": 1,
         "grey_refinery": 1,
         "sum_refining": 1,
     },
@@ -507,10 +507,10 @@ def grey_refinery_level():
     depends_on={
         "blue_refinery": 1,
         "blue_h2_cost": 1,
-        "green_h2_cost": 1,
         "green_refinery": 1,
-        "grey_refinery": 1,
+        "green_h2_cost": 1,
         "grey_h2_cost": 1,
+        "grey_refinery": 1,
         "sum_refining": 1,
     },
 )
@@ -607,8 +607,8 @@ def refinery_consumption():
     comp_subtype="Normal",
     depends_on={
         "grey_refinery": 1,
-        "blue_refinery": 1,
         "cc_capture_rate": 1,
+        "blue_refinery": 1,
         "smr_emission_factor": 1,
     },
 )
@@ -632,6 +632,17 @@ def refinery_emissions():
 )
 def refinery_equalizer():
     return 1 / (grey_refinery_level() + green_refinery_level() + blue_refinery_level())
+
+
+@component.add(
+    name="refinery H2 price break",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"blue_h2_cost": 1, "grey_h2_cost": 1},
+)
+def refinery_h2_price_break():
+    return np.minimum(blue_h2_cost(), grey_h2_cost())
 
 
 @component.add(

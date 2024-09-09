@@ -31,8 +31,8 @@ def demand_change_dom_shipping():
     depends_on={
         "fc_ship_cost": 1,
         "be_ship_cost": 3,
-        "meoh_ship_cost": 1,
         "hfo_ship_cost": 1,
+        "meoh_ship_cost": 1,
     },
 )
 def domestic_battery_competitiveness():
@@ -122,8 +122,8 @@ _smooth_domestic_battery_inno_switch = Smooth(
         "domestic_shipping_reinvestment": 1,
         "innovators": 1,
         "domestic_battery_inno_switch": 1,
-        "sum_dom_shipping": 2,
         "domestic_battery_shipping_consumption": 1,
+        "sum_dom_shipping": 2,
     },
 )
 def domestic_battery_innovators():
@@ -214,8 +214,8 @@ _integ_domestic_battery_shipping_consumption = Integ(
     depends_on={
         "meoh_ship_cost": 1,
         "fc_ship_cost": 3,
-        "be_ship_cost": 1,
         "hfo_ship_cost": 1,
+        "be_ship_cost": 1,
     },
 )
 def domestic_h2_competitiveness():
@@ -385,8 +385,8 @@ _integ_domestic_h2_shipping_consumption = Integ(
     depends_on={
         "fc_ship_cost": 1,
         "hfo_ship_cost": 3,
-        "be_ship_cost": 1,
         "meoh_ship_cost": 1,
+        "be_ship_cost": 1,
     },
 )
 def domestic_hfo_competitiveness():
@@ -404,8 +404,8 @@ def domestic_hfo_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "domestic_hfo_shipping_consumption": 1,
-        "ship_lifetime": 1,
         "domestic_hfo_early_decommission_rate": 1,
+        "ship_lifetime": 1,
     },
 )
 def domestic_hfo_decay():
@@ -503,8 +503,8 @@ _integ_domestic_hfo_shipping_consumption = Integ(
     depends_on={
         "fc_ship_cost": 1,
         "meoh_ship_cost": 3,
-        "be_ship_cost": 1,
         "hfo_ship_cost": 1,
+        "be_ship_cost": 1,
     },
 )
 def domestic_meoh_competitiveness():
@@ -592,8 +592,8 @@ _smooth_domestic_meoh_inno_switch = Smooth(
         "domestic_shipping_reinvestment": 1,
         "innovators": 1,
         "domestic_meoh_inno_switch": 1,
-        "domestic_meoh_shipping_consumption": 1,
         "sum_dom_shipping": 2,
+        "domestic_meoh_shipping_consumption": 1,
     },
 )
 def domestic_meoh_innovators():
@@ -682,10 +682,10 @@ _integ_domestic_meoh_shipping_consumption = Integ(
         "hfo_ship_cost": 1,
         "meoh_ship_cost": 1,
         "domestic_meoh_shipping_consumption": 1,
-        "be_ship_cost": 1,
         "domestic_battery_shipping_consumption": 1,
-        "fc_ship_cost": 1,
+        "be_ship_cost": 1,
         "domestic_h2_shipping_consumption": 1,
+        "fc_ship_cost": 1,
         "yearly_hfo_consumption": 1,
         "sum_dom_shipping": 1,
     },
@@ -916,10 +916,10 @@ def domestic_shipping_equalizer():
         "domestic_meoh_shipping_consumption": 1,
         "meoh_lhv": 1,
         "meoh_h2_usage": 1,
-        "ice_efficiency": 1,
-        "fc_efficiency": 1,
-        "h2_lhv": 1,
         "domestic_h2_shipping_consumption": 1,
+        "fc_efficiency": 1,
+        "ice_efficiency": 1,
+        "h2_lhv": 1,
     },
 )
 def domestic_shipping_hydrogen_demand():
@@ -1009,6 +1009,59 @@ _integ_error_int_dom_shipping = Integ(
     lambda: domestic_shipping_consumption() / 40,
     "_integ_error_int_dom_shipping",
 )
+
+
+@component.add(
+    name="FC ship H2 price break",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "be_ship_cost": 1,
+        "hfo_ship_cost": 1,
+        "fc_ship_cost_without_h2": 1,
+        "h2_lhv": 1,
+        "yearly_h2_consumption": 1,
+    },
+)
+def fc_ship_h2_price_break():
+    return (
+        (np.minimum(be_ship_cost(), hfo_ship_cost()) - fc_ship_cost_without_h2())
+        * h2_lhv()
+        / yearly_h2_consumption()
+        / 1000
+    )
+
+
+@component.add(
+    name="MeOH ship H2 price break",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "be_ship_cost": 1,
+        "hfo_ship_cost": 1,
+        "meoh_ship_cost_without_meoh": 1,
+        "yearly_hfo_consumption": 1,
+        "biomeoh_cost_without_h2": 1,
+        "meoh_h2_usage": 1,
+        "meoh_lhv": 1,
+    },
+)
+def meoh_ship_h2_price_break():
+    return (
+        (
+            (
+                np.minimum(be_ship_cost(), hfo_ship_cost())
+                - meoh_ship_cost_without_meoh()
+            )
+            / 3600
+            / yearly_hfo_consumption()
+            - biomeoh_cost_without_h2()
+        )
+        * meoh_h2_usage()
+        * meoh_lhv()
+    )
 
 
 @component.add(

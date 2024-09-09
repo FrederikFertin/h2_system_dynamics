@@ -119,8 +119,8 @@ _smooth_biomeoh_inno_switch = Smooth(
         "meoh_reinvestment": 1,
         "innovators": 1,
         "biomeoh_inno_switch": 1,
-        "sum_meoh": 2,
         "biomeoh": 1,
+        "sum_meoh": 2,
     },
 )
 def biomeoh_innovators():
@@ -484,8 +484,8 @@ _smooth_emeoh_inno_switch = Smooth(
         "meoh_reinvestment": 1,
         "innovators": 1,
         "emeoh_inno_switch": 1,
-        "sum_meoh": 2,
         "emeoh": 1,
+        "sum_meoh": 2,
     },
 )
 def emeoh_innovators():
@@ -760,12 +760,12 @@ def meoh_biomass_demand():
     depends_on={
         "grey_meoh": 1,
         "convmeoh_emission_factor": 1,
-        "electricity_emission_factor": 1,
         "convmeoh_electricity_usage": 1,
-        "smr_emission_factor": 1,
+        "electricity_emission_factor": 1,
         "blue_meoh": 1,
-        "cc_capture_rate": 1,
         "meoh_h2_usage": 1,
+        "cc_capture_rate": 1,
+        "smr_emission_factor": 1,
     },
 )
 def meoh_emissions():

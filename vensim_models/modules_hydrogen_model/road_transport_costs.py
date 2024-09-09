@@ -120,9 +120,9 @@ def hd_be_energy_usage():
         "hd_af": 1,
         "hd_annual_km": 1,
         "hd_be_opex": 1,
+        "charging_efficiency": 1,
         "hd_be_energy_usage": 1,
         "grid_electricity_price": 1,
-        "charging_efficiency": 1,
     },
 )
 def hd_be_lco():
@@ -244,21 +244,28 @@ def hd_fc_energy_usage():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
+    depends_on={"hd_fc_lco_without_h2": 1, "green_h2_cost": 1, "hd_fc_energy_usage": 1},
+)
+def hd_fc_lco():
+    return hd_fc_lco_without_h2() + hd_fc_energy_usage() * green_h2_cost()
+
+
+@component.add(
+    name="HD FC LCO without H2",
+    units="€/km",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
     depends_on={
         "hd_fc_capex": 1,
         "vehicle_insurance": 1,
         "hd_af": 1,
         "hd_annual_km": 1,
         "hd_fc_opex": 1,
-        "green_h2_cost": 1,
-        "hd_fc_energy_usage": 1,
     },
 )
-def hd_fc_lco():
+def hd_fc_lco_without_h2():
     return (
-        hd_fc_capex() * (hd_af() + vehicle_insurance()) / hd_annual_km()
-        + hd_fc_opex()
-        + hd_fc_energy_usage() * green_h2_cost()
+        hd_fc_capex() * (hd_af() + vehicle_insurance()) / hd_annual_km() + hd_fc_opex()
     )
 
 
@@ -302,7 +309,7 @@ def hd_fc_storage_capacity():
     units="€",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"battery_cost": 1, "h2_lhv": 1, "hd_fc_storage_capacity": 1},
+    depends_on={"battery_cost": 1, "hd_fc_storage_capacity": 1, "h2_lhv": 1},
 )
 def hd_fc_storage_capex():
     """
@@ -531,14 +538,14 @@ def ld_be_engine_capex():
     comp_subtype="Normal",
     depends_on={
         "ld_be_capex": 1,
-        "vehicle_insurance": 1,
         "ld_af": 1,
+        "vehicle_insurance": 1,
         "ld_annual_km": 1,
         "ld_be_opex": 1,
-        "grid_electricity_price": 1,
-        "electricity_taxes": 1,
         "ld_be_energy_usage": 1,
+        "grid_electricity_price": 1,
         "charging_efficiency": 1,
+        "electricity_taxes": 1,
     },
 )
 def ld_be_lco():
@@ -673,20 +680,31 @@ def ld_fc_engine_capex():
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "ld_fc_capex": 1,
-        "vehicle_insurance": 1,
-        "ld_af": 1,
-        "ld_annual_km": 1,
-        "ld_fc_opex": 1,
-        "ld_green_h2_price": 1,
+        "ld_fc_lco_without_h2": 1,
         "ld_fc_energy_usage": 1,
+        "ld_green_h2_price": 1,
     },
 )
 def ld_fc_lco():
+    return ld_fc_lco_without_h2() + ld_fc_energy_usage() * ld_green_h2_price()
+
+
+@component.add(
+    name="LD FC LCO without H2",
+    units="€/km",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "ld_fc_capex": 1,
+        "ld_af": 1,
+        "vehicle_insurance": 1,
+        "ld_annual_km": 1,
+        "ld_fc_opex": 1,
+    },
+)
+def ld_fc_lco_without_h2():
     return (
-        ld_fc_capex() * (ld_af() + vehicle_insurance()) / ld_annual_km()
-        + ld_fc_opex()
-        + ld_fc_energy_usage() * ld_green_h2_price()
+        ld_fc_capex() * (ld_af() + vehicle_insurance()) / ld_annual_km() + ld_fc_opex()
     )
 
 
@@ -819,8 +837,8 @@ def ld_ice_engine_cost():
     comp_subtype="Normal",
     depends_on={
         "ld_ice_capex": 1,
-        "vehicle_insurance": 1,
         "ld_af": 1,
+        "vehicle_insurance": 1,
         "ld_annual_km": 1,
         "ld_ice_opex": 1,
         "ld_ice_energy_usage": 1,

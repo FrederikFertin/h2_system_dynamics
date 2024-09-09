@@ -86,8 +86,8 @@ _smooth_bf_ccs_inno_switch = Smooth(
         "foundry_reinvestment": 1,
         "innovators": 1,
         "bf_ccs_inno_switch": 1,
-        "sum_steel": 2,
         "coal_bf_bof_ccs": 1,
+        "sum_steel": 2,
     },
 )
 def bf_ccs_innovators():
@@ -314,7 +314,9 @@ _integ_errorint_steel = Integ(
 )
 
 
-@component.add(name="foundry lifetime", comp_type="Constant", comp_subtype="Normal")
+@component.add(
+    name="foundry lifetime", units="years", comp_type="Constant", comp_subtype="Normal"
+)
 def foundry_lifetime():
     return 25
 
@@ -444,8 +446,8 @@ def hdri_eaf_inno_switch():
         "foundry_reinvestment": 1,
         "innovators": 1,
         "hdri_eaf_inno_switch": 1,
-        "sum_steel": 2,
         "hdri_eaf": 1,
+        "sum_steel": 2,
     },
 )
 def hdri_eaf_innovators():
@@ -547,8 +549,8 @@ def secondary_sector_growth():
         "bf_coal_cost": 1,
         "coal_bf_bof_ccs": 1,
         "bf_ccs_cost": 1,
-        "hdri_cost": 1,
         "hdri_eaf": 1,
+        "hdri_cost": 1,
         "sum_steel": 1,
     },
 )
@@ -570,8 +572,8 @@ def steel_average_cost():
     comp_subtype="Normal",
     depends_on={
         "coal_bf_bof": 1,
-        "cc_capture_rate": 1,
         "coal_bf_bof_ccs": 1,
+        "cc_capture_rate": 1,
         "bf_coal_emission_factor": 1,
     },
 )
@@ -591,6 +593,26 @@ def steel_emissions():
 )
 def steel_equalizer():
     return 1 / (bf_coal_level() + hdri_eaf_level() + bf_ccs_level())
+
+
+@component.add(
+    name="steel H2 price break",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "bf_ccs_cost": 1,
+        "bf_coal_cost": 1,
+        "hdri_cost_without_h2": 1,
+        "h2_to_steel": 1,
+    },
+)
+def steel_h2_price_break():
+    return (
+        (np.minimum(bf_ccs_cost(), bf_coal_cost()) - hdri_cost_without_h2())
+        / 1000
+        / h2_to_steel()
+    )
 
 
 @component.add(
