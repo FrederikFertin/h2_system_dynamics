@@ -116,8 +116,8 @@ _smooth_biogas_nm_inno_switch = Smooth(
         "nm_reinvestment": 1,
         "innovators": 1,
         "biogas_nm_inno_switch": 1,
-        "biogas_nm": 1,
         "sum_nm": 2,
+        "biogas_nm": 1,
     },
 )
 def biogas_nm_innovators():
@@ -156,8 +156,8 @@ def biogas_nm_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
         "biogas_nm_competitiveness": 1,
+        "cross_innovation": 1,
         "biogas_nm": 1,
         "sum_nm": 1,
     },
@@ -286,8 +286,8 @@ _smooth_blue_ng_nm_inno_switch = Smooth(
         "nm_reinvestment": 1,
         "innovators": 1,
         "blue_ng_nm_inno_switch": 1,
-        "blue_ng_nm": 1,
         "sum_nm": 2,
+        "blue_ng_nm": 1,
     },
 )
 def blue_ng_nm_innovators():
@@ -327,8 +327,8 @@ def blue_ng_nm_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
         "blue_ng_nm_competitiveness": 1,
+        "cross_innovation": 1,
         "blue_ng_nm": 1,
         "sum_nm": 1,
     },
@@ -530,8 +530,8 @@ _smooth_h2_nm_inno_switch = Smooth(
         "nm_reinvestment": 1,
         "innovators": 1,
         "h2_nm_inno_switch": 1,
-        "sum_nm": 2,
         "h2_nm": 1,
+        "sum_nm": 2,
     },
 )
 def h2_nm_innovators():
@@ -596,10 +596,10 @@ def h2_nm_level():
         "biogas_cost": 1,
         "blue_ng_cost": 1,
         "blue_ng_nm": 1,
-        "grey_ng_cost": 1,
         "ng_nm": 1,
-        "green_h2_nm_cost": 1,
+        "grey_ng_cost": 1,
         "h2_nm": 1,
+        "green_h2_nm_cost": 1,
         "sum_nm": 1,
     },
 )
@@ -713,7 +713,7 @@ def ng_nm_competitiveness():
     name="NG NM decay",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"ng_nm": 1, "gas_lockin_factor": 1, "ng_nm_early_decommission_rate": 1},
+    depends_on={"ng_nm": 1, "ng_nm_early_decommission_rate": 1, "gas_lockin_factor": 1},
 )
 def ng_nm_decay():
     return ng_nm() * (ng_nm_early_decommission_rate() + 1 / gas_lockin_factor())

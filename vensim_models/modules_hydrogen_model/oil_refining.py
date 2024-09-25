@@ -110,8 +110,8 @@ _smooth_blue_refinery_inno_switch = Smooth(
         "refinery_reinvestment": 1,
         "innovators": 1,
         "blue_refinery_inno_switch": 1,
-        "sum_refining": 2,
         "blue_refinery": 1,
+        "sum_refining": 2,
     },
 )
 def blue_refinery_innovators():
@@ -151,8 +151,8 @@ def blue_refinery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
         "blue_refinery_competitiveness": 1,
+        "cross_innovation": 1,
         "blue_refinery": 1,
         "sum_refining": 1,
     },
@@ -335,8 +335,8 @@ _smooth_green_refinery_inno_switch = Smooth(
         "refinery_reinvestment": 1,
         "innovators": 1,
         "green_refinery_inno_switch": 1,
-        "sum_refining": 2,
         "green_refinery": 1,
+        "sum_refining": 2,
     },
 )
 def green_refinery_innovators():
@@ -376,8 +376,8 @@ def green_refinery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
         "green_refinery_competitiveness": 1,
+        "cross_innovation": 1,
         "green_refinery": 1,
         "sum_refining": 1,
     },
@@ -434,8 +434,8 @@ def grey_refinery_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "grey_refinery": 1,
-        "smr_lifetime": 1,
         "grey_refinery_early_decommission_rate": 1,
+        "smr_lifetime": 1,
     },
 )
 def grey_refinery_decay():
@@ -607,8 +607,8 @@ def refinery_consumption():
     comp_subtype="Normal",
     depends_on={
         "grey_refinery": 1,
-        "cc_capture_rate": 1,
         "blue_refinery": 1,
+        "cc_capture_rate": 1,
         "smr_emission_factor": 1,
     },
 )

@@ -119,8 +119,8 @@ _smooth_biomeoh_inno_switch = Smooth(
         "meoh_reinvestment": 1,
         "innovators": 1,
         "biomeoh_inno_switch": 1,
-        "biomeoh": 1,
         "sum_meoh": 2,
+        "biomeoh": 1,
     },
 )
 def biomeoh_innovators():
@@ -160,8 +160,8 @@ def biomeoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
         "biomeoh_competitiveness": 1,
+        "cross_innovation": 1,
         "biomeoh": 1,
         "sum_meoh": 1,
     },
@@ -291,8 +291,8 @@ _smooth_blue_meoh_inno_switch = Smooth(
         "meoh_reinvestment": 1,
         "innovators": 1,
         "blue_meoh_inno_switch": 1,
-        "blue_meoh": 1,
         "sum_meoh": 2,
+        "blue_meoh": 1,
     },
 )
 def blue_meoh_innovators():
@@ -332,8 +332,8 @@ def blue_meoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
         "blue_meoh_competitiveness": 1,
+        "cross_innovation": 1,
         "blue_meoh": 1,
         "sum_meoh": 1,
     },
@@ -524,8 +524,8 @@ def emeoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
         "emeoh_competitiveness": 1,
+        "cross_innovation": 1,
         "emeoh": 1,
         "sum_meoh": 1,
     },
@@ -697,8 +697,8 @@ def grey_meoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "grey_meoh_competitiveness": 1,
         "cross_conventional": 1,
+        "grey_meoh_competitiveness": 1,
         "grey_meoh": 1,
         "sum_meoh": 1,
     },
@@ -722,10 +722,10 @@ def grey_meoh_level():
         "green_biomeoh_cost": 1,
         "blue_meoh": 1,
         "blue_biomeoh_cost": 1,
-        "convmeoh_cost": 1,
         "grey_meoh": 1,
-        "green_emeoh_cost": 1,
+        "convmeoh_cost": 1,
         "emeoh": 1,
+        "green_emeoh_cost": 1,
         "sum_meoh": 1,
     },
 )
@@ -759,13 +759,13 @@ def meoh_biomass_demand():
     comp_subtype="Normal",
     depends_on={
         "grey_meoh": 1,
-        "convmeoh_emission_factor": 1,
         "convmeoh_electricity_usage": 1,
         "electricity_emission_factor": 1,
-        "blue_meoh": 1,
+        "convmeoh_emission_factor": 1,
         "meoh_h2_usage": 1,
-        "cc_capture_rate": 1,
         "smr_emission_factor": 1,
+        "blue_meoh": 1,
+        "cc_capture_rate": 1,
     },
 )
 def meoh_emissions():
@@ -789,7 +789,7 @@ def meoh_emissions():
     units="t H2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"biomeoh": 1, "meoh_h2_usage": 1, "emeoh_h2_usage": 1, "emeoh": 1},
+    depends_on={"biomeoh": 1, "meoh_h2_usage": 1, "emeoh": 1, "emeoh_h2_usage": 1},
 )
 def meoh_hydrogen_demand():
     """

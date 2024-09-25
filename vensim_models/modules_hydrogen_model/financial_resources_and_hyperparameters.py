@@ -219,8 +219,8 @@ _hardcodedlookup_gas_price_lookup = HardcodedLookups(
     depends_on={
         "time": 1,
         "electricity_price_lookup": 1,
-        "carbon_tax": 1,
         "electricity_emission_factor": 1,
+        "carbon_tax": 1,
         "electricity_sensitivity": 1,
     },
 )
@@ -262,9 +262,9 @@ def model_seed():
 )
 def oil_biomass_price():
     """
-    Assumed to be similar to Wood Pellets. 1.2 times the average biomass price. Source for wood pellet price: "HRE_D6.1_Appendix_2 1"
+    Assumed to be similar to Wood Pellets. 1.5 times the average biomass price. Source for wood pellet price: "HRE_D6.1_Appendix_2 1"
     """
-    return biomass_price() * 1.2
+    return biomass_price() * 1.5
 
 
 @component.add(

@@ -90,10 +90,10 @@ def aec_opex():
     comp_subtype="Normal",
     depends_on={
         "grey_h2_cost": 1,
-        "ccs_cost": 1,
-        "carbon_tax": 1,
-        "cc_capture_rate": 1,
         "smr_emission_factor": 1,
+        "cc_capture_rate": 1,
+        "carbon_tax": 1,
+        "ccs_cost": 1,
     },
 )
 def blue_h2_cost():
@@ -165,8 +165,8 @@ def green_h2_cost():
     depends_on={
         "yearly_total_subsidies_limit": 1,
         "total_subsidies_ytd": 1,
-        "green_h2_subsidy_size": 1,
         "pulse_h2_subsidy": 1,
+        "green_h2_subsidy_size": 1,
     },
 )
 def green_h2_subsidy():
@@ -208,8 +208,8 @@ def green_h2_subsidy_size():
         "smr_af": 1,
         "smr_opex": 1,
         "smr_operating_hours": 1,
-        "smr_efficiency": 1,
         "gas_price": 1,
+        "smr_efficiency": 1,
         "carbon_tax": 1,
         "smr_emission_factor": 1,
     },
@@ -233,6 +233,13 @@ def h2_lhv():
     33.33 kWh/kg as LHV H2
     """
     return 33.33
+
+
+@component.add(
+    name="H2 subsidy length", units="years", comp_type="Constant", comp_subtype="Normal"
+)
+def h2_subsidy_length():
+    return 10
 
 
 @component.add(
@@ -271,10 +278,10 @@ def pilot_plant_capacity():
     name="pulse H2 subsidy",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"time": 1},
+    depends_on={"h2_subsidy_length": 1, "time": 1},
 )
 def pulse_h2_subsidy():
-    return pulse(__data["time"], 2025, width=10)
+    return pulse(__data["time"], 2025, width=h2_subsidy_length())
 
 
 @component.add(
@@ -284,8 +291,8 @@ def pulse_h2_subsidy():
     comp_subtype="Normal",
     depends_on={
         "aec_capex": 1,
-        "aec_opex": 1,
         "aec_af": 1,
+        "aec_opex": 1,
         "electrolyser_operating_hours": 1,
         "aec_efficiency": 2,
         "capex_multiplier": 1,

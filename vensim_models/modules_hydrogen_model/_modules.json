@@ -425,6 +425,7 @@
         "green_h2_subsidy_size",
         "grey_h2_cost",
         "h2_lhv",
+        "h2_subsidy_length",
         "initial_gw_aec_capex",
         "learning_rate",
         "one_gw_aec_capex",
@@ -1143,6 +1144,7 @@
         "hdri_cost_without_h2",
         "hdri_learning_curve",
         "hdri_learning_rate",
+        "hdri_plant_size",
         "steel_subsidy_removal",
         "yearly_steel_subsidy_limit"
     ]

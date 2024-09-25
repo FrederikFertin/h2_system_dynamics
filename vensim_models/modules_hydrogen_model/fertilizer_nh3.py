@@ -110,8 +110,8 @@ _smooth_blue_nh3_inno_switch = Smooth(
         "nh3_reinvestment": 1,
         "innovators": 1,
         "blue_nh3_inno_switch": 1,
-        "blue_nh3": 1,
         "sum_fertilizer": 2,
+        "blue_nh3": 1,
     },
 )
 def blue_nh3_innovators():
@@ -406,8 +406,8 @@ _smooth_green_nh3_inno_switch = Smooth(
         "nh3_reinvestment": 1,
         "innovators": 1,
         "green_nh3_inno_switch": 1,
-        "green_nh3": 1,
         "sum_fertilizer": 2,
+        "green_nh3": 1,
     },
 )
 def green_nh3_innovators():

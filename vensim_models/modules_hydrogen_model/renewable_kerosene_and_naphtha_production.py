@@ -43,9 +43,9 @@ def biokero_capex():
 )
 def biokero_cost():
     """
-    30% of the production costs is assumed covered through coproduct selling of naphtha and LPG.
+    20% of the production costs is assumed covered through coproduct selling of naphtha and LPG.
     """
-    return hvo_jet_total_costs() / biokero_fraction() * 0.7
+    return hvo_jet_total_costs() / biokero_fraction() * 0.8
 
 
 @component.add(
@@ -56,9 +56,9 @@ def biokero_cost():
     depends_on={
         "biokero_cost": 1,
         "kerosene_h2_cost": 1,
+        "biokero_h2_usage": 1,
         "biokero_fraction": 1,
         "h2_lhv": 1,
-        "biokero_h2_usage": 1,
     },
 )
 def biokero_cost_without_h2():
@@ -69,7 +69,7 @@ def biokero_cost_without_h2():
         / h2_lhv()
         * biokero_h2_usage()
         / 3600
-        * 0.7
+        * 0.8
         / biokero_fraction()
     )
 
@@ -134,14 +134,14 @@ def biokero_gas_usage():
     depends_on={
         "jetfuel_cost": 1,
         "biokero_cost_without_h2": 1,
-        "biokero_fraction": 1,
-        "biokero_h2_usage": 1,
         "h2_lhv": 1,
+        "biokero_h2_usage": 1,
+        "biokero_fraction": 1,
     },
 )
 def biokero_h2_price_break():
     return (jetfuel_cost() - biokero_cost_without_h2()) / (
-        1000 / h2_lhv() * biokero_h2_usage() / 3600 * 0.7 / biokero_fraction()
+        1000 / h2_lhv() * biokero_h2_usage() / 3600 * 0.8 / biokero_fraction()
     )
 
 
@@ -203,22 +203,13 @@ def biokero_variable():
     units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "hvo_jet_total_costs": 1,
-        "naphtha_fraction_bio": 1,
-        "lpg_fraction_bio": 1,
-    },
+    depends_on={"hvo_jet_total_costs": 1, "naphtha_fraction_bio": 1},
 )
 def bionaphtha_cost():
     """
-    The LPG and naphtha coproduct sale cover 30% of the production costs on an equal level. Note here is that the naphtha output is quite low, which does not motivate this as the primary method to produce biogenic naphtha.
+    The naphtha coproduct sale cover 10% of the production costs. The LPG coproduct sale cover the remaining 10% of the production costs. Note here is that the naphtha output is quite low, which does not motivate this as the primary method to produce biogenic naphtha.
     """
-    return (
-        hvo_jet_total_costs()
-        / (lpg_fraction_bio() + naphtha_fraction_bio())
-        * 0.3
-        * 1000
-    )
+    return hvo_jet_total_costs() / naphtha_fraction_bio() * 0.1 * 1000
 
 
 @component.add(
@@ -228,11 +219,10 @@ def bionaphtha_cost():
     comp_subtype="Normal",
     depends_on={
         "bionaphtha_cost": 1,
-        "kerosene_h2_cost": 1,
-        "lpg_fraction_bio": 1,
         "naphtha_fraction_bio": 1,
-        "h2_lhv": 1,
+        "kerosene_h2_cost": 1,
         "biokero_h2_usage": 1,
+        "h2_lhv": 1,
     },
 )
 def bionaphtha_cost_without_h2():
@@ -243,8 +233,8 @@ def bionaphtha_cost_without_h2():
         / h2_lhv()
         * biokero_h2_usage()
         / 3600
-        * 0.3
-        / (lpg_fraction_bio() + naphtha_fraction_bio())
+        * 0.1
+        / naphtha_fraction_bio()
     )
 
 
@@ -257,19 +247,13 @@ def bionaphtha_cost_without_h2():
         "naphtha_cost": 1,
         "bionaphtha_cost_without_h2": 1,
         "naphtha_fraction_bio": 1,
-        "lpg_fraction_bio": 1,
         "h2_lhv": 1,
         "biokero_h2_usage": 1,
     },
 )
 def bionaphtha_h2_price_break():
     return (naphtha_cost() - bionaphtha_cost_without_h2()) / (
-        10**6
-        / h2_lhv()
-        * biokero_h2_usage()
-        / 3600
-        * 0.3
-        / (lpg_fraction_bio() + naphtha_fraction_bio())
+        10**6 / h2_lhv() * biokero_h2_usage() / 3600 * 0.1 / naphtha_fraction_bio()
     )
 
 
@@ -281,8 +265,8 @@ def bionaphtha_h2_price_break():
     depends_on={
         "biokero_electricity_usage": 1,
         "renewable_electricity_price": 1,
-        "biogas_cost": 1,
         "biokero_gas_usage": 1,
+        "biogas_cost": 1,
         "biokero_biomass_usage": 1,
         "oil_biomass_price": 1,
         "kerosene_h2_cost": 1,
@@ -291,11 +275,11 @@ def bionaphtha_h2_price_break():
         "biokero_excess_heat": 1,
         "heat_cost": 1,
         "biokero_opex": 1,
-        "biokero_capex": 1,
         "biokero_variable": 1,
-        "biokero_fraction": 1,
         "biokero_operating_hours": 1,
+        "biokero_fraction": 1,
         "biokero_af": 1,
+        "biokero_capex": 1,
     },
 )
 def hvo_jet_total_costs():
@@ -355,10 +339,10 @@ def kerosene_h2_cost():
     comp_subtype="Normal",
     depends_on={
         "kerosene_yearly_total_subsidies_limit": 1,
-        "domestic_aviation_subsidy_ytd": 1,
         "international_aviation_subsidy_ytd": 1,
-        "kerosene_h2_subsidy_size": 1,
+        "domestic_aviation_subsidy_ytd": 1,
         "kerosene_h2_subsidy_pulse": 1,
+        "kerosene_h2_subsidy_size": 1,
     },
 )
 def kerosene_h2_subsidy():
@@ -486,17 +470,17 @@ def synkero_co2_usage():
         "cc_capture_rate": 1,
         "synkero_co2_usage": 1,
         "jetfuel_lhv": 1,
+        "synkero_h2_usage": 1,
+        "synkero_excess_heat": 1,
         "kerosene_h2_cost": 1,
         "synkero_electricity_usage": 1,
-        "renewable_electricity_price": 1,
-        "synkero_h2_usage": 1,
         "heat_cost": 1,
-        "synkero_excess_heat": 1,
         "h2_lhv": 1,
         "synkero_output": 1,
+        "renewable_electricity_price": 1,
         "synkero_af": 1,
-        "synkero_operating_hours": 1,
         "synkero_capex": 1,
+        "synkero_operating_hours": 1,
         "synkero_opex": 1,
         "synkero_variable": 1,
         "synkero_fraction": 1,
@@ -532,10 +516,10 @@ def synkero_cost():
     comp_subtype="Normal",
     depends_on={
         "synkero_cost": 1,
-        "kerosene_h2_cost": 1,
-        "synkero_fraction": 1,
-        "synkero_h2_usage": 1,
         "h2_lhv": 1,
+        "synkero_h2_usage": 1,
+        "synkero_fraction": 1,
+        "kerosene_h2_cost": 1,
         "synkero_output": 1,
     },
 )
@@ -601,10 +585,10 @@ def synkero_fraction():
     depends_on={
         "jetfuel_cost": 1,
         "synkero_cost_without_h2": 1,
-        "h2_lhv": 1,
-        "synkero_output": 1,
-        "synkero_fraction": 1,
         "synkero_h2_usage": 1,
+        "synkero_fraction": 1,
+        "synkero_output": 1,
+        "h2_lhv": 1,
     },
 )
 def synkero_h2_price_break():
@@ -748,10 +732,10 @@ def synnaphtha_fraction():
     depends_on={
         "naphtha_cost": 1,
         "synnaphtha_cost_without_h2": 1,
-        "synkero_output": 1,
-        "synnaphtha_fraction": 1,
-        "h2_lhv": 1,
         "synkero_h2_usage": 1,
+        "synnaphtha_fraction": 1,
+        "synkero_output": 1,
+        "h2_lhv": 1,
         "synkero_fraction": 1,
     },
 )

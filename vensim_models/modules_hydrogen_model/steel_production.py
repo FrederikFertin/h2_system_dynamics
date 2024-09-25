@@ -43,8 +43,8 @@ def bf_coal_capex():
         "coal_price": 1,
         "coal_lhv": 1,
         "coal_to_steel": 1,
-        "grid_electricity_price": 1,
         "el_to_steel_bf_coal": 1,
+        "grid_electricity_price": 1,
         "foundry_proxy_af": 1,
         "bf_coal_capex": 1,
     },
@@ -195,10 +195,10 @@ def hdri_cost():
     depends_on={
         "renewable_electricity_price": 1,
         "el_to_steel_hdri": 1,
-        "hdri_capex_subsidy_pulse": 1,
         "foundry_proxy_af": 1,
         "hdri_capex": 1,
         "hdri_learning_curve": 1,
+        "hdri_capex_subsidy_pulse": 1,
         "hdri_capex_subsidy_size": 1,
     },
 )
@@ -215,10 +215,12 @@ def hdri_cost_without_h2():
     units="percent",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hdri_eaf": 1, "hdri_learning_rate": 1},
+    depends_on={"hdri_plant_size": 2, "hdri_eaf": 1, "hdri_learning_rate": 1},
 )
 def hdri_learning_curve():
-    return np.maximum(1, hdri_eaf()) ** (np.log(1 - hdri_learning_rate()) / np.log(2))
+    return (np.maximum(hdri_plant_size(), hdri_eaf()) / hdri_plant_size()) ** (
+        np.log(1 - hdri_learning_rate()) / np.log(2)
+    )
 
 
 @component.add(
@@ -228,7 +230,17 @@ def hdri_learning_curve():
     comp_subtype="Normal",
 )
 def hdri_learning_rate():
-    return 0.15
+    return 0.12
+
+
+@component.add(
+    name="HDRI plant size", units="MT", comp_type="Constant", comp_subtype="Normal"
+)
+def hdri_plant_size():
+    """
+    Common capacity found in https://globalenergymonitor.org/projects/global-steel-plant-tracker/tracker -map/
+    """
+    return 2
 
 
 @component.add(

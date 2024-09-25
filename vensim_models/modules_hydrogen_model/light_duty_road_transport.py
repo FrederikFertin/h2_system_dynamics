@@ -81,8 +81,8 @@ def ice_car_ban():
         "ld_fcev_consumption": 1,
         "ld_fossil_consumption": 1,
         "ld_ice_lco": 1,
-        "diesel_lhv": 1,
         "ld_ice_energy_usage": 1,
+        "diesel_lhv": 1,
         "sum_ld_rt": 1,
     },
 )
@@ -253,8 +253,8 @@ def ld_bev_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
         "ld_bev_competitiveness": 1,
+        "cross_innovation": 1,
         "ld_bev_consumption": 1,
         "sum_ld_rt": 1,
     },
@@ -416,8 +416,8 @@ def ld_fcev_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
         "ld_fcev_competitiveness": 1,
+        "cross_innovation": 1,
         "ld_fcev_consumption": 1,
         "sum_ld_rt": 1,
     },
@@ -521,11 +521,11 @@ def ld_fossil_investment_level():
     comp_subtype="Normal",
     depends_on={
         "ice_car_ban": 1,
-        "ld_fossil_consumption": 1,
-        "ld_fossil_competitiveness": 1,
         "cross_conventional": 1,
         "sum_ld_rt": 1,
         "slope": 1,
+        "ld_fossil_consumption": 1,
+        "ld_fossil_competitiveness": 1,
     },
 )
 def ld_fossil_level():
@@ -637,11 +637,11 @@ _integ_ld_rt_reinvestment = Integ(
     depends_on={
         "ld_fossil_consumption": 1,
         "diesel_emission_factor": 1,
-        "ld_bev_consumption": 1,
-        "ld_ev_efficiency": 1,
-        "electricity_emission_factor": 1,
-        "charging_efficiency": 1,
         "ld_ice_efficiency": 1,
+        "ld_ev_efficiency": 1,
+        "charging_efficiency": 1,
+        "electricity_emission_factor": 1,
+        "ld_bev_consumption": 1,
     },
 )
 def light_duty_emissions():
