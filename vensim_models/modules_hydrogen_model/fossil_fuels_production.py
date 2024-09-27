@@ -10,9 +10,9 @@ Translated using PySD version 3.14.0
     comp_subtype="Normal",
     depends_on={
         "gas_price": 1,
+        "gas_emission_factor": 1,
         "carbon_tax": 1,
         "cc_capture_rate": 1,
-        "gas_emission_factor": 1,
         "ccs_cost": 1,
     },
 )
@@ -43,9 +43,9 @@ def diesel_emission_factor():
     depends_on={
         "oil_price": 1,
         "oil_price_init": 1,
-        "diesel_emission_factor": 1,
         "carbon_tax": 1,
         "diesel_lhv": 1,
+        "diesel_emission_factor": 1,
     },
 )
 def diesel_price():
@@ -169,8 +169,8 @@ def jetfuel_emission_factor():
     depends_on={
         "naphtha_crack_spread": 1,
         "oil_price": 1,
-        "carbon_tax": 1,
         "naphtha_emission_factor": 1,
+        "carbon_tax": 1,
     },
 )
 def naphtha_cost():

@@ -286,8 +286,8 @@ _smooth_blue_ng_nm_inno_switch = Smooth(
         "nm_reinvestment": 1,
         "innovators": 1,
         "blue_ng_nm_inno_switch": 1,
-        "sum_nm": 2,
         "blue_ng_nm": 1,
+        "sum_nm": 2,
     },
 )
 def blue_ng_nm_innovators():
@@ -530,8 +530,8 @@ _smooth_h2_nm_inno_switch = Smooth(
         "nm_reinvestment": 1,
         "innovators": 1,
         "h2_nm_inno_switch": 1,
-        "h2_nm": 1,
         "sum_nm": 2,
+        "h2_nm": 1,
     },
 )
 def h2_nm_innovators():
@@ -571,8 +571,8 @@ def h2_nm_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
         "h2_nm_competitiveness": 1,
+        "cross_innovation": 1,
         "h2_nm": 1,
         "sum_nm": 1,
     },
@@ -594,8 +594,8 @@ def h2_nm_level():
     depends_on={
         "biogas_nm": 1,
         "biogas_cost": 1,
-        "blue_ng_cost": 1,
         "blue_ng_nm": 1,
+        "blue_ng_cost": 1,
         "ng_nm": 1,
         "grey_ng_cost": 1,
         "h2_nm": 1,
@@ -726,7 +726,7 @@ def ng_nm_decay():
     depends_on={"ng_nm_competitiveness": 1},
 )
 def ng_nm_early_decommission_rate():
-    return 1 / (1 + np.exp(-5 * -ng_nm_competitiveness()))
+    return 1 / (1 + np.exp(-5 * -ng_nm_competitiveness())) * 0
 
 
 @component.add(

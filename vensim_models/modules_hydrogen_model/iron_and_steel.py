@@ -127,8 +127,8 @@ def bf_ccs_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "bf_ccs_competitiveness": 1,
         "cross_innovation": 1,
+        "bf_ccs_competitiveness": 1,
         "coal_bf_bof_ccs": 1,
         "sum_steel": 1,
     },
@@ -173,7 +173,7 @@ def bf_coal_decay():
     depends_on={"bf_coal_competitiveness": 1},
 )
 def bf_coal_early_decommission_rate():
-    return 1 / (1 + np.exp(-5 * -bf_coal_competitiveness()))
+    return 1 / (1 + np.exp(-5 * -bf_coal_competitiveness())) * 0
 
 
 @component.add(
@@ -203,8 +203,8 @@ def bf_coal_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_conventional": 1,
         "bf_coal_competitiveness": 1,
+        "cross_conventional": 1,
         "coal_bf_bof": 1,
         "sum_steel": 1,
     },
@@ -446,8 +446,8 @@ def hdri_eaf_inno_switch():
         "foundry_reinvestment": 1,
         "innovators": 1,
         "hdri_eaf_inno_switch": 1,
-        "hdri_eaf": 1,
         "sum_steel": 2,
+        "hdri_eaf": 1,
     },
 )
 def hdri_eaf_innovators():
@@ -547,8 +547,8 @@ def secondary_sector_growth():
     depends_on={
         "coal_bf_bof": 1,
         "bf_coal_cost": 1,
-        "bf_ccs_cost": 1,
         "coal_bf_bof_ccs": 1,
+        "bf_ccs_cost": 1,
         "hdri_cost": 1,
         "hdri_eaf": 1,
         "sum_steel": 1,
@@ -572,8 +572,8 @@ def steel_average_cost():
     comp_subtype="Normal",
     depends_on={
         "coal_bf_bof": 1,
-        "cc_capture_rate": 1,
         "coal_bf_bof_ccs": 1,
+        "cc_capture_rate": 1,
         "bf_coal_emission_factor": 1,
     },
 )

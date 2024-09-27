@@ -10,8 +10,8 @@ Translated using PySD version 3.14.0
     comp_subtype="Normal",
     depends_on={
         "bf_coal_cost": 1,
-        "bf_coal_emission_factor": 1,
         "carbon_tax": 1,
+        "bf_coal_emission_factor": 1,
         "cc_capture_rate": 1,
         "ccs_cost": 1,
     },
@@ -40,11 +40,11 @@ def bf_coal_capex():
     depends_on={
         "carbon_tax": 1,
         "bf_coal_emission_factor": 1,
-        "coal_price": 1,
-        "coal_lhv": 1,
         "coal_to_steel": 1,
-        "el_to_steel_bf_coal": 1,
+        "coal_lhv": 1,
+        "coal_price": 1,
         "grid_electricity_price": 1,
+        "el_to_steel_bf_coal": 1,
         "foundry_proxy_af": 1,
         "bf_coal_capex": 1,
     },
@@ -175,7 +175,7 @@ def hdri_capex_subsidy_size():
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "green_h2_cost": 1,
+        "steel_green_h2_cost": 1,
         "steel_subsidy_removal": 1,
         "h2_to_steel": 1,
         "hdri_cost_without_h2": 1,
@@ -183,7 +183,7 @@ def hdri_capex_subsidy_size():
 )
 def hdri_cost():
     return (
-        (green_h2_cost() + steel_subsidy_removal()) * 1000
+        (steel_green_h2_cost() + steel_subsidy_removal()) * 1000
     ) * h2_to_steel() + hdri_cost_without_h2()
 
 
@@ -195,11 +195,11 @@ def hdri_cost():
     depends_on={
         "renewable_electricity_price": 1,
         "el_to_steel_hdri": 1,
-        "foundry_proxy_af": 1,
         "hdri_capex": 1,
+        "hdri_capex_subsidy_size": 1,
         "hdri_learning_curve": 1,
         "hdri_capex_subsidy_pulse": 1,
-        "hdri_capex_subsidy_size": 1,
+        "foundry_proxy_af": 1,
     },
 )
 def hdri_cost_without_h2():
@@ -244,19 +244,75 @@ def hdri_plant_size():
 
 
 @component.add(
+    name="Steel Green H2 cost",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"green_h2_cost": 1, "steel_h2_subsidy": 1},
+)
+def steel_green_h2_cost():
+    return np.maximum(green_h2_cost() - steel_h2_subsidy(), 0.1)
+
+
+@component.add(
+    name="steel H2 actual subsidy",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"green_h2_cost": 1, "steel_green_h2_cost": 1},
+)
+def steel_h2_actual_subsidy():
+    return green_h2_cost() - steel_green_h2_cost()
+
+
+@component.add(
+    name="steel H2 subsidy",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"steel_h2_subsidy_size": 1, "steel_h2_subsidy_length": 1, "time": 1},
+)
+def steel_h2_subsidy():
+    return steel_h2_subsidy_size() * pulse(
+        __data["time"], 2025, width=steel_h2_subsidy_length()
+    )
+
+
+@component.add(
+    name="steel H2 subsidy length",
+    units="years",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def steel_h2_subsidy_length():
+    return 10
+
+
+@component.add(
+    name="steel H2 subsidy size",
+    units="€/kg",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def steel_h2_subsidy_size():
+    return 0
+
+
+@component.add(
     name="steel subsidy removal",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "steel_subsidy_ytd": 1,
         "yearly_steel_subsidy_limit": 1,
-        "green_h2_subsidy_actual": 1,
+        "green_h2_actual_subsidy": 1,
+        "steel_h2_actual_subsidy": 1,
     },
 )
 def steel_subsidy_removal():
     return if_then_else(
         steel_subsidy_ytd() > yearly_steel_subsidy_limit(),
-        lambda: green_h2_subsidy_actual(),
+        lambda: green_h2_actual_subsidy() + steel_h2_actual_subsidy(),
         lambda: 0,
     )
 

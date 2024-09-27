@@ -14,7 +14,8 @@ Translated using PySD version 3.14.0
             "initial": {},
             "step": {
                 "domestic_aviation_hydrogen_demand": 1,
-                "green_h2_subsidy_actual": 1,
+                "green_h2_actual_subsidy": 1,
+                "ft_h2_actual_subsidy": 1,
             },
         }
     },
@@ -24,7 +25,9 @@ def domestic_aviation_subsidy():
 
 
 _integ_domestic_aviation_subsidy = Integ(
-    lambda: domestic_aviation_hydrogen_demand() * green_h2_subsidy_actual() / 1000,
+    lambda: domestic_aviation_hydrogen_demand()
+    * (green_h2_actual_subsidy() + ft_h2_actual_subsidy())
+    / 1000,
     lambda: 0,
     "_integ_domestic_aviation_subsidy",
 )
@@ -42,7 +45,8 @@ _integ_domestic_aviation_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_subsidy_actual": 1,
+                "green_h2_actual_subsidy": 1,
+                "ft_h2_actual_subsidy": 1,
                 "domestic_aviation_hydrogen_demand": 1,
                 "domestic_aviation_subsidy_ytd": 1,
             },
@@ -56,7 +60,9 @@ def domestic_aviation_subsidy_ytd():
 _integ_domestic_aviation_subsidy_ytd = Integ(
     lambda: if_then_else(
         modulo(time(), 1) >= time_step(),
-        lambda: green_h2_subsidy_actual() * domestic_aviation_hydrogen_demand() / 1000,
+        lambda: (green_h2_actual_subsidy() + ft_h2_actual_subsidy())
+        * domestic_aviation_hydrogen_demand()
+        / 1000,
         lambda: -domestic_aviation_subsidy_ytd() / time_step(),
     ),
     lambda: 0,
@@ -75,7 +81,7 @@ _integ_domestic_aviation_subsidy_ytd = Integ(
             "initial": {},
             "step": {
                 "domestic_shipping_hydrogen_demand": 1,
-                "green_h2_subsidy_actual": 1,
+                "green_h2_actual_subsidy": 1,
             },
         }
     },
@@ -85,7 +91,7 @@ def domestic_shipping_subsidy():
 
 
 _integ_domestic_shipping_subsidy = Integ(
-    lambda: domestic_shipping_hydrogen_demand() * green_h2_subsidy_actual() / 1000,
+    lambda: domestic_shipping_hydrogen_demand() * green_h2_actual_subsidy() / 1000,
     lambda: 0,
     "_integ_domestic_shipping_subsidy",
 )
@@ -103,8 +109,8 @@ _integ_domestic_shipping_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_subsidy_actual": 1,
                 "domestic_shipping_hydrogen_demand": 1,
+                "green_h2_actual_subsidy": 1,
                 "domestic_shipping_subsidy_ytd": 1,
             },
         }
@@ -117,7 +123,7 @@ def domestic_shipping_subsidy_ytd():
 _integ_domestic_shipping_subsidy_ytd = Integ(
     lambda: if_then_else(
         modulo(time(), 1) >= time_step(),
-        lambda: green_h2_subsidy_actual() * domestic_shipping_hydrogen_demand() / 1000,
+        lambda: green_h2_actual_subsidy() * domestic_shipping_hydrogen_demand() / 1000,
         lambda: -domestic_shipping_subsidy_ytd() / time_step(),
     ),
     lambda: 0,
@@ -134,7 +140,11 @@ _integ_domestic_shipping_subsidy_ytd = Integ(
     other_deps={
         "_integ_fertilizer_subsidy": {
             "initial": {},
-            "step": {"fertilizer_hydrogen_demand": 1, "green_h2_subsidy_actual": 1},
+            "step": {
+                "fertilizer_hydrogen_demand": 1,
+                "green_h2_actual_subsidy": 1,
+                "nh3_h2_actual_subsidy": 1,
+            },
         }
     },
 )
@@ -143,7 +153,9 @@ def fertilizer_subsidy():
 
 
 _integ_fertilizer_subsidy = Integ(
-    lambda: fertilizer_hydrogen_demand() * green_h2_subsidy_actual() / 1000,
+    lambda: fertilizer_hydrogen_demand()
+    * (green_h2_actual_subsidy() + nh3_h2_actual_subsidy())
+    / 1000,
     lambda: 0,
     "_integ_fertilizer_subsidy",
 )
@@ -161,7 +173,8 @@ _integ_fertilizer_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_subsidy_actual": 1,
+                "green_h2_actual_subsidy": 1,
+                "nh3_h2_actual_subsidy": 1,
                 "fertilizer_hydrogen_demand": 1,
                 "fertilizer_subsidy_ytd": 1,
             },
@@ -175,7 +188,9 @@ def fertilizer_subsidy_ytd():
 _integ_fertilizer_subsidy_ytd = Integ(
     lambda: if_then_else(
         modulo(time(), 1) >= time_step(),
-        lambda: green_h2_subsidy_actual() * fertilizer_hydrogen_demand() / 1000,
+        lambda: (green_h2_actual_subsidy() + nh3_h2_actual_subsidy())
+        * fertilizer_hydrogen_demand()
+        / 1000,
         lambda: -fertilizer_subsidy_ytd() / time_step(),
     ),
     lambda: 0,
@@ -203,7 +218,7 @@ def h2_demand_in_twh():
     other_deps={
         "_integ_heavy_duty_subsidy": {
             "initial": {},
-            "step": {"green_h2_subsidy_actual": 1, "heavy_duty_hydrogen_demand": 1},
+            "step": {"green_h2_actual_subsidy": 1, "heavy_duty_hydrogen_demand": 1},
         }
     },
 )
@@ -212,7 +227,7 @@ def heavy_duty_subsidy():
 
 
 _integ_heavy_duty_subsidy = Integ(
-    lambda: green_h2_subsidy_actual() * heavy_duty_hydrogen_demand() / 1000,
+    lambda: green_h2_actual_subsidy() * heavy_duty_hydrogen_demand() / 1000,
     lambda: 0,
     "_integ_heavy_duty_subsidy",
 )
@@ -230,8 +245,8 @@ _integ_heavy_duty_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_subsidy_actual": 1,
                 "heavy_duty_hydrogen_demand": 1,
+                "green_h2_actual_subsidy": 1,
                 "heavy_duty_subsidy_ytd": 1,
             },
         }
@@ -244,7 +259,7 @@ def heavy_duty_subsidy_ytd():
 _integ_heavy_duty_subsidy_ytd = Integ(
     lambda: if_then_else(
         modulo(time(), 1) >= time_step(),
-        lambda: green_h2_subsidy_actual() * heavy_duty_hydrogen_demand() / 1000,
+        lambda: green_h2_actual_subsidy() * heavy_duty_hydrogen_demand() / 1000,
         lambda: -heavy_duty_subsidy_ytd() / time_step(),
     ),
     lambda: 0,
@@ -262,7 +277,7 @@ _integ_heavy_duty_subsidy_ytd = Integ(
         "_integ_high_temperature_subsidy": {
             "initial": {},
             "step": {
-                "green_h2_subsidy_actual": 1,
+                "green_h2_actual_subsidy": 1,
                 "high_temperature_hydrogen_demand": 1,
             },
         }
@@ -273,7 +288,7 @@ def high_temperature_subsidy():
 
 
 _integ_high_temperature_subsidy = Integ(
-    lambda: green_h2_subsidy_actual() * high_temperature_hydrogen_demand() / 1000,
+    lambda: green_h2_actual_subsidy() * high_temperature_hydrogen_demand() / 1000,
     lambda: 0,
     "_integ_high_temperature_subsidy",
 )
@@ -291,7 +306,7 @@ _integ_high_temperature_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_subsidy_actual": 1,
+                "green_h2_actual_subsidy": 1,
                 "high_temperature_hydrogen_demand": 1,
                 "high_temperature_subsidy_ytd": 1,
             },
@@ -305,7 +320,7 @@ def high_temperature_subsidy_ytd():
 _integ_high_temperature_subsidy_ytd = Integ(
     lambda: if_then_else(
         modulo(time(), 1) >= time_step(),
-        lambda: green_h2_subsidy_actual() * high_temperature_hydrogen_demand() / 1000,
+        lambda: green_h2_actual_subsidy() * high_temperature_hydrogen_demand() / 1000,
         lambda: -high_temperature_subsidy_ytd() / time_step(),
     ),
     lambda: 0,
@@ -357,7 +372,8 @@ def industry_twh():
         "_integ_international_aviation_subsidy": {
             "initial": {},
             "step": {
-                "green_h2_subsidy_actual": 1,
+                "green_h2_actual_subsidy": 1,
+                "ft_h2_actual_subsidy": 1,
                 "international_aviation_hydrogen_demand": 1,
             },
         }
@@ -368,7 +384,9 @@ def international_aviation_subsidy():
 
 
 _integ_international_aviation_subsidy = Integ(
-    lambda: green_h2_subsidy_actual() * international_aviation_hydrogen_demand() / 1000,
+    lambda: (green_h2_actual_subsidy() + ft_h2_actual_subsidy())
+    * international_aviation_hydrogen_demand()
+    / 1000,
     lambda: 0,
     "_integ_international_aviation_subsidy",
 )
@@ -386,8 +404,9 @@ _integ_international_aviation_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_subsidy_actual": 1,
+                "green_h2_actual_subsidy": 1,
                 "international_aviation_hydrogen_demand": 1,
+                "ft_h2_actual_subsidy": 1,
                 "international_aviation_subsidy_ytd": 1,
             },
         }
@@ -400,7 +419,7 @@ def international_aviation_subsidy_ytd():
 _integ_international_aviation_subsidy_ytd = Integ(
     lambda: if_then_else(
         modulo(time(), 1) >= time_step(),
-        lambda: green_h2_subsidy_actual()
+        lambda: (green_h2_actual_subsidy() + ft_h2_actual_subsidy())
         * international_aviation_hydrogen_demand()
         / 1000,
         lambda: -international_aviation_subsidy_ytd() / time_step(),
@@ -420,7 +439,7 @@ _integ_international_aviation_subsidy_ytd = Integ(
         "_integ_international_shipping_subsidy": {
             "initial": {},
             "step": {
-                "green_h2_subsidy_actual": 1,
+                "green_h2_actual_subsidy": 1,
                 "international_shipping_hydrogen_demand": 1,
             },
         }
@@ -431,7 +450,7 @@ def international_shipping_subsidy():
 
 
 _integ_international_shipping_subsidy = Integ(
-    lambda: green_h2_subsidy_actual() * international_shipping_hydrogen_demand() / 1000,
+    lambda: green_h2_actual_subsidy() * international_shipping_hydrogen_demand() / 1000,
     lambda: 0,
     "_integ_international_shipping_subsidy",
 )
@@ -449,8 +468,8 @@ _integ_international_shipping_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_subsidy_actual": 1,
                 "international_shipping_hydrogen_demand": 1,
+                "green_h2_actual_subsidy": 1,
                 "international_shipping_subsidy_ytd": 1,
             },
         }
@@ -463,7 +482,7 @@ def international_shipping_subsidy_ytd():
 _integ_international_shipping_subsidy_ytd = Integ(
     lambda: if_then_else(
         modulo(time(), 1) >= time_step(),
-        lambda: green_h2_subsidy_actual()
+        lambda: green_h2_actual_subsidy()
         * international_shipping_hydrogen_demand()
         / 1000,
         lambda: -international_shipping_subsidy_ytd() / time_step(),
@@ -482,7 +501,7 @@ _integ_international_shipping_subsidy_ytd = Integ(
     other_deps={
         "_integ_light_duty_subsidy": {
             "initial": {},
-            "step": {"green_h2_subsidy_actual": 1, "light_duty_hydrogen_demand": 1},
+            "step": {"green_h2_actual_subsidy": 1, "light_duty_hydrogen_demand": 1},
         }
     },
 )
@@ -491,7 +510,7 @@ def light_duty_subsidy():
 
 
 _integ_light_duty_subsidy = Integ(
-    lambda: green_h2_subsidy_actual() * light_duty_hydrogen_demand() / 1000,
+    lambda: green_h2_actual_subsidy() * light_duty_hydrogen_demand() / 1000,
     lambda: 0,
     "_integ_light_duty_subsidy",
 )
@@ -509,7 +528,7 @@ _integ_light_duty_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_subsidy_actual": 1,
+                "green_h2_actual_subsidy": 1,
                 "light_duty_hydrogen_demand": 1,
                 "light_duty_subsidy_ytd": 1,
             },
@@ -523,7 +542,7 @@ def light_duty_subsidy_ytd():
 _integ_light_duty_subsidy_ytd = Integ(
     lambda: if_then_else(
         modulo(time(), 1) >= time_step(),
-        lambda: green_h2_subsidy_actual() * light_duty_hydrogen_demand() / 1000,
+        lambda: green_h2_actual_subsidy() * light_duty_hydrogen_demand() / 1000,
         lambda: -light_duty_subsidy_ytd() / time_step(),
     ),
     lambda: 0,
@@ -540,7 +559,7 @@ _integ_light_duty_subsidy_ytd = Integ(
     other_deps={
         "_integ_meoh_subsidy": {
             "initial": {},
-            "step": {"green_h2_subsidy_actual": 1, "meoh_hydrogen_demand": 1},
+            "step": {"green_h2_actual_subsidy": 1, "meoh_hydrogen_demand": 1},
         }
     },
 )
@@ -549,7 +568,7 @@ def meoh_subsidy():
 
 
 _integ_meoh_subsidy = Integ(
-    lambda: green_h2_subsidy_actual() * meoh_hydrogen_demand() / 1000,
+    lambda: green_h2_actual_subsidy() * meoh_hydrogen_demand() / 1000,
     lambda: 0,
     "_integ_meoh_subsidy",
 )
@@ -567,8 +586,8 @@ _integ_meoh_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_subsidy_actual": 1,
                 "meoh_hydrogen_demand": 1,
+                "green_h2_actual_subsidy": 1,
                 "meoh_subsidy_ytd": 1,
             },
         }
@@ -581,7 +600,7 @@ def meoh_subsidy_ytd():
 _integ_meoh_subsidy_ytd = Integ(
     lambda: if_then_else(
         modulo(time(), 1) >= time_step(),
-        lambda: green_h2_subsidy_actual() * meoh_hydrogen_demand() / 1000,
+        lambda: green_h2_actual_subsidy() * meoh_hydrogen_demand() / 1000,
         lambda: -meoh_subsidy_ytd() / time_step(),
     ),
     lambda: 0,
@@ -598,7 +617,11 @@ _integ_meoh_subsidy_ytd = Integ(
     other_deps={
         "_integ_naphtha_subsidy": {
             "initial": {},
-            "step": {"naphtha_hydrogen_demand": 1, "green_h2_subsidy_actual": 1},
+            "step": {
+                "naphtha_hydrogen_demand": 1,
+                "green_h2_actual_subsidy": 1,
+                "ft_h2_actual_subsidy": 1,
+            },
         }
     },
 )
@@ -607,7 +630,9 @@ def naphtha_subsidy():
 
 
 _integ_naphtha_subsidy = Integ(
-    lambda: naphtha_hydrogen_demand() * green_h2_subsidy_actual() / 1000,
+    lambda: naphtha_hydrogen_demand()
+    * (green_h2_actual_subsidy() + ft_h2_actual_subsidy())
+    / 1000,
     lambda: 0,
     "_integ_naphtha_subsidy",
 )
@@ -625,8 +650,9 @@ _integ_naphtha_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_subsidy_actual": 1,
+                "green_h2_actual_subsidy": 1,
                 "naphtha_hydrogen_demand": 1,
+                "ft_h2_actual_subsidy": 1,
                 "naphtha_subsidy_ytd": 1,
             },
         }
@@ -639,7 +665,9 @@ def naphtha_subsidy_ytd():
 _integ_naphtha_subsidy_ytd = Integ(
     lambda: if_then_else(
         modulo(time(), 1) >= time_step(),
-        lambda: green_h2_subsidy_actual() * naphtha_hydrogen_demand() / 1000,
+        lambda: (green_h2_actual_subsidy() + ft_h2_actual_subsidy())
+        * naphtha_hydrogen_demand()
+        / 1000,
         lambda: -naphtha_subsidy_ytd() / time_step(),
     ),
     lambda: 0,
@@ -656,7 +684,7 @@ _integ_naphtha_subsidy_ytd = Integ(
     other_deps={
         "_integ_power_subsidy": {
             "initial": {},
-            "step": {"green_h2_subsidy_actual": 1, "power_hydrogen_demand": 1},
+            "step": {"green_h2_actual_subsidy": 1, "power_hydrogen_demand": 1},
         }
     },
 )
@@ -665,7 +693,7 @@ def power_subsidy():
 
 
 _integ_power_subsidy = Integ(
-    lambda: green_h2_subsidy_actual() * power_hydrogen_demand() / 1000,
+    lambda: green_h2_actual_subsidy() * power_hydrogen_demand() / 1000,
     lambda: 0,
     "_integ_power_subsidy",
 )
@@ -683,7 +711,7 @@ _integ_power_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_subsidy_actual": 1,
+                "green_h2_actual_subsidy": 1,
                 "power_hydrogen_demand": 1,
                 "power_subsidy_ytd": 1,
             },
@@ -697,7 +725,7 @@ def power_subsidy_ytd():
 _integ_power_subsidy_ytd = Integ(
     lambda: if_then_else(
         modulo(time(), 1) >= time_step(),
-        lambda: green_h2_subsidy_actual() * power_hydrogen_demand() / 1000,
+        lambda: green_h2_actual_subsidy() * power_hydrogen_demand() / 1000,
         lambda: -power_subsidy_ytd() / time_step(),
     ),
     lambda: 0,
@@ -725,7 +753,11 @@ def power_twh():
     other_deps={
         "_integ_refinery_subsidy": {
             "initial": {},
-            "step": {"green_h2_subsidy_actual": 1, "refinery_hydrogen_demand": 1},
+            "step": {
+                "refinery_hydrogen_demand": 1,
+                "green_h2_actual_subsidy": 1,
+                "refinery_h2_actual_subsidy": 1,
+            },
         }
     },
 )
@@ -734,7 +766,9 @@ def refinery_subsidy():
 
 
 _integ_refinery_subsidy = Integ(
-    lambda: green_h2_subsidy_actual() * refinery_hydrogen_demand() / 1000,
+    lambda: refinery_hydrogen_demand()
+    * (green_h2_actual_subsidy() + refinery_h2_actual_subsidy())
+    / 1000,
     lambda: 0,
     "_integ_refinery_subsidy",
 )
@@ -752,8 +786,9 @@ _integ_refinery_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_subsidy_actual": 1,
+                "green_h2_actual_subsidy": 1,
                 "refinery_hydrogen_demand": 1,
+                "refinery_h2_actual_subsidy": 1,
                 "refinery_subsidy_ytd": 1,
             },
         }
@@ -766,7 +801,9 @@ def refinery_subsidy_ytd():
 _integ_refinery_subsidy_ytd = Integ(
     lambda: if_then_else(
         modulo(time(), 1) >= time_step(),
-        lambda: green_h2_subsidy_actual() * refinery_hydrogen_demand() / 1000,
+        lambda: (green_h2_actual_subsidy() + refinery_h2_actual_subsidy())
+        * refinery_hydrogen_demand()
+        / 1000,
         lambda: -refinery_subsidy_ytd() / time_step(),
     ),
     lambda: 0,
@@ -784,7 +821,8 @@ _integ_refinery_subsidy_ytd = Integ(
         "_integ_steel_subsidy": {
             "initial": {},
             "step": {
-                "green_h2_subsidy_actual": 1,
+                "green_h2_actual_subsidy": 1,
+                "steel_h2_actual_subsidy": 1,
                 "steel_subsidy_removal": 1,
                 "steel_hydrogen_demand": 1,
             },
@@ -796,7 +834,9 @@ def steel_subsidy():
 
 
 _integ_steel_subsidy = Integ(
-    lambda: (green_h2_subsidy_actual() - steel_subsidy_removal())
+    lambda: (
+        green_h2_actual_subsidy() + steel_h2_actual_subsidy() - steel_subsidy_removal()
+    )
     * steel_hydrogen_demand()
     / 1000,
     lambda: 0,
@@ -816,9 +856,10 @@ _integ_steel_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_subsidy_actual": 1,
-                "steel_subsidy_removal": 1,
+                "green_h2_actual_subsidy": 1,
                 "steel_hydrogen_demand": 1,
+                "steel_h2_actual_subsidy": 1,
+                "steel_subsidy_removal": 1,
                 "steel_subsidy_ytd": 1,
             },
         }
@@ -831,7 +872,11 @@ def steel_subsidy_ytd():
 _integ_steel_subsidy_ytd = Integ(
     lambda: if_then_else(
         modulo(time(), 1) >= time_step(),
-        lambda: (green_h2_subsidy_actual() - steel_subsidy_removal())
+        lambda: (
+            green_h2_actual_subsidy()
+            + steel_h2_actual_subsidy()
+            - steel_subsidy_removal()
+        )
         * steel_hydrogen_demand()
         / 1000,
         lambda: -steel_subsidy_ytd() / time_step(),

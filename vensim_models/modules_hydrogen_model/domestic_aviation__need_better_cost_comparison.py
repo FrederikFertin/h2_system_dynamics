@@ -128,8 +128,8 @@ _smooth_bio_kerosene_inno_switch_dom = Smooth(
         "domestic_aviation_reinvestment": 1,
         "innovators": 1,
         "bio_kerosene_inno_switch_dom": 1,
-        "sum_domestic_aviation": 2,
         "bio_kerosene_consumption_dom": 1,
+        "sum_domestic_aviation": 2,
     },
 )
 def bio_kerosene_innovators_dom():
@@ -169,8 +169,8 @@ def bio_kerosene_investment_level_dom():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "bio_kerosene_competitiveness_dom": 1,
         "cross_innovation": 1,
+        "bio_kerosene_competitiveness_dom": 1,
         "bio_kerosene_consumption_dom": 1,
         "sum_domestic_aviation": 1,
     },
@@ -449,12 +449,12 @@ def domestic_aviation_emissions():
     depends_on={
         "bio_kerosene_consumption_dom": 1,
         "biokero_h2_usage": 1,
-        "synkero_h2_usage": 1,
         "syn_kerosene_consumption_dom": 1,
+        "synkero_h2_usage": 1,
         "h2_lhv": 2,
-        "hydrogen_fuel_cell_efficiency": 1,
-        "hydrogen_consumption_dom": 1,
         "jet_engine_efficiency": 1,
+        "hydrogen_consumption_dom": 1,
+        "hydrogen_fuel_cell_efficiency": 1,
     },
 )
 def domestic_aviation_hydrogen_demand():
@@ -669,8 +669,8 @@ _smooth_hydrogen_inno_switch_dom = Smooth(
         "domestic_aviation_reinvestment": 1,
         "innovators": 1,
         "hydrogen_inno_switch_dom": 1,
-        "sum_domestic_aviation": 2,
         "hydrogen_consumption_dom": 1,
+        "sum_domestic_aviation": 2,
     },
 )
 def hydrogen_innovators_dom():
@@ -709,8 +709,8 @@ def hydrogen_investment_level_dom():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "hydrogen_competitiveness_dom": 1,
         "cross_innovation": 1,
+        "hydrogen_competitiveness_dom": 1,
         "hydrogen_consumption_dom": 1,
         "sum_domestic_aviation": 1,
     },
@@ -775,8 +775,8 @@ _integ_jetfuel_consumption_dom = Integ(
     comp_subtype="Normal",
     depends_on={
         "jetfuel_consumption_dom": 1,
-        "jetfuel_lockin_period": 1,
         "jetfuel_early_decommission_rate_dom": 1,
+        "jetfuel_lockin_period": 1,
     },
 )
 def jetfuel_decay_dom():
@@ -792,7 +792,7 @@ def jetfuel_decay_dom():
     depends_on={"jetfuel_competitiveness_dom": 1},
 )
 def jetfuel_early_decommission_rate_dom():
-    return 1 / (1 + np.exp(-5 * -jetfuel_competitiveness_dom()))
+    return 1 / (1 + np.exp(-5 * -jetfuel_competitiveness_dom())) * 0
 
 
 @component.add(
@@ -983,8 +983,8 @@ _smooth_syn_kerosene_inno_switch_dom = Smooth(
         "domestic_aviation_reinvestment": 1,
         "innovators": 1,
         "syn_kerosene_inno_switch_dom": 1,
-        "sum_domestic_aviation": 2,
         "syn_kerosene_consumption_dom": 1,
+        "sum_domestic_aviation": 2,
     },
 )
 def syn_kerosene_innovators_dom():

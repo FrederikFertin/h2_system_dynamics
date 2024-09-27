@@ -128,8 +128,8 @@ _smooth_bio_naphtha_inno_switch = Smooth(
         "bio_naphtha_inno_switch": 1,
         "naphtha_feedstock_reinvestment": 1,
         "innovators": 1,
-        "bio_naphtha": 1,
         "sum_naphtha": 2,
+        "bio_naphtha": 1,
     },
 )
 def bio_naphtha_innovators():
@@ -169,8 +169,8 @@ def bio_naphtha_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "bio_naphtha_competitiveness": 1,
         "cross_innovation": 1,
+        "bio_naphtha_competitiveness": 1,
         "bio_naphtha": 1,
         "sum_naphtha": 1,
     },
@@ -265,8 +265,8 @@ def f_naphtha_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "fossil_naphtha": 1,
-        "feedstock_lockin": 1,
         "f_naphtha_early_decommission_rate": 1,
+        "feedstock_lockin": 1,
     },
 )
 def f_naphtha_decay():
@@ -282,7 +282,7 @@ def f_naphtha_decay():
     depends_on={"f_naphtha_competitiveness": 1},
 )
 def f_naphtha_early_decommission_rate():
-    return 1 / (1 + np.exp(-5 * -f_naphtha_competitiveness()))
+    return 1 / (1 + np.exp(-5 * -f_naphtha_competitiveness())) * 0
 
 
 @component.add(
@@ -396,12 +396,12 @@ def naphta_olefin_rate():
     depends_on={
         "bio_naphtha": 1,
         "bionaphtha_cost": 1,
-        "fossil_naphtha": 1,
         "naphtha_cost": 1,
+        "fossil_naphtha": 1,
         "pyrolysisnaphtha_cost": 1,
         "recycled_naphtha": 1,
-        "synnaphtha_cost": 1,
         "synthetic_naphtha": 1,
+        "synnaphtha_cost": 1,
         "sum_naphtha": 1,
     },
 )
@@ -506,8 +506,8 @@ _integ_naphtha_feedstock_reinvestment = Integ(
     depends_on={
         "bio_naphtha": 1,
         "hydrogen_bio_naphtha_rate": 1,
-        "hydrogen_synthetic_naphtha_rate": 1,
         "synthetic_naphtha": 1,
+        "hydrogen_synthetic_naphtha_rate": 1,
     },
 )
 def naphtha_hydrogen_demand():
@@ -537,8 +537,8 @@ def naphtha_lhv():
         "olefin_production": 1,
         "mto": 1,
         "naphta_olefin_rate": 1,
-        "pulse_size": 1,
         "pulse_naphtha": 1,
+        "pulse_size": 1,
     },
 )
 def naphtha_production():

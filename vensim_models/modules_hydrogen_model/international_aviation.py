@@ -452,8 +452,8 @@ def international_aviation_equalizer():
     depends_on={
         "bio_kerosene_consumption": 1,
         "biokero_h2_usage": 1,
-        "synkero_h2_usage": 1,
         "syn_kerosene_consumption": 1,
+        "synkero_h2_usage": 1,
         "h2_lhv": 1,
     },
 )
@@ -569,7 +569,7 @@ def jetfuel_decay():
     depends_on={"jetfuel_competitiveness": 1},
 )
 def jetfuel_early_decommission_rate():
-    return 1 / (1 + np.exp(-5 * -jetfuel_competitiveness()))
+    return 1 / (1 + np.exp(-5 * -jetfuel_competitiveness())) * 0
 
 
 @component.add(
@@ -602,8 +602,8 @@ def jetfuel_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_conventional": 1,
         "jetfuel_competitiveness": 1,
+        "cross_conventional": 1,
         "jetfuel_consumption": 1,
         "sum_international_aviation": 1,
     },

@@ -31,8 +31,8 @@ def demand_change_dom_shipping():
     depends_on={
         "fc_ship_cost": 1,
         "be_ship_cost": 3,
-        "meoh_ship_cost": 1,
         "hfo_ship_cost": 1,
+        "meoh_ship_cost": 1,
     },
 )
 def domestic_battery_competitiveness():
@@ -298,8 +298,8 @@ _smooth_domestic_h2_inno_switch = Smooth(
         "innovators": 1,
         "domestic_h2_inno_switch": 1,
         "domestic_shipping_reinvestment": 1,
-        "sum_dom_shipping": 2,
         "domestic_h2_shipping_consumption": 1,
+        "sum_dom_shipping": 2,
     },
 )
 def domestic_h2_innovators():
@@ -385,8 +385,8 @@ _integ_domestic_h2_shipping_consumption = Integ(
     depends_on={
         "fc_ship_cost": 1,
         "hfo_ship_cost": 3,
-        "meoh_ship_cost": 1,
         "be_ship_cost": 1,
+        "meoh_ship_cost": 1,
     },
 )
 def domestic_hfo_competitiveness():
@@ -421,7 +421,7 @@ def domestic_hfo_decay():
     depends_on={"domestic_hfo_competitiveness": 1},
 )
 def domestic_hfo_early_decommission_rate():
-    return 1 / (1 + np.exp(-5 * -domestic_hfo_competitiveness()))
+    return 1 / (1 + np.exp(-5 * -domestic_hfo_competitiveness())) * 0
 
 
 @component.add(
@@ -684,8 +684,8 @@ _integ_domestic_meoh_shipping_consumption = Integ(
         "meoh_ship_cost": 1,
         "domestic_battery_shipping_consumption": 1,
         "be_ship_cost": 1,
-        "domestic_h2_shipping_consumption": 1,
         "fc_ship_cost": 1,
+        "domestic_h2_shipping_consumption": 1,
         "yearly_hfo_consumption": 1,
         "sum_dom_shipping": 1,
     },
@@ -916,10 +916,10 @@ def domestic_shipping_equalizer():
         "domestic_meoh_shipping_consumption": 1,
         "meoh_lhv": 1,
         "meoh_h2_usage": 1,
-        "ice_efficiency": 1,
         "fc_efficiency": 1,
-        "h2_lhv": 1,
+        "ice_efficiency": 1,
         "domestic_h2_shipping_consumption": 1,
+        "h2_lhv": 1,
     },
 )
 def domestic_shipping_hydrogen_demand():

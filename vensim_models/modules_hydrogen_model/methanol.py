@@ -160,8 +160,8 @@ def biomeoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "biomeoh_competitiveness": 1,
         "cross_innovation": 1,
+        "biomeoh_competitiveness": 1,
         "biomeoh": 1,
         "sum_meoh": 1,
     },
@@ -697,8 +697,8 @@ def grey_meoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_conventional": 1,
         "grey_meoh_competitiveness": 1,
+        "cross_conventional": 1,
         "grey_meoh": 1,
         "sum_meoh": 1,
     },
@@ -759,13 +759,13 @@ def meoh_biomass_demand():
     comp_subtype="Normal",
     depends_on={
         "grey_meoh": 1,
-        "convmeoh_electricity_usage": 1,
-        "electricity_emission_factor": 1,
         "convmeoh_emission_factor": 1,
-        "meoh_h2_usage": 1,
-        "smr_emission_factor": 1,
+        "electricity_emission_factor": 1,
+        "convmeoh_electricity_usage": 1,
         "blue_meoh": 1,
+        "meoh_h2_usage": 1,
         "cc_capture_rate": 1,
+        "smr_emission_factor": 1,
     },
 )
 def meoh_emissions():

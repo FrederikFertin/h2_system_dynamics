@@ -82,8 +82,8 @@ def hfo_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "hfo_shipping_consumption": 1,
-        "hfo_early_decommission_rate": 1,
         "ship_lifetime": 1,
+        "hfo_early_decommission_rate": 1,
     },
 )
 def hfo_decay():
@@ -99,7 +99,7 @@ def hfo_decay():
     depends_on={"hfo_competitiveness": 1},
 )
 def hfo_early_decommission_rate():
-    return 1 / (1 + np.exp(-5 * -hfo_competitiveness()))
+    return 1 / (1 + np.exp(-5 * -hfo_competitiveness())) * 0
 
 
 @component.add(
@@ -173,7 +173,7 @@ _integ_hfo_shipping_consumption = Integ(
     units="GWh",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"fuel_use_index": 1, "int_shipping_consumption_forecast": 1, "time": 1},
+    depends_on={"fuel_use_index": 1, "time": 1, "int_shipping_consumption_forecast": 1},
 )
 def int_shipping_consumption():
     """
@@ -396,8 +396,8 @@ def international_shipping_emissions():
         "meoh_shipping_consumption": 1,
         "meoh_lhv": 1,
         "meoh_h2_usage": 1,
-        "nh3_h2_usage": 1,
         "nh3_shipping_consumption": 1,
+        "nh3_h2_usage": 1,
         "nh3_lhv": 1,
     },
 )
@@ -434,9 +434,9 @@ def meoh_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "hfo_containership_cost": 1,
-        "ship_engine_af": 1,
         "meoh_ship_capex": 1,
         "containership_opex": 1,
+        "ship_engine_af": 1,
         "yearly_containership_consumption": 1,
         "biomeoh_cost_without_h2": 1,
         "meoh_h2_usage": 1,
