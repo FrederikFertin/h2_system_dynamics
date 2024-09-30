@@ -10,8 +10,8 @@ Translated using PySD version 3.14.0
     depends_on={
         "bf_cracking_cost": 3,
         "fossil_cracking_cost": 1,
-        "mto_cost": 1,
         "e_cracking_cost": 1,
+        "mto_cost": 1,
     },
 )
 def bf_cracking_competitiveness():
@@ -396,8 +396,8 @@ def error_olefin():
     depends_on={
         "fossil_cracking_cost": 3,
         "bf_cracking_cost": 1,
-        "mto_cost": 1,
         "e_cracking_cost": 1,
+        "mto_cost": 1,
     },
 )
 def f_cracking_competitiveness():

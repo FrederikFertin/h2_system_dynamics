@@ -20,8 +20,8 @@ def aec_af():
     comp_subtype="Normal",
     depends_on={
         "electrolyser_capacity": 3,
-        "one_gw_aec_capex": 2,
         "learning_rate": 1,
+        "one_gw_aec_capex": 2,
         "initial_gw_aec_capex": 2,
     },
 )
@@ -90,10 +90,10 @@ def aec_opex():
     comp_subtype="Normal",
     depends_on={
         "grey_h2_cost": 1,
+        "ccs_cost": 1,
         "carbon_tax": 1,
         "cc_capture_rate": 1,
         "smr_emission_factor": 1,
-        "ccs_cost": 1,
     },
 )
 def blue_h2_cost():
@@ -176,8 +176,8 @@ def green_h2_cost():
     depends_on={
         "yearly_total_subsidies_limit": 1,
         "total_subsidies_ytd": 1,
-        "green_h2_subsidy_size": 1,
         "pulse_h2_subsidy": 1,
+        "green_h2_subsidy_size": 1,
     },
 )
 def green_h2_subsidy():
@@ -291,8 +291,8 @@ def pulse_h2_subsidy():
     comp_subtype="Normal",
     depends_on={
         "aec_capex": 1,
-        "aec_opex": 1,
         "aec_af": 1,
+        "aec_opex": 1,
         "electrolyser_operating_hours": 1,
         "aec_efficiency": 2,
         "capex_multiplier": 1,
@@ -309,65 +309,6 @@ def raw_green_h2_cost():
         * capex_multiplier()
         + renewable_electricity_price() / aec_efficiency()
     ) * h2_lhv()
-
-
-@component.add(
-    name="Refinery Green H2 cost",
-    units="€/kg",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"green_h2_cost": 1, "refinery_h2_subsidy": 1},
-)
-def refinery_green_h2_cost():
-    return np.maximum(green_h2_cost() - refinery_h2_subsidy(), 0.1)
-
-
-@component.add(
-    name="refinery H2 actual subsidy",
-    units="€/kg",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"green_h2_cost": 1, "refinery_green_h2_cost": 1},
-)
-def refinery_h2_actual_subsidy():
-    return green_h2_cost() - refinery_green_h2_cost()
-
-
-@component.add(
-    name="refinery H2 subsidy",
-    units="€/kg",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "refinery_h2_subsidy_size": 1,
-        "time": 1,
-        "refinery_h2_subsidy_length": 1,
-    },
-)
-def refinery_h2_subsidy():
-    return refinery_h2_subsidy_size() * pulse(
-        __data["time"], 2025, width=refinery_h2_subsidy_length()
-    )
-
-
-@component.add(
-    name="refinery H2 subsidy length",
-    units="years",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def refinery_h2_subsidy_length():
-    return 10
-
-
-@component.add(
-    name="refinery H2 subsidy size",
-    units="€/kg",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def refinery_h2_subsidy_size():
-    return 0
 
 
 @component.add(

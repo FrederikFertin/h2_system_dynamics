@@ -122,8 +122,8 @@ _smooth_domestic_battery_inno_switch = Smooth(
         "domestic_shipping_reinvestment": 1,
         "innovators": 1,
         "domestic_battery_inno_switch": 1,
-        "domestic_battery_shipping_consumption": 1,
         "sum_dom_shipping": 2,
+        "domestic_battery_shipping_consumption": 1,
     },
 )
 def domestic_battery_innovators():
@@ -163,8 +163,8 @@ def domestic_battery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
         "domestic_battery_competitiveness": 1,
+        "cross_innovation": 1,
         "domestic_battery_shipping_consumption": 1,
         "sum_dom_shipping": 1,
     },
@@ -298,8 +298,8 @@ _smooth_domestic_h2_inno_switch = Smooth(
         "innovators": 1,
         "domestic_h2_inno_switch": 1,
         "domestic_shipping_reinvestment": 1,
-        "domestic_h2_shipping_consumption": 1,
         "sum_dom_shipping": 2,
+        "domestic_h2_shipping_consumption": 1,
     },
 )
 def domestic_h2_innovators():
@@ -404,8 +404,8 @@ def domestic_hfo_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "domestic_hfo_shipping_consumption": 1,
-        "ship_lifetime": 1,
         "domestic_hfo_early_decommission_rate": 1,
+        "ship_lifetime": 1,
     },
 )
 def domestic_hfo_decay():
@@ -592,8 +592,8 @@ _smooth_domestic_meoh_inno_switch = Smooth(
         "domestic_shipping_reinvestment": 1,
         "innovators": 1,
         "domestic_meoh_inno_switch": 1,
-        "domestic_meoh_shipping_consumption": 1,
         "sum_dom_shipping": 2,
+        "domestic_meoh_shipping_consumption": 1,
     },
 )
 def domestic_meoh_innovators():
@@ -680,10 +680,10 @@ _integ_domestic_meoh_shipping_consumption = Integ(
     depends_on={
         "domestic_hfo_shipping_consumption": 1,
         "hfo_ship_cost": 1,
-        "domestic_meoh_shipping_consumption": 1,
         "meoh_ship_cost": 1,
-        "domestic_battery_shipping_consumption": 1,
+        "domestic_meoh_shipping_consumption": 1,
         "be_ship_cost": 1,
+        "domestic_battery_shipping_consumption": 1,
         "fc_ship_cost": 1,
         "domestic_h2_shipping_consumption": 1,
         "yearly_hfo_consumption": 1,
@@ -908,18 +908,33 @@ def domestic_shipping_equalizer():
 
 
 @component.add(
+    name="domestic shipping FC hydrogen demand",
+    units="t H2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "domestic_h2_shipping_consumption": 1,
+        "ice_efficiency": 1,
+        "fc_efficiency": 1,
+        "h2_lhv": 1,
+    },
+)
+def domestic_shipping_fc_hydrogen_demand():
+    return (
+        (domestic_h2_shipping_consumption() * ice_efficiency() / fc_efficiency())
+        * 3600
+        / h2_lhv()
+    )
+
+
+@component.add(
     name="domestic shipping hydrogen demand",
     units="t H2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "domestic_meoh_shipping_consumption": 1,
-        "meoh_lhv": 1,
-        "meoh_h2_usage": 1,
-        "fc_efficiency": 1,
-        "ice_efficiency": 1,
-        "domestic_h2_shipping_consumption": 1,
-        "h2_lhv": 1,
+        "domestic_shipping_fc_hydrogen_demand": 1,
+        "domestic_shipping_meoh_hydrogen_demand": 1,
     },
 )
 def domestic_shipping_hydrogen_demand():
@@ -927,11 +942,24 @@ def domestic_shipping_hydrogen_demand():
     Convert from GWh to GJ, then from GJ to tons fuel, then from tons fuel to tons H2. Example 1: MeOH cons. [GWh] * 3600 [GJ/GWh] / 19.9 [GJ/t] / 15.7 [t MeOH/t H2] Example 2: NH3 cons. [GWh] * 3600 [GJ/GWh] / 18.6 [GJ/t] / 5.56 [t NH3/t H2]
     """
     return (
-        domestic_meoh_shipping_consumption() * 3600 / meoh_lhv() / meoh_h2_usage()
-        + (domestic_h2_shipping_consumption() * ice_efficiency() / fc_efficiency())
-        * 3600
-        / h2_lhv()
+        domestic_shipping_fc_hydrogen_demand()
+        + domestic_shipping_meoh_hydrogen_demand()
     )
+
+
+@component.add(
+    name="domestic shipping MeOH hydrogen demand",
+    units="t H2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "domestic_meoh_shipping_consumption": 1,
+        "meoh_lhv": 1,
+        "meoh_h2_usage": 1,
+    },
+)
+def domestic_shipping_meoh_hydrogen_demand():
+    return domestic_meoh_shipping_consumption() * 3600 / meoh_lhv() / meoh_h2_usage()
 
 
 @component.add(

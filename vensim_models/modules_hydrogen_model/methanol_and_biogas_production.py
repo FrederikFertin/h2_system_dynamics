@@ -51,8 +51,8 @@ def biogas_capex():
         "biogas_operating_hours": 1,
         "biogas_electricity_usage": 1,
         "renewable_electricity_price": 1,
-        "biogas_heat_usage": 1,
         "heat_cost": 1,
+        "biogas_heat_usage": 1,
         "biogas_biomass_usage": 1,
         "biomass_price": 1,
     },
@@ -142,16 +142,16 @@ def biogas_opex():
     depends_on={
         "meoh_learning": 1,
         "meoh_capex": 1,
-        "meoh_opex": 1,
         "meoh_af": 1,
+        "meoh_opex": 1,
         "meoh_operating_hours": 1,
         "meoh_lhv": 2,
         "heat_cost": 1,
         "renewable_electricity_price": 1,
-        "meoh_electricity_usage": 1,
         "meoh_excess_heat": 1,
-        "biomass_price": 1,
+        "meoh_electricity_usage": 1,
         "meoh_biomass_usage": 1,
+        "biomass_price": 1,
     },
 )
 def biomeoh_cost_without_h2():
@@ -179,8 +179,8 @@ def biomeoh_cost_without_h2():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_cost_without_h2": 1,
-        "blue_h2_cost": 1,
         "meoh_h2_usage": 1,
+        "blue_h2_cost": 1,
         "meoh_lhv": 1,
     },
 )
@@ -195,8 +195,8 @@ def blue_biomeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "emeoh_cost_without_hydrogen": 1,
-        "blue_h2_cost": 1,
         "emeoh_h2_usage": 1,
+        "blue_h2_cost": 1,
         "meoh_lhv": 1,
     },
 )
@@ -232,8 +232,8 @@ def convmeoh_capex():
     depends_on={
         "convmeoh_electricity_usage": 1,
         "grid_electricity_price": 1,
-        "convmeoh_emission_factor": 1,
         "carbon_tax": 1,
+        "convmeoh_emission_factor": 1,
         "convmeoh_gas_usage": 1,
         "gas_price": 1,
         "convmeoh_opex": 1,
@@ -344,17 +344,17 @@ def emeoh_co2_usage():
     comp_subtype="Normal",
     depends_on={
         "emeoh_capex": 1,
-        "emeoh_af": 1,
         "emeoh_opex": 1,
-        "emeoh_operating_hours": 1,
+        "emeoh_af": 1,
         "meoh_lhv": 2,
+        "emeoh_operating_hours": 1,
+        "emeoh_excess_heat": 1,
         "emeoh_electricity_usage": 1,
         "ps_cc_cost": 1,
-        "renewable_electricity_price": 1,
         "emeoh_co2_usage": 1,
-        "heat_cost": 1,
         "cc_capture_rate": 1,
-        "emeoh_excess_heat": 1,
+        "heat_cost": 1,
+        "renewable_electricity_price": 1,
     },
 )
 def emeoh_cost_without_hydrogen():
@@ -441,9 +441,9 @@ def emeoh_opex():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_cost_without_h2": 1,
-        "green_h2_cost": 1,
         "meoh_h2_usage": 1,
         "meoh_lhv": 1,
+        "green_h2_cost": 1,
     },
 )
 def green_biomeoh_cost():
@@ -457,9 +457,9 @@ def green_biomeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "emeoh_cost_without_hydrogen": 1,
-        "green_h2_cost": 1,
         "emeoh_h2_usage": 1,
         "meoh_lhv": 1,
+        "green_h2_cost": 1,
     },
 )
 def green_emeoh_cost():
@@ -475,9 +475,9 @@ def green_emeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_cost_without_h2": 1,
-        "grey_h2_cost": 1,
         "meoh_h2_usage": 1,
         "meoh_lhv": 1,
+        "grey_h2_cost": 1,
     },
 )
 def grey_biomeoh_cost():
@@ -491,9 +491,9 @@ def grey_biomeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "emeoh_cost_without_hydrogen": 1,
-        "grey_h2_cost": 1,
         "emeoh_h2_usage": 1,
         "meoh_lhv": 1,
+        "grey_h2_cost": 1,
     },
 )
 def grey_emeoh_cost():
@@ -575,8 +575,8 @@ def meoh_h2_usage():
     comp_subtype="Normal",
     depends_on={
         "meoh_plant_size": 2,
-        "domestic_meoh_shipping_consumption": 1,
         "meoh_shipping_consumption": 1,
+        "domestic_meoh_shipping_consumption": 1,
         "meoh_learning_rate": 1,
     },
 )
@@ -634,3 +634,22 @@ def meoh_opex():
 )
 def meoh_plant_size():
     return 400 * 1000 * 19.9 / 3600
+
+
+@component.add(
+    name="shipping bioMeOH cost",
+    units="€/MJ",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "biomeoh_cost_without_h2": 1,
+        "shipping_meoh_h2_cost": 1,
+        "meoh_h2_usage": 1,
+        "meoh_lhv": 1,
+    },
+)
+def shipping_biomeoh_cost():
+    return (
+        biomeoh_cost_without_h2()
+        + shipping_meoh_h2_cost() / meoh_h2_usage() / meoh_lhv()
+    )

@@ -128,8 +128,8 @@ _smooth_bio_naphtha_inno_switch = Smooth(
         "bio_naphtha_inno_switch": 1,
         "naphtha_feedstock_reinvestment": 1,
         "innovators": 1,
-        "sum_naphtha": 2,
         "bio_naphtha": 1,
+        "sum_naphtha": 2,
     },
 )
 def bio_naphtha_innovators():
@@ -169,8 +169,8 @@ def bio_naphtha_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
         "bio_naphtha_competitiveness": 1,
+        "cross_innovation": 1,
         "bio_naphtha": 1,
         "sum_naphtha": 1,
     },
@@ -182,6 +182,27 @@ def bio_naphtha_level():
         * bio_naphtha()
         / sum_naphtha()
     )
+
+
+@component.add(
+    name="BioNaphtha H2 Usage",
+    units="MWh H2/t Naphtha",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def bionaphtha_h2_usage():
+    return 0.78
+
+
+@component.add(
+    name="BioNaphtha hydrogen demand",
+    units="t H2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"bio_naphtha": 1, "bionaphtha_h2_usage": 1},
+)
+def bionaphtha_hydrogen_demand():
+    return bio_naphtha() * bionaphtha_h2_usage() / 33.33 * 10**6
 
 
 @component.add(
@@ -265,8 +286,8 @@ def f_naphtha_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "fossil_naphtha": 1,
-        "f_naphtha_early_decommission_rate": 1,
         "feedstock_lockin": 1,
+        "f_naphtha_early_decommission_rate": 1,
     },
 )
 def f_naphtha_decay():
@@ -314,8 +335,8 @@ def f_naphtha_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_conventional": 1,
         "f_naphtha_competitiveness": 1,
+        "cross_conventional": 1,
         "fossil_naphtha": 1,
         "sum_naphtha": 1,
     },
@@ -359,26 +380,6 @@ _integ_fossil_naphtha = Integ(
 
 
 @component.add(
-    name="hydrogen bio naphtha rate",
-    units="MWh H2/t naphtfa",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def hydrogen_bio_naphtha_rate():
-    return 0.78
-
-
-@component.add(
-    name="hydrogen synthetic naphtha rate",
-    units="MWh H2/t Naphfta",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def hydrogen_synthetic_naphtha_rate():
-    return 5.85
-
-
-@component.add(
     name="naphta olefin rate",
     units="t Naphfta / t HVC",
     comp_type="Constant",
@@ -396,8 +397,8 @@ def naphta_olefin_rate():
     depends_on={
         "bio_naphtha": 1,
         "bionaphtha_cost": 1,
-        "naphtha_cost": 1,
         "fossil_naphtha": 1,
+        "naphtha_cost": 1,
         "pyrolysisnaphtha_cost": 1,
         "recycled_naphtha": 1,
         "synthetic_naphtha": 1,
@@ -503,22 +504,10 @@ _integ_naphtha_feedstock_reinvestment = Integ(
     units="t H2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "bio_naphtha": 1,
-        "hydrogen_bio_naphtha_rate": 1,
-        "synthetic_naphtha": 1,
-        "hydrogen_synthetic_naphtha_rate": 1,
-    },
+    depends_on={"bionaphtha_hydrogen_demand": 1, "synnaphtha_hydrogen_demand": 1},
 )
 def naphtha_hydrogen_demand():
-    return (
-        (
-            bio_naphtha() * hydrogen_bio_naphtha_rate()
-            + synthetic_naphtha() * hydrogen_synthetic_naphtha_rate()
-        )
-        / 33.33
-        * 10**6
-    )
+    return bionaphtha_hydrogen_demand() + synnaphtha_hydrogen_demand()
 
 
 @component.add(
@@ -537,8 +526,8 @@ def naphtha_lhv():
         "olefin_production": 1,
         "mto": 1,
         "naphta_olefin_rate": 1,
-        "pulse_naphtha": 1,
         "pulse_size": 1,
+        "pulse_naphtha": 1,
     },
 )
 def naphtha_production():
@@ -775,8 +764,8 @@ def sum_naphtha():
     depends_on={
         "naphtha_cost": 1,
         "synnaphtha_cost": 3,
-        "bionaphtha_cost": 1,
         "pyrolysisnaphtha_cost": 1,
+        "bionaphtha_cost": 1,
     },
 )
 def syn_naphtha_competitiveness():
@@ -916,6 +905,27 @@ def syn_naphtha_level():
         * synthetic_naphtha()
         / sum_naphtha()
     )
+
+
+@component.add(
+    name="SynNaphtha H2 Usage",
+    units="MWh H2/t Naphfta",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def synnaphtha_h2_usage():
+    return 5.85
+
+
+@component.add(
+    name="SynNaphtha hydrogen demand",
+    units="t H2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"synthetic_naphtha": 1, "synnaphtha_h2_usage": 1},
+)
+def synnaphtha_hydrogen_demand():
+    return synthetic_naphtha() * synnaphtha_h2_usage() / 33.33 * 10**6
 
 
 @component.add(

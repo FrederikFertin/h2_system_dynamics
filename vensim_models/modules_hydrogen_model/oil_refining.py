@@ -31,11 +31,11 @@ _integ_blue_refinery = Integ(
     name="Blue refinery competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"grey_h2_cost": 1, "blue_h2_cost": 2, "refinery_green_h2_cost": 1},
+    depends_on={"grey_h2_cost": 1, "blue_h2_cost": 2, "refinery_h2_cost": 1},
 )
 def blue_refinery_competitiveness():
     return np.minimum(
-        grey_h2_cost() / blue_h2_cost(), refinery_green_h2_cost() / blue_h2_cost()
+        grey_h2_cost() / blue_h2_cost(), refinery_h2_cost() / blue_h2_cost()
     )
 
 
@@ -112,8 +112,8 @@ _smooth_blue_refinery_inno_switch = Smooth(
         "refinery_reinvestment": 1,
         "innovators": 1,
         "blue_refinery_inno_switch": 1,
-        "blue_refinery": 1,
         "sum_refining": 2,
+        "blue_refinery": 1,
     },
 )
 def blue_refinery_innovators():
@@ -252,12 +252,11 @@ _integ_green_refinery = Integ(
     name="Green refinery competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"blue_h2_cost": 1, "refinery_green_h2_cost": 2, "grey_h2_cost": 1},
+    depends_on={"blue_h2_cost": 1, "refinery_h2_cost": 2, "grey_h2_cost": 1},
 )
 def green_refinery_competitiveness():
     return np.minimum(
-        blue_h2_cost() / refinery_green_h2_cost(),
-        grey_h2_cost() / refinery_green_h2_cost(),
+        blue_h2_cost() / refinery_h2_cost(), grey_h2_cost() / refinery_h2_cost()
     )
 
 
@@ -425,11 +424,11 @@ _integ_grey_refinery = Integ(
     name="Grey refinery competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"blue_h2_cost": 1, "grey_h2_cost": 2, "refinery_green_h2_cost": 1},
+    depends_on={"blue_h2_cost": 1, "grey_h2_cost": 2, "refinery_h2_cost": 1},
 )
 def grey_refinery_competitiveness():
     return np.minimum(
-        blue_h2_cost() / grey_h2_cost(), refinery_green_h2_cost() / grey_h2_cost()
+        blue_h2_cost() / grey_h2_cost(), refinery_h2_cost() / grey_h2_cost()
     )
 
 
@@ -439,8 +438,8 @@ def grey_refinery_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "grey_refinery": 1,
-        "grey_refinery_early_decommission_rate": 1,
         "smr_lifetime": 1,
+        "grey_refinery_early_decommission_rate": 1,
     },
 )
 def grey_refinery_decay():
@@ -486,8 +485,8 @@ def grey_refinery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_conventional": 1,
         "grey_refinery_competitiveness": 1,
+        "cross_conventional": 1,
         "grey_refinery": 1,
         "sum_refining": 1,
     },
@@ -512,17 +511,17 @@ def grey_refinery_level():
     depends_on={
         "blue_refinery": 1,
         "blue_h2_cost": 1,
-        "refinery_green_h2_cost": 1,
+        "refinery_h2_cost": 1,
         "green_refinery": 1,
-        "grey_h2_cost": 1,
         "grey_refinery": 1,
+        "grey_h2_cost": 1,
         "sum_refining": 1,
     },
 )
 def refinery_average_cost():
     return (
         blue_refinery() * blue_h2_cost()
-        + green_refinery() * refinery_green_h2_cost()
+        + green_refinery() * refinery_h2_cost()
         + grey_refinery() * grey_h2_cost()
     ) / sum_refining()
 
@@ -612,8 +611,8 @@ def refinery_consumption():
     comp_subtype="Normal",
     depends_on={
         "grey_refinery": 1,
-        "blue_refinery": 1,
         "cc_capture_rate": 1,
+        "blue_refinery": 1,
         "smr_emission_factor": 1,
     },
 )

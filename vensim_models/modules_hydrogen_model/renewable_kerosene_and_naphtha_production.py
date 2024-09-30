@@ -56,9 +56,9 @@ def biokero_cost():
     depends_on={
         "biokero_cost": 1,
         "biokero_h2_usage": 1,
-        "h2_lhv": 1,
         "biokero_fraction": 1,
         "ft_h2_cost": 1,
+        "h2_lhv": 1,
     },
 )
 def biokero_cost_without_h2():
@@ -135,8 +135,8 @@ def biokero_gas_usage():
         "jetfuel_cost": 1,
         "biokero_cost_without_h2": 1,
         "biokero_h2_usage": 1,
-        "h2_lhv": 1,
         "biokero_fraction": 1,
+        "h2_lhv": 1,
     },
 )
 def biokero_h2_price_break():
@@ -220,9 +220,9 @@ def bionaphtha_cost():
     depends_on={
         "bionaphtha_cost": 1,
         "biokero_h2_usage": 1,
-        "h2_lhv": 1,
         "naphtha_fraction_bio": 1,
         "ft_h2_cost": 1,
+        "h2_lhv": 1,
     },
 )
 def bionaphtha_cost_without_h2():
@@ -247,85 +247,14 @@ def bionaphtha_cost_without_h2():
         "naphtha_cost": 1,
         "bionaphtha_cost_without_h2": 1,
         "biokero_h2_usage": 1,
-        "h2_lhv": 1,
         "naphtha_fraction_bio": 1,
+        "h2_lhv": 1,
     },
 )
 def bionaphtha_h2_price_break():
     return (naphtha_cost() - bionaphtha_cost_without_h2()) / (
         10**6 / h2_lhv() * biokero_h2_usage() / 3600 * 0.1 / naphtha_fraction_bio()
     )
-
-
-@component.add(
-    name="FT H2 actual subsidy",
-    units="€/kg",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"green_h2_cost": 1, "ft_h2_cost": 1},
-)
-def ft_h2_actual_subsidy():
-    return green_h2_cost() - ft_h2_cost()
-
-
-@component.add(
-    name="FT H2 cost",
-    units="€/kgH2",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"green_h2_cost": 1, "ft_h2_subsidy": 1},
-)
-def ft_h2_cost():
-    return np.maximum(green_h2_cost() - ft_h2_subsidy(), 0.1)
-
-
-@component.add(
-    name="FT H2 subsidy",
-    units="€/kg",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "ft_yearly_total_subsidies_limit": 1,
-        "domestic_aviation_subsidy_ytd": 1,
-        "international_aviation_subsidy_ytd": 1,
-        "ft_h2_subsidy_pulse": 1,
-        "ft_h2_subsidy_size": 1,
-    },
-)
-def ft_h2_subsidy():
-    return if_then_else(
-        ft_yearly_total_subsidies_limit()
-        >= domestic_aviation_subsidy_ytd() + international_aviation_subsidy_ytd(),
-        lambda: ft_h2_subsidy_size() * ft_h2_subsidy_pulse(),
-        lambda: 0,
-    )
-
-
-@component.add(
-    name="FT H2 subsidy pulse",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"time": 1},
-)
-def ft_h2_subsidy_pulse():
-    return pulse(__data["time"], 2025, width=10)
-
-
-@component.add(
-    name="FT H2 subsidy size", units="€/kg", comp_type="Constant", comp_subtype="Normal"
-)
-def ft_h2_subsidy_size():
-    return 0
-
-
-@component.add(
-    name="FT yearly total subsidies limit",
-    units="M€",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def ft_yearly_total_subsidies_limit():
-    return 10000 * 100
 
 
 @component.add(
@@ -336,21 +265,21 @@ def ft_yearly_total_subsidies_limit():
     depends_on={
         "biokero_electricity_usage": 1,
         "renewable_electricity_price": 1,
-        "biogas_cost": 1,
         "biokero_gas_usage": 1,
-        "oil_biomass_price": 1,
+        "biogas_cost": 1,
         "biokero_biomass_usage": 1,
+        "oil_biomass_price": 1,
         "biokero_h2_usage": 1,
-        "h2_lhv": 1,
         "ft_h2_cost": 1,
+        "h2_lhv": 1,
         "heat_cost": 1,
         "biokero_excess_heat": 1,
         "biokero_fraction": 1,
-        "biokero_operating_hours": 1,
-        "biokero_af": 1,
         "biokero_opex": 1,
-        "biokero_capex": 1,
+        "biokero_operating_hours": 1,
         "biokero_variable": 1,
+        "biokero_capex": 1,
+        "biokero_af": 1,
     },
 )
 def hvo_jet_total_costs():
@@ -369,17 +298,6 @@ def hvo_jet_total_costs():
         )
         * biokero_fraction()
     ) / 3600
-
-
-@component.add(
-    name="Hydrogen cost",
-    units="€/MJ",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"green_h2_cost": 1, "h2_lhv": 1},
-)
-def hydrogen_cost():
-    return green_h2_cost() / (h2_lhv() * 3.6)
 
 
 @component.add(
@@ -468,13 +386,13 @@ def synkero_co2_usage():
         "synkero_co2_usage": 1,
         "jetfuel_lhv": 1,
         "synkero_h2_usage": 1,
-        "ft_h2_cost": 1,
-        "renewable_electricity_price": 1,
-        "heat_cost": 1,
-        "synkero_electricity_usage": 1,
         "synkero_output": 1,
         "h2_lhv": 1,
+        "synkero_electricity_usage": 1,
+        "renewable_electricity_price": 1,
         "synkero_excess_heat": 1,
+        "heat_cost": 1,
+        "ft_h2_cost": 1,
         "synkero_operating_hours": 1,
         "synkero_capex": 1,
         "synkero_af": 1,
@@ -513,11 +431,11 @@ def synkero_cost():
     comp_subtype="Normal",
     depends_on={
         "synkero_cost": 1,
-        "ft_h2_cost": 1,
-        "synkero_output": 1,
-        "synkero_fraction": 1,
-        "h2_lhv": 1,
         "synkero_h2_usage": 1,
+        "synkero_output": 1,
+        "h2_lhv": 1,
+        "synkero_fraction": 1,
+        "ft_h2_cost": 1,
     },
 )
 def synkero_cost_without_h2():
@@ -582,9 +500,9 @@ def synkero_fraction():
     depends_on={
         "jetfuel_cost": 1,
         "synkero_cost_without_h2": 1,
-        "h2_lhv": 1,
         "synkero_h2_usage": 1,
         "synkero_output": 1,
+        "h2_lhv": 1,
         "synkero_fraction": 1,
     },
 )
@@ -729,10 +647,10 @@ def synnaphtha_fraction():
     depends_on={
         "naphtha_cost": 1,
         "synnaphtha_cost_without_h2": 1,
-        "h2_lhv": 1,
         "synkero_h2_usage": 1,
-        "synnaphtha_fraction": 1,
         "synkero_output": 1,
+        "synnaphtha_fraction": 1,
+        "h2_lhv": 1,
         "synkero_fraction": 1,
     },
 )

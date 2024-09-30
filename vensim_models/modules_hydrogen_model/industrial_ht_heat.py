@@ -32,13 +32,13 @@ _integ_biogas_nm = Integ(
     depends_on={
         "blue_ng_cost": 1,
         "biogas_cost": 3,
-        "green_h2_nm_cost": 1,
+        "nm_h2_gj_cost": 1,
         "grey_ng_cost": 1,
     },
 )
 def biogas_nm_competitiveness():
     return np.minimum(
-        np.minimum(blue_ng_cost() / biogas_cost(), green_h2_nm_cost() / biogas_cost()),
+        np.minimum(blue_ng_cost() / biogas_cost(), nm_h2_gj_cost() / biogas_cost()),
         grey_ng_cost() / biogas_cost(),
     )
 
@@ -116,8 +116,8 @@ _smooth_biogas_nm_inno_switch = Smooth(
         "nm_reinvestment": 1,
         "innovators": 1,
         "biogas_nm_inno_switch": 1,
-        "sum_nm": 2,
         "biogas_nm": 1,
+        "sum_nm": 2,
     },
 )
 def biogas_nm_innovators():
@@ -156,8 +156,8 @@ def biogas_nm_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "biogas_nm_competitiveness": 1,
         "cross_innovation": 1,
+        "biogas_nm_competitiveness": 1,
         "biogas_nm": 1,
         "sum_nm": 1,
     },
@@ -200,15 +200,13 @@ _integ_blue_ng_nm = Integ(
     depends_on={
         "grey_ng_cost": 1,
         "blue_ng_cost": 3,
-        "green_h2_nm_cost": 1,
+        "nm_h2_gj_cost": 1,
         "biogas_cost": 1,
     },
 )
 def blue_ng_nm_competitiveness():
     return np.minimum(
-        np.minimum(
-            grey_ng_cost() / blue_ng_cost(), green_h2_nm_cost() / blue_ng_cost()
-        ),
+        np.minimum(grey_ng_cost() / blue_ng_cost(), nm_h2_gj_cost() / blue_ng_cost()),
         biogas_cost() / blue_ng_cost(),
     )
 
@@ -286,8 +284,8 @@ _smooth_blue_ng_nm_inno_switch = Smooth(
         "nm_reinvestment": 1,
         "innovators": 1,
         "blue_ng_nm_inno_switch": 1,
-        "blue_ng_nm": 1,
         "sum_nm": 2,
+        "blue_ng_nm": 1,
     },
 )
 def blue_ng_nm_innovators():
@@ -402,20 +400,6 @@ def gas_lockin_factor():
 
 
 @component.add(
-    name="Green H2 NM cost",
-    units="€/GJ",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"green_h2_cost": 1},
-)
-def green_h2_nm_cost():
-    """
-    Converts the €/kg H2 price to a €/GJ H2 cost.
-    """
-    return green_h2_cost() / 120 * 1000
-
-
-@component.add(
     name="H2 NM",
     units="GWh",
     comp_type="Stateful",
@@ -443,17 +427,15 @@ _integ_h2_nm = Integ(
     comp_subtype="Normal",
     depends_on={
         "blue_ng_cost": 1,
-        "green_h2_nm_cost": 3,
+        "nm_h2_gj_cost": 3,
         "grey_ng_cost": 1,
         "biogas_cost": 1,
     },
 )
 def h2_nm_competitiveness():
     return np.minimum(
-        np.minimum(
-            blue_ng_cost() / green_h2_nm_cost(), grey_ng_cost() / green_h2_nm_cost()
-        ),
-        biogas_cost() / green_h2_nm_cost(),
+        np.minimum(blue_ng_cost() / nm_h2_gj_cost(), grey_ng_cost() / nm_h2_gj_cost()),
+        biogas_cost() / nm_h2_gj_cost(),
     )
 
 
@@ -594,12 +576,12 @@ def h2_nm_level():
     depends_on={
         "biogas_nm": 1,
         "biogas_cost": 1,
-        "blue_ng_nm": 1,
         "blue_ng_cost": 1,
-        "ng_nm": 1,
+        "blue_ng_nm": 1,
         "grey_ng_cost": 1,
+        "ng_nm": 1,
         "h2_nm": 1,
-        "green_h2_nm_cost": 1,
+        "nm_h2_gj_cost": 1,
         "sum_nm": 1,
     },
 )
@@ -612,7 +594,7 @@ def high_temperature_average_cost():
             biogas_nm() * biogas_cost()
             + blue_ng_nm() * blue_ng_cost()
             + ng_nm() * grey_ng_cost()
-            + h2_nm() * green_h2_nm_cost()
+            + h2_nm() * nm_h2_gj_cost()
         )
         / 1000
         * 120
@@ -696,15 +678,13 @@ _integ_ng_nm = Integ(
     depends_on={
         "blue_ng_cost": 1,
         "grey_ng_cost": 3,
-        "green_h2_nm_cost": 1,
+        "nm_h2_gj_cost": 1,
         "biogas_cost": 1,
     },
 )
 def ng_nm_competitiveness():
     return np.minimum(
-        np.minimum(
-            blue_ng_cost() / grey_ng_cost(), green_h2_nm_cost() / grey_ng_cost()
-        ),
+        np.minimum(blue_ng_cost() / grey_ng_cost(), nm_h2_gj_cost() / grey_ng_cost()),
         biogas_cost() / grey_ng_cost(),
     )
 
@@ -756,8 +736,8 @@ def ng_nm_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_conventional": 1,
         "ng_nm_competitiveness": 1,
+        "cross_conventional": 1,
         "ng_nm": 1,
         "sum_nm": 1,
     },

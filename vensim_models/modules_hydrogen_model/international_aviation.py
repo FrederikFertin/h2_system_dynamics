@@ -264,6 +264,20 @@ def international_aviation_average_cost():
 
 
 @component.add(
+    name="international aviation BioKero hydrogen demand",
+    units="t H2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"bio_kerosene_consumption": 1, "biokero_h2_usage": 1, "h2_lhv": 1},
+)
+def international_aviation_biokero_hydrogen_demand():
+    """
+    Convert from GWh jetfuel to GWh G2 - then to MWh H2 - then to tons H2
+    """
+    return bio_kerosene_consumption() * biokero_h2_usage() * 1000 / h2_lhv()
+
+
+@component.add(
     name="international aviation biomass demand",
     units="GWh Biomass",
     comp_type="Auxiliary",
@@ -450,11 +464,8 @@ def international_aviation_equalizer():
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "bio_kerosene_consumption": 1,
-        "biokero_h2_usage": 1,
-        "syn_kerosene_consumption": 1,
-        "synkero_h2_usage": 1,
-        "h2_lhv": 1,
+        "international_aviation_synkero_hydrogen_demand": 1,
+        "international_aviation_biokero_hydrogen_demand": 1,
     },
 )
 def international_aviation_hydrogen_demand():
@@ -462,12 +473,8 @@ def international_aviation_hydrogen_demand():
     Convert from GWh jetfuel to GWh G2 - then to MWh H2 - then to tons H2
     """
     return (
-        (
-            bio_kerosene_consumption() * biokero_h2_usage()
-            + syn_kerosene_consumption() * synkero_h2_usage()
-        )
-        * 1000
-        / h2_lhv()
+        international_aviation_synkero_hydrogen_demand()
+        + international_aviation_biokero_hydrogen_demand()
     )
 
 
@@ -513,6 +520,20 @@ _integ_international_aviation_reinvestment = Integ(
 
 
 @component.add(
+    name="international aviation SynKero hydrogen demand",
+    units="t H2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"syn_kerosene_consumption": 1, "synkero_h2_usage": 1, "h2_lhv": 1},
+)
+def international_aviation_synkero_hydrogen_demand():
+    """
+    Convert from GWh jetfuel to GWh G2 - then to MWh H2 - then to tons H2
+    """
+    return syn_kerosene_consumption() * synkero_h2_usage() * 1000 / h2_lhv()
+
+
+@component.add(
     name="Jetfuel competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -552,8 +573,8 @@ _integ_jetfuel_consumption = Integ(
     comp_subtype="Normal",
     depends_on={
         "jetfuel_consumption": 1,
-        "jetfuel_lockin_period": 1,
         "jetfuel_early_decommission_rate": 1,
+        "jetfuel_lockin_period": 1,
     },
 )
 def jetfuel_decay():
@@ -754,8 +775,8 @@ _smooth_syn_kerosene_inno_switch = Smooth(
         "international_aviation_reinvestment": 1,
         "innovators": 1,
         "syn_kerosene_inno_switch": 1,
-        "syn_kerosene_consumption": 1,
         "sum_international_aviation": 2,
+        "syn_kerosene_consumption": 1,
     },
 )
 def syn_kerosene_innovators():

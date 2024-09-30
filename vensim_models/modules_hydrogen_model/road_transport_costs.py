@@ -13,7 +13,9 @@ def battery_weight_penalty():
     """
     The levelized cost of trasnporting cargo with BE trucks is higher since the battery weight of 8 tons removes potential cargo from the assumed 14 tons of storage space. Following previously sourced material 75% of the 14 tons space is utilized on average. Motivates the discussion on whether trucks and buses should be evaluated on the same metrics.
     """
-    return (0.75 * 14) / (14 - 8) * hd_be_weight_penalty_on()
+    return if_then_else(
+        hd_be_weight_penalty_on() > 0.5, lambda: (0.75 * 14) / (14 - 8), lambda: 1
+    )
 
 
 @component.add(
@@ -129,13 +131,13 @@ def hd_be_energy_usage():
     comp_subtype="Normal",
     depends_on={
         "hd_be_capex": 1,
-        "vehicle_insurance": 1,
         "hd_af": 1,
+        "vehicle_insurance": 1,
         "hd_annual_km": 1,
         "hd_be_opex": 1,
+        "hd_be_energy_usage": 1,
         "grid_electricity_price": 1,
         "charging_efficiency": 1,
-        "hd_be_energy_usage": 1,
         "battery_weight_penalty": 1,
     },
 )
@@ -268,10 +270,10 @@ def hd_fc_energy_usage():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hd_fc_lco_without_h2": 1, "green_h2_cost": 1, "hd_fc_energy_usage": 1},
+    depends_on={"hd_fc_lco_without_h2": 1, "hd_h2_cost": 1, "hd_fc_energy_usage": 1},
 )
 def hd_fc_lco():
-    return hd_fc_lco_without_h2() + hd_fc_energy_usage() * green_h2_cost()
+    return hd_fc_lco_without_h2() + hd_fc_energy_usage() * hd_h2_cost()
 
 
 @component.add(
@@ -281,8 +283,8 @@ def hd_fc_lco():
     comp_subtype="Normal",
     depends_on={
         "hd_fc_capex": 1,
-        "vehicle_insurance": 1,
         "hd_af": 1,
+        "vehicle_insurance": 1,
         "hd_annual_km": 1,
         "hd_fc_opex": 1,
     },
@@ -396,8 +398,8 @@ def hd_ice_engine_cost():
     comp_subtype="Normal",
     depends_on={
         "hd_ice_capex": 1,
-        "vehicle_insurance": 1,
         "hd_af": 1,
+        "vehicle_insurance": 1,
         "hd_annual_km": 1,
         "hd_ice_opex": 1,
         "diesel_price": 1,
@@ -566,10 +568,10 @@ def ld_be_engine_capex():
         "ld_af": 1,
         "ld_annual_km": 1,
         "ld_be_opex": 1,
-        "grid_electricity_price": 1,
+        "charging_efficiency": 1,
         "ld_be_energy_usage": 1,
         "electricity_taxes": 1,
-        "charging_efficiency": 1,
+        "grid_electricity_price": 1,
     },
 )
 def ld_be_lco():
@@ -703,14 +705,10 @@ def ld_fc_engine_capex():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "ld_fc_lco_without_h2": 1,
-        "ld_fc_energy_usage": 1,
-        "ld_green_h2_price": 1,
-    },
+    depends_on={"ld_fc_lco_without_h2": 1, "ld_h2_cost": 1, "ld_fc_energy_usage": 1},
 )
 def ld_fc_lco():
-    return ld_fc_lco_without_h2() + ld_fc_energy_usage() * ld_green_h2_price()
+    return ld_fc_lco_without_h2() + ld_fc_energy_usage() * ld_h2_cost()
 
 
 @component.add(
@@ -789,27 +787,6 @@ def ld_fcev_efficiency():
     60% efficiency from energy content of H2 to energy delivered to the electric motor. 95% efficient electric motor.
     """
     return 0.57
-
-
-@component.add(
-    name="LD green H2 price",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "light_duty_subsidy_ytd": 1,
-        "green_h2_cost": 1,
-        "raw_green_h2_cost": 1,
-    },
-)
-def ld_green_h2_price():
-    """
-    Cap subsidy of light duty FCEV at 100 M€ per year.
-    """
-    return if_then_else(
-        light_duty_subsidy_ytd() < 1000000.0,
-        lambda: green_h2_cost(),
-        lambda: raw_green_h2_cost(),
-    )
 
 
 @component.add(

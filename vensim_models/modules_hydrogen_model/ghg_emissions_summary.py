@@ -360,6 +360,17 @@ def total_emissions():
 
 
 @component.add(
+    name="TOTAL EMISSIONS wo LD",
+    units="tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"total_emissions": 1, "light_duty_emissions": 1},
+)
+def total_emissions_wo_ld():
+    return total_emissions() - light_duty_emissions()
+
+
+@component.add(
     name="transportation CT revenue",
     units="M€",
     comp_type="Auxiliary",
