@@ -5,7 +5,7 @@ Translated using PySD version 3.14.0
 
 @component.add(
     name="Blue NH3 cost",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
@@ -16,12 +16,59 @@ Translated using PySD version 3.14.0
     },
 )
 def blue_nh3_cost():
-    return grey_nh3_cost_without_h2() + blue_h2_cost() / nh3_h2_usage() / nh3_lhv()
+    return (
+        grey_nh3_cost_without_h2() + blue_h2_cost() / nh3_h2_usage() / nh3_lhv() * 1000
+    )
+
+
+@component.add(
+    name="fertilizer H2 price break",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "min_alternative_nh3_cost": 1,
+        "green_nh3_cost_without_h2": 1,
+        "nh3_lhv": 1,
+        "nh3_h2_usage": 1,
+    },
+)
+def fertilizer_h2_price_break():
+    return (
+        (min_alternative_nh3_cost() - green_nh3_cost_without_h2())
+        * (nh3_lhv() * nh3_h2_usage())
+        / 1000
+    )
+
+
+@component.add(
+    name="fertilizer H2 price break marginal",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "min_alternative_nh3_cost": 1,
+        "nh3_lhv": 2,
+        "renewable_electricity_price": 1,
+        "nh3_el_usage": 1,
+        "nh3_h2_usage": 1,
+    },
+)
+def fertilizer_h2_price_break_marginal():
+    return (
+        (
+            min_alternative_nh3_cost()
+            - nh3_el_usage() * renewable_electricity_price() / nh3_lhv() * 1000
+        )
+        / 1000
+        * nh3_lhv()
+        * nh3_h2_usage()
+    )
 
 
 @component.add(
     name="fertilizer NH3 cost",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
@@ -33,23 +80,24 @@ def blue_nh3_cost():
 )
 def fertilizer_nh3_cost():
     return (
-        green_nh3_cost_without_h2() + fertilizer_h2_cost() / nh3_h2_usage() / nh3_lhv()
+        green_nh3_cost_without_h2()
+        + fertilizer_h2_cost() / nh3_h2_usage() / nh3_lhv() * 1000
     )
 
 
 @component.add(
     name="Green NH3 cost without H2",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "nh3_capex": 1,
-        "nh3_af": 1,
         "nh3_opex": 1,
+        "nh3_af": 1,
         "green_nh3_operating_hours": 1,
         "nh3_lhv": 2,
-        "nh3_el_usage": 1,
         "renewable_electricity_price": 1,
+        "nh3_el_usage": 1,
     },
 )
 def green_nh3_cost_without_h2():
@@ -61,7 +109,7 @@ def green_nh3_cost_without_h2():
         * (nh3_af() + nh3_opex())
         / (green_nh3_operating_hours() * nh3_lhv())
         + nh3_el_usage() * renewable_electricity_price() / nh3_lhv()
-    )
+    ) * 1000
 
 
 @component.add(
@@ -76,7 +124,7 @@ def green_nh3_operating_hours():
 
 @component.add(
     name="Grey NH3 cost",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
@@ -87,29 +135,31 @@ def green_nh3_operating_hours():
     },
 )
 def grey_nh3_cost():
-    return grey_nh3_cost_without_h2() + grey_h2_cost() / nh3_h2_usage() / nh3_lhv()
+    return (
+        grey_nh3_cost_without_h2() + grey_h2_cost() / nh3_h2_usage() / nh3_lhv() * 1000
+    )
 
 
 @component.add(
     name="Grey NH3 cost without H2",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "nh3_capex": 1,
-        "nh3_af": 1,
         "nh3_opex": 1,
-        "grey_nh3_operating_hours": 1,
+        "nh3_af": 1,
         "nh3_lhv": 2,
-        "nh3_el_usage": 1,
+        "grey_nh3_operating_hours": 1,
         "grid_electricity_price": 1,
+        "nh3_el_usage": 1,
     },
 )
 def grey_nh3_cost_without_h2():
     return (
         nh3_capex() * (nh3_af() + nh3_opex()) / (grey_nh3_operating_hours() * nh3_lhv())
         + nh3_el_usage() * grid_electricity_price() / nh3_lhv()
-    )
+    ) * 1000
 
 
 @component.add(
@@ -120,6 +170,17 @@ def grey_nh3_cost_without_h2():
 )
 def grey_nh3_operating_hours():
     return 8000
+
+
+@component.add(
+    name="min alternative NH3 cost",
+    units="€/GJ",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"blue_nh3_cost": 1, "grey_nh3_cost": 1},
+)
+def min_alternative_nh3_cost():
+    return np.minimum(blue_nh3_cost(), grey_nh3_cost())
 
 
 @component.add(
@@ -155,7 +216,7 @@ def nh3_h2_usage():
 
 
 @component.add(
-    name="NH3 LHV", units="MJ/kgNH3", comp_type="Constant", comp_subtype="Normal"
+    name="NH3 LHV", units="MJ/kgNH3", comp_type="Constant", comp_subtype="Unchangeable"
 )
 def nh3_lhv():
     return 18.6
@@ -180,7 +241,7 @@ def nh3_plant_lifetime():
 
 @component.add(
     name="shipping NH3 cost",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
@@ -193,5 +254,5 @@ def nh3_plant_lifetime():
 def shipping_nh3_cost():
     return (
         green_nh3_cost_without_h2()
-        + shipping_nh3_h2_cost() / nh3_h2_usage() / nh3_lhv()
+        + shipping_nh3_h2_cost() / nh3_h2_usage() / nh3_lhv() * 1000
     )

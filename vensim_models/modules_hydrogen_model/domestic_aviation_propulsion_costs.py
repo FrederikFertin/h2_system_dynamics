@@ -5,18 +5,18 @@ Translated using PySD version 3.14.0
 
 @component.add(
     name="Biokero propulsion cost",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"biokero_cost": 1, "opex_jet_engine": 1, "jet_engine_efficiency": 1},
+    depends_on={"biokero_cost": 1, "jet_engine_efficiency": 1},
 )
 def biokero_propulsion_cost():
-    return (biokero_cost() + opex_jet_engine()) / jet_engine_efficiency()
+    return biokero_cost() / jet_engine_efficiency()
 
 
 @component.add(
     name="H2 propulsion cost aviation",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
@@ -54,28 +54,21 @@ def jet_engine_efficiency():
 
 @component.add(
     name="Jetfuel propulsion cost",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"jetfuel_cost": 1, "opex_jet_engine": 1, "jet_engine_efficiency": 1},
+    depends_on={"jetfuel_cost": 1, "jet_engine_efficiency": 1},
 )
 def jetfuel_propulsion_cost():
-    return (jetfuel_cost() + opex_jet_engine()) / jet_engine_efficiency()
-
-
-@component.add(
-    name="OPEX jet engine", units="€/MJ", comp_type="Constant", comp_subtype="Normal"
-)
-def opex_jet_engine():
-    return 0
+    return jetfuel_cost() / jet_engine_efficiency()
 
 
 @component.add(
     name="Synkero propulsion cost",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"synkero_cost": 1, "opex_jet_engine": 1, "jet_engine_efficiency": 1},
+    depends_on={"synkero_cost": 1, "jet_engine_efficiency": 1},
 )
 def synkero_propulsion_cost():
-    return (synkero_cost() + opex_jet_engine()) / jet_engine_efficiency()
+    return synkero_cost() / jet_engine_efficiency()

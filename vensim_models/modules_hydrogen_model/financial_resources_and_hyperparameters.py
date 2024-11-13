@@ -18,6 +18,25 @@ def biomass_price():
 
 
 @component.add(
+    name="BIOMASS PRICE INIT",
+    units="€/GJ",
+    comp_type="Stateful",
+    comp_subtype="Initial",
+    depends_on={"_initial_biomass_price_init": 1},
+    other_deps={
+        "_initial_biomass_price_init": {"initial": {"biomass_price": 1}, "step": {}}
+    },
+)
+def biomass_price_init():
+    return _initial_biomass_price_init()
+
+
+_initial_biomass_price_init = Initial(
+    lambda: biomass_price(), "_initial_biomass_price_init"
+)
+
+
+@component.add(
     name="BIOMASS PRICE LOOKUP",
     units="€/GJ",
     comp_type="Lookup",
@@ -46,14 +65,14 @@ _hardcodedlookup_biomass_price_lookup = HardcodedLookups(
     units="€/tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"time": 1, "carbon_tax_lookup": 1},
+    depends_on={"time": 1, "carbon_tax_lookup": 1, "carbon_tax_sensitivity": 1},
 )
 def carbon_tax():
     """
     €/tCO2
     !Time
     """
-    return carbon_tax_lookup(time())
+    return carbon_tax_lookup(time()) * carbon_tax_sensitivity()
 
 
 @component.add(
@@ -75,6 +94,16 @@ _hardcodedlookup_carbon_tax_lookup = HardcodedLookups(
     {},
     "_hardcodedlookup_carbon_tax_lookup",
 )
+
+
+@component.add(
+    name="CARBON TAX SENSITIVITY",
+    units="scalar",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def carbon_tax_sensitivity():
+    return 1
 
 
 @component.add(
@@ -112,20 +141,38 @@ _hardcodedlookup_coal_price_lookup = HardcodedLookups(
 )
 
 
-@component.add(name="CROSS CONVENTIONAL", comp_type="Constant", comp_subtype="Normal")
+@component.add(name="CROSS", comp_type="Constant", comp_subtype="Normal")
+def cross():
+    return 1
+
+
+@component.add(
+    name="CROSS CONVENTIONAL",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"cross": 1},
+)
 def cross_conventional():
-    return 1
+    return cross()
 
 
-@component.add(name="CROSS INNOVATION", comp_type="Constant", comp_subtype="Normal")
+@component.add(
+    name="CROSS INNOVATION",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"cross": 1},
+)
 def cross_innovation():
-    return 1
+    return cross()
 
 
 @component.add(
     name="DISCOUNT RATE", units="percent", comp_type="Constant", comp_subtype="Normal"
 )
 def discount_rate():
+    """
+    General discount rate if nothing special is assumed.
+    """
     return 0.08
 
 
@@ -173,7 +220,7 @@ _hardcodedlookup_electricity_price_lookup = HardcodedLookups(
     comp_subtype="Normal",
 )
 def electricity_sensitivity():
-    return 0.5
+    return 1
 
 
 @component.add(
@@ -219,8 +266,8 @@ _hardcodedlookup_gas_price_lookup = HardcodedLookups(
     depends_on={
         "time": 1,
         "electricity_price_lookup": 1,
-        "carbon_tax": 1,
         "electricity_emission_factor": 1,
+        "carbon_tax": 1,
         "electricity_sensitivity": 1,
     },
 )
@@ -251,20 +298,6 @@ def k_p():
 )
 def model_seed():
     return time() * seed()
-
-
-@component.add(
-    name="OIL BIOMASS PRICE",
-    units="€/GJ",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"biomass_price": 1},
-)
-def oil_biomass_price():
-    """
-    Assumed to be similar to Wood Pellets. 1.5 times the average biomass price. Source for wood pellet price: "HRE_D6.1_Appendix_2 1"
-    """
-    return biomass_price() * 1.5
 
 
 @component.add(
@@ -347,7 +380,7 @@ def system_noise():
     return 0.03
 
 
-@component.add(name="USD to EUR", comp_type="Constant", comp_subtype="Normal")
+@component.add(name="USD to EUR", comp_type="Constant", comp_subtype="Unchangeable")
 def usd_to_eur():
     """
     https://www.google.com/finance/quote/USD-EUR?sa=X&sqi=2&ved=2ahUKEwjLjIbOkrCGAxUz3wIH HdJaCOAQmY0JegQIJBAw Exchange rate 28/05-2024

@@ -46,6 +46,36 @@ one = 1900
 zero = 2500
 
 y = [one*x**(np.log2(1-0.18)) if x > 1 else zero - (zero - one) * x for x in x_values]
+#%%
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+installed_cap = np.logspace(0,10,num=100,base=2)
+lr = [0.1, 0.12, 0.15, 0.18, 0.2, 0.25]
+xx, yy = np.meshgrid(installed_cap, lr)
+
+init_capex = np.linspace(1000, 2500, 5)
+
+z = []
+
+colors = ["green", "White", "Red", "Yellow", "pink", "Grey"]
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+for c in init_capex:
+    z.append([c * xx**(np.log2(1-yy))])
+
+for ix in range(len(z)):
+    ax.plot_surface(xx, yy*100, z[ix][0], color=colors[ix], alpha=0.8, label=f"Initial CAPEX: {init_capex[ix]}")
+    
+ax.set_ylabel("Learning rate [%]")
+ax.set_xlabel("Installed capacity [GW]")
+ax.set_zlabel("Capital cost [€/kW]")
+ax.set_title("Electrolysis CAPEX - learning curve")
+plt.legend(loc='best', bbox_to_anchor=(1.5, 0.5))
+plt.show()
+#%%
 """
 # plot y as a function of x
 plt.plot(x_values, y)
@@ -93,3 +123,4 @@ plt.xlabel("Competitiveness")
 plt.ylabel("Decommissioning rate [%]")
 plt.legend(loc='best')
 plt.show()
+

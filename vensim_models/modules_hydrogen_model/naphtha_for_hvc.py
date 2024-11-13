@@ -4,37 +4,6 @@ Translated using PySD version 3.14.0
 """
 
 @component.add(
-    name="Bio naphtha",
-    units="MT naphtha",
-    comp_type="Stateful",
-    comp_subtype="Integ",
-    depends_on={"_integ_bio_naphtha": 1},
-    other_deps={
-        "_smooth_bio_naphtha": {
-            "initial": {"bio_naphtha_investment": 1, "bio_naphtha_decay": 1},
-            "step": {"bio_naphtha_investment": 1, "bio_naphtha_decay": 1},
-        },
-        "_integ_bio_naphtha": {"initial": {}, "step": {"_smooth_bio_naphtha": 1}},
-    },
-)
-def bio_naphtha():
-    return _integ_bio_naphtha()
-
-
-_smooth_bio_naphtha = Smooth(
-    lambda: bio_naphtha_investment() - bio_naphtha_decay(),
-    lambda: 1,
-    lambda: bio_naphtha_investment() - bio_naphtha_decay(),
-    lambda: 1,
-    "_smooth_bio_naphtha",
-)
-
-_integ_bio_naphtha = Integ(
-    lambda: _smooth_bio_naphtha(), lambda: 0, "_integ_bio_naphtha"
-)
-
-
-@component.add(
     name="bio naphtha competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -59,10 +28,10 @@ def bio_naphtha_competitiveness():
     name="bio naphtha decay",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"bio_naphtha": 1, "feedstock_lockin": 1},
+    depends_on={"biogenic_naphtha": 1, "feedstock_lockin": 1},
 )
 def bio_naphtha_decay():
-    return bio_naphtha() / feedstock_lockin()
+    return biogenic_naphtha() / feedstock_lockin()
 
 
 @component.add(
@@ -128,7 +97,7 @@ _smooth_bio_naphtha_inno_switch = Smooth(
         "bio_naphtha_inno_switch": 1,
         "naphtha_feedstock_reinvestment": 1,
         "innovators": 1,
-        "bio_naphtha": 1,
+        "biogenic_naphtha": 1,
         "sum_naphtha": 2,
     },
 )
@@ -137,7 +106,7 @@ def bio_naphtha_innovators():
         bio_naphtha_inno_switch()
         * naphtha_feedstock_reinvestment()
         * innovators()
-        * (sum_naphtha() - bio_naphtha())
+        * (sum_naphtha() - biogenic_naphtha())
         / sum_naphtha()
     )
 
@@ -169,9 +138,9 @@ def bio_naphtha_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "bio_naphtha_competitiveness": 1,
         "cross_innovation": 1,
-        "bio_naphtha": 1,
+        "bio_naphtha_competitiveness": 1,
+        "biogenic_naphtha": 1,
         "sum_naphtha": 1,
     },
 )
@@ -179,9 +148,43 @@ def bio_naphtha_level():
     return (
         1
         / (1 + np.exp(slope() * (cross_innovation() - bio_naphtha_competitiveness())))
-        * bio_naphtha()
+        * biogenic_naphtha()
         / sum_naphtha()
     )
+
+
+@component.add(
+    name="Biogenic naphtha",
+    units="MT naphtha",
+    comp_type="Stateful",
+    comp_subtype="Integ",
+    depends_on={"_integ_biogenic_naphtha": 1},
+    other_deps={
+        "_smooth_biogenic_naphtha": {
+            "initial": {"bio_naphtha_investment": 1, "bio_naphtha_decay": 1},
+            "step": {"bio_naphtha_investment": 1, "bio_naphtha_decay": 1},
+        },
+        "_integ_biogenic_naphtha": {
+            "initial": {},
+            "step": {"_smooth_biogenic_naphtha": 1},
+        },
+    },
+)
+def biogenic_naphtha():
+    return _integ_biogenic_naphtha()
+
+
+_smooth_biogenic_naphtha = Smooth(
+    lambda: bio_naphtha_investment() - bio_naphtha_decay(),
+    lambda: 1,
+    lambda: bio_naphtha_investment() - bio_naphtha_decay(),
+    lambda: 1,
+    "_smooth_biogenic_naphtha",
+)
+
+_integ_biogenic_naphtha = Integ(
+    lambda: _smooth_biogenic_naphtha(), lambda: 0, "_integ_biogenic_naphtha"
+)
 
 
 @component.add(
@@ -199,10 +202,10 @@ def bionaphtha_h2_usage():
     units="t H2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"bio_naphtha": 1, "bionaphtha_h2_usage": 1},
+    depends_on={"biogenic_naphtha": 1, "bionaphtha_h2_usage": 1},
 )
 def bionaphtha_hydrogen_demand():
-    return bio_naphtha() * bionaphtha_h2_usage() / 33.33 * 10**6
+    return biogenic_naphtha() * bionaphtha_h2_usage() / 33.33 * 10**6
 
 
 @component.add(
@@ -286,8 +289,8 @@ def f_naphtha_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "fossil_naphtha": 1,
-        "feedstock_lockin": 1,
         "f_naphtha_early_decommission_rate": 1,
+        "feedstock_lockin": 1,
     },
 )
 def f_naphtha_decay():
@@ -335,8 +338,8 @@ def f_naphtha_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "f_naphtha_competitiveness": 1,
         "cross_conventional": 1,
+        "f_naphtha_competitiveness": 1,
         "fossil_naphtha": 1,
         "sum_naphtha": 1,
     },
@@ -395,12 +398,12 @@ def naphta_olefin_rate():
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "bio_naphtha": 1,
+        "biogenic_naphtha": 1,
         "bionaphtha_cost": 1,
-        "fossil_naphtha": 1,
         "naphtha_cost": 1,
-        "pyrolysisnaphtha_cost": 1,
+        "fossil_naphtha": 1,
         "recycled_naphtha": 1,
+        "pyrolysisnaphtha_cost": 1,
         "synthetic_naphtha": 1,
         "synnaphtha_cost": 1,
         "sum_naphtha": 1,
@@ -408,7 +411,7 @@ def naphta_olefin_rate():
 )
 def naphtha_average_cost():
     return (
-        bio_naphtha() * bionaphtha_cost()
+        biogenic_naphtha() * bionaphtha_cost()
         + fossil_naphtha() * naphtha_cost()
         + recycled_naphtha() * pyrolysisnaphtha_cost()
         + synthetic_naphtha() * synnaphtha_cost()
@@ -420,10 +423,10 @@ def naphtha_average_cost():
     units="GWh Biomass",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"bio_naphtha": 1, "naphtha_lhv": 1},
+    depends_on={"biogenic_naphtha": 1, "naphtha_lhv": 1},
 )
 def naphtha_biomass_demand():
-    return bio_naphtha() * (naphtha_lhv() / 3600) * 10**6
+    return biogenic_naphtha() * (naphtha_lhv() / 3600) * 10**6
 
 
 @component.add(
@@ -574,8 +577,8 @@ def pyrolysisnaphtha_cost():
     depends_on={
         "naphtha_cost": 1,
         "pyrolysisnaphtha_cost": 3,
-        "bionaphtha_cost": 1,
         "synnaphtha_cost": 1,
+        "bionaphtha_cost": 1,
     },
 )
 def recycled_competitiveness():
@@ -661,8 +664,8 @@ _smooth_recycled_inno_switch = Smooth(
         "naphtha_feedstock_reinvestment": 1,
         "innovators": 1,
         "recycled_inno_switch": 1,
-        "sum_naphtha": 2,
         "recycled_naphtha": 1,
+        "sum_naphtha": 2,
     },
 )
 def recycled_innovators():
@@ -747,14 +750,16 @@ _integ_recycled_naphtha = Integ(
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "bio_naphtha": 1,
+        "biogenic_naphtha": 1,
         "recycled_naphtha": 1,
         "synthetic_naphtha": 1,
         "fossil_naphtha": 1,
     },
 )
 def sum_naphtha():
-    return bio_naphtha() + recycled_naphtha() + synthetic_naphtha() + fossil_naphtha()
+    return (
+        biogenic_naphtha() + recycled_naphtha() + synthetic_naphtha() + fossil_naphtha()
+    )
 
 
 @component.add(
@@ -851,8 +856,8 @@ _smooth_syn_naphtha_inno_switch = Smooth(
         "naphtha_feedstock_reinvestment": 1,
         "innovators": 1,
         "syn_naphtha_inno_switch": 1,
-        "sum_naphtha": 2,
         "synthetic_naphtha": 1,
+        "sum_naphtha": 2,
     },
 )
 def syn_naphtha_innovators():
@@ -892,8 +897,8 @@ def syn_naphtha_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "syn_naphtha_competitiveness": 1,
         "cross_innovation": 1,
+        "syn_naphtha_competitiveness": 1,
         "synthetic_naphtha": 1,
         "sum_naphtha": 1,
     },

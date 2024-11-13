@@ -11,9 +11,9 @@ Translated using PySD version 3.14.0
     depends_on={
         "gas_price": 1,
         "ccs_cost": 1,
+        "gas_emission_factor": 1,
         "carbon_tax": 1,
         "cc_capture_rate": 1,
-        "gas_emission_factor": 1,
     },
 )
 def blue_ng_cost():
@@ -83,16 +83,16 @@ def grey_ng_cost():
 
 @component.add(
     name="HFO cost",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"oil_price": 1, "hfo_emission_factor": 1, "carbon_tax": 1},
+    depends_on={"oil_price": 1, "carbon_tax": 1, "hfo_emission_factor": 1},
 )
 def hfo_cost():
     """
-    €/MJ Oil
+    €/GJ Oil
     """
-    return oil_price() / 1000 + carbon_tax() * (hfo_emission_factor() / 1000)
+    return oil_price() + carbon_tax() * hfo_emission_factor()
 
 
 @component.add(
@@ -110,7 +110,7 @@ def hfo_emission_factor():
 
 
 @component.add(
-    name="HFO LHV", units="MJ/kg", comp_type="Constant", comp_subtype="Normal"
+    name="HFO LHV", units="MJ/kg", comp_type="Constant", comp_subtype="Unchangeable"
 )
 def hfo_lhv():
     return 39
@@ -118,21 +118,21 @@ def hfo_lhv():
 
 @component.add(
     name="Jetfuel cost",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "carbon_tax": 1,
         "jetfuel_emission_factor": 1,
-        "oil_price": 1,
         "jetfuel_crack_spread": 1,
+        "oil_price": 1,
     },
 )
 def jetfuel_cost():
     return (
         carbon_tax() * jetfuel_emission_factor()
         + (1 + jetfuel_crack_spread()) * oil_price()
-    ) / 1000
+    )
 
 
 @component.add(
@@ -169,8 +169,8 @@ def jetfuel_emission_factor():
     depends_on={
         "naphtha_crack_spread": 1,
         "oil_price": 1,
-        "carbon_tax": 1,
         "naphtha_emission_factor": 1,
+        "carbon_tax": 1,
     },
 )
 def naphtha_cost():

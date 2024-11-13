@@ -10,8 +10,8 @@ Translated using PySD version 3.14.0
     comp_subtype="Normal",
     depends_on={
         "bf_coal_cost": 1,
-        "ccs_cost": 1,
         "bf_coal_emission_factor": 1,
+        "ccs_cost": 1,
         "carbon_tax": 1,
         "cc_capture_rate": 1,
     },
@@ -40,13 +40,13 @@ def bf_coal_capex():
     depends_on={
         "carbon_tax": 1,
         "bf_coal_emission_factor": 1,
-        "coal_price": 1,
-        "coal_to_steel": 1,
         "coal_lhv": 1,
+        "coal_to_steel": 1,
+        "coal_price": 1,
         "grid_electricity_price": 1,
         "el_to_steel_bf_coal": 1,
-        "foundry_proxy_af": 1,
         "bf_coal_capex": 1,
+        "foundry_proxy_af": 1,
     },
 )
 def bf_coal_cost():
@@ -75,7 +75,7 @@ def bf_coal_emission_factor():
 
 
 @component.add(
-    name="Coal LHV", units="MJ/kg", comp_type="Constant", comp_subtype="Normal"
+    name="Coal LHV", units="MJ/kg", comp_type="Constant", comp_subtype="Unchangeable"
 )
 def coal_lhv():
     """
@@ -200,7 +200,7 @@ def hdri_capex_subsidy_length():
     comp_subtype="Normal",
 )
 def hdri_capex_subsidy_size():
-    return 0.2
+    return 0
 
 
 @component.add(
@@ -268,14 +268,58 @@ def hdri_plant_size():
 
 
 @component.add(
-    name="HDRI plants",
-    units="number",
+    name="new HDRI capacity",
+    units="Mtsteel/Year",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hdri_eaf_investment": 1, "hdri_plant_size": 1},
+    depends_on={"hdri_eaf_investment": 1},
 )
-def hdri_plants():
-    return hdri_eaf_investment() / hdri_plant_size()
+def new_hdri_capacity():
+    return hdri_eaf_investment()
+
+
+@component.add(
+    name="steel H2 price break",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "bf_ccs_cost": 1,
+        "bf_coal_cost": 1,
+        "hdri_cost_without_h2": 1,
+        "h2_to_steel": 1,
+    },
+)
+def steel_h2_price_break():
+    return (
+        (np.minimum(bf_ccs_cost(), bf_coal_cost()) - hdri_cost_without_h2())
+        / 1000
+        / h2_to_steel()
+    )
+
+
+@component.add(
+    name="steel H2 price break marginal",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "bf_ccs_cost": 1,
+        "bf_coal_cost": 1,
+        "el_to_steel_hdri": 1,
+        "renewable_electricity_price": 1,
+        "h2_to_steel": 1,
+    },
+)
+def steel_h2_price_break_marginal():
+    return (
+        (
+            np.minimum(bf_ccs_cost(), bf_coal_cost())
+            - (renewable_electricity_price() * 1000) * (el_to_steel_hdri() / 3.6)
+        )
+        / 1000
+        / h2_to_steel()
+    )
 
 
 @component.add(
@@ -287,7 +331,11 @@ def hdri_plants():
     other_deps={
         "_integ_total_hdri_capex_subsidy": {
             "initial": {},
-            "step": {"hdri_capex_subsidy": 1, "hdri_plant_size": 1, "hdri_plants": 1},
+            "step": {
+                "hdri_capex_subsidy": 1,
+                "foundry_lifetime": 1,
+                "new_hdri_capacity": 1,
+            },
         }
     },
 )
@@ -296,7 +344,7 @@ def total_hdri_capex_subsidy():
 
 
 _integ_total_hdri_capex_subsidy = Integ(
-    lambda: hdri_capex_subsidy() * hdri_plant_size() * 25 * hdri_plants(),
+    lambda: hdri_capex_subsidy() * foundry_lifetime() * new_hdri_capacity(),
     lambda: 0,
     "_integ_total_hdri_capex_subsidy",
 )

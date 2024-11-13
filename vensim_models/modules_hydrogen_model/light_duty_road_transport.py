@@ -79,8 +79,8 @@ def ice_car_ban():
         "ld_be_lco": 1,
         "ld_fc_lco": 1,
         "ld_fcev_consumption": 1,
-        "ld_fossil_consumption": 1,
         "ld_ice_lco": 1,
+        "ld_fossil_consumption": 1,
         "ld_ice_energy_usage": 1,
         "diesel_lhv": 1,
         "sum_ld_rt": 1,
@@ -474,8 +474,8 @@ _integ_ld_fossil_consumption = Integ(
     comp_subtype="Normal",
     depends_on={
         "ld_fossil_consumption": 1,
-        "ld_lifetime": 1,
         "ld_fossil_early_decommission_rate": 1,
+        "ld_lifetime": 1,
     },
 )
 def ld_fossil_decay():
@@ -521,11 +521,11 @@ def ld_fossil_investment_level():
     comp_subtype="Normal",
     depends_on={
         "ice_car_ban": 1,
-        "ld_fossil_consumption": 1,
-        "slope": 1,
-        "cross_conventional": 1,
-        "sum_ld_rt": 1,
         "ld_fossil_competitiveness": 1,
+        "ld_fossil_consumption": 1,
+        "cross_conventional": 1,
+        "slope": 1,
+        "sum_ld_rt": 1,
     },
 )
 def ld_fossil_level():
@@ -637,11 +637,11 @@ _integ_ld_rt_reinvestment = Integ(
     depends_on={
         "ld_fossil_consumption": 1,
         "diesel_emission_factor": 1,
-        "ld_bev_consumption": 1,
         "ld_ice_efficiency": 1,
-        "ld_ev_efficiency": 1,
-        "electricity_emission_factor": 1,
         "charging_efficiency": 1,
+        "ld_ev_efficiency": 1,
+        "ld_bev_consumption": 1,
+        "electricity_emission_factor": 1,
     },
 )
 def light_duty_emissions():

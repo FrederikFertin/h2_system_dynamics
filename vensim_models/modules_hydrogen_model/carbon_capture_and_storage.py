@@ -4,23 +4,42 @@ Translated using PySD version 3.14.0
 """
 
 @component.add(
+    name="Carbon Storage CAPEX",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"cs_capex": 1, "cs_proxy_af": 1},
+)
+def carbon_storage_capex():
+    return cs_capex() * cs_proxy_af()
+
+
+@component.add(
     name="Carbon Storage cost",
     units="€/tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
+    depends_on={"carbon_storage_capex": 1, "carbon_storage_opex": 1},
+)
+def carbon_storage_cost():
+    return carbon_storage_capex() + carbon_storage_opex()
+
+
+@component.add(
+    name="Carbon Storage OPEX",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
     depends_on={
-        "cs_capex": 1,
-        "cs_proxy_af": 1,
         "cs_decommisioning": 1,
         "cs_fixed_opex": 1,
         "cs_other_expenditures": 1,
         "cs_variable_cost": 1,
     },
 )
-def carbon_storage_cost():
+def carbon_storage_opex():
     return (
-        cs_capex() * cs_proxy_af()
-        + cs_decommisioning()
+        cs_decommisioning()
         + cs_fixed_opex()
         + cs_other_expenditures()
         + cs_variable_cost()
@@ -34,9 +53,9 @@ def carbon_storage_cost():
     comp_subtype="Normal",
     depends_on={
         "ct_distance": 1,
-        "ct_capex": 1,
-        "ct_opex": 1,
         "ct_af": 1,
+        "ct_opex": 1,
+        "ct_capex": 1,
         "ct_capacity_factor": 1,
     },
 )
@@ -160,18 +179,40 @@ def cc_variable_cost():
 
 
 @component.add(
+    name="CCS CAPEX",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"carbon_storage_capex": 1, "ps_cc_capex": 1},
+)
+def ccs_capex():
+    return carbon_storage_capex() + ps_cc_capex()
+
+
+@component.add(
     name="CCS cost",
     units="€/tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "ps_cc_cost": 1,
-        "carbon_transportation_cost": 1,
-        "carbon_storage_cost": 1,
-    },
+    depends_on={"ccs_capex": 1, "ccs_opex": 1},
 )
 def ccs_cost():
-    return ps_cc_cost() + carbon_transportation_cost() + carbon_storage_cost()
+    return ccs_capex() + ccs_opex()
+
+
+@component.add(
+    name="CCS OPEX",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "carbon_storage_opex": 1,
+        "carbon_transportation_cost": 1,
+        "ps_cc_opex": 1,
+    },
+)
+def ccs_opex():
+    return carbon_storage_opex() + carbon_transportation_cost() + ps_cc_opex()
 
 
 @component.add(
@@ -325,26 +366,45 @@ def heat_cost():
 
 
 @component.add(
+    name="PS CC CAPEX",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"cc_capex": 1, "cc_capacity_factor": 1, "cc_fixed_opex": 1, "cc_af": 1},
+)
+def ps_cc_capex():
+    return (
+        cc_capex() * 10**6 / (8760 * cc_capacity_factor()) * (cc_fixed_opex() + cc_af())
+    )
+
+
+@component.add(
     name="PS CC cost",
     units="€/tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
+    depends_on={"ps_cc_capex": 1, "ps_cc_opex": 1},
+)
+def ps_cc_cost():
+    return ps_cc_capex() + ps_cc_opex()
+
+
+@component.add(
+    name="PS CC OPEX",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
     depends_on={
-        "cc_capex": 1,
-        "cc_capacity_factor": 1,
-        "cc_af": 1,
-        "cc_fixed_opex": 1,
-        "grid_electricity_price": 1,
         "cc_electricity_usage": 1,
-        "cc_heat_usage": 1,
+        "grid_electricity_price": 1,
         "heat_cost": 1,
+        "cc_heat_usage": 1,
         "cc_variable_cost": 1,
     },
 )
-def ps_cc_cost():
+def ps_cc_opex():
     return (
-        cc_capex() * 10**6 / (8760 * cc_capacity_factor()) * (cc_fixed_opex() + cc_af())
-        + cc_electricity_usage() * grid_electricity_price() * 1000
+        cc_electricity_usage() * grid_electricity_price() * 1000
         + cc_heat_usage() * heat_cost()
         + cc_variable_cost()
     )

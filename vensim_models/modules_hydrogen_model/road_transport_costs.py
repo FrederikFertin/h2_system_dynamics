@@ -7,25 +7,25 @@ Translated using PySD version 3.14.0
     name="battery weight penalty",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hd_be_weight_penalty_on": 1},
+    depends_on={"hd_be_weight_penalty_switch": 1},
 )
 def battery_weight_penalty():
     """
     The levelized cost of trasnporting cargo with BE trucks is higher since the battery weight of 8 tons removes potential cargo from the assumed 14 tons of storage space. Following previously sourced material 75% of the 14 tons space is utilized on average. Motivates the discussion on whether trucks and buses should be evaluated on the same metrics.
     """
     return if_then_else(
-        hd_be_weight_penalty_on() > 0.5, lambda: (0.75 * 14) / (14 - 8), lambda: 1
+        hd_be_weight_penalty_switch() > 0.5, lambda: (0.75 * 14) / (14 - 8), lambda: 1
     )
 
 
 @component.add(
-    name="Diesel LHV", units="kWh/l", comp_type="Constant", comp_subtype="Normal"
+    name="Diesel LHV", units="kWh/l", comp_type="Constant", comp_subtype="Unchangeable"
 )
 def diesel_lhv():
     """
     https://www.engineeringtoolbox.com/fuels-higher-calorific-values-d_169.html
     """
-    return 36 / 3.6
+    return 10
 
 
 @component.add(
@@ -97,19 +97,27 @@ def hd_battery_weight():
 
 @component.add(
     name="HD BE CAPEX",
+    units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "hd_be_powertrain_capex": 1,
         "hd_be_storage_capex": 1,
         "hd_rest_of_vehicle_capex": 1,
+        "vehicle_insurance": 1,
+        "hd_af": 1,
+        "hd_annual_km": 1,
     },
 )
 def hd_be_capex():
     return (
-        hd_be_powertrain_capex()
-        + hd_be_storage_capex() * 1.6
-        + hd_rest_of_vehicle_capex()
+        (
+            hd_be_powertrain_capex()
+            + hd_be_storage_capex() * 1.6
+            + hd_rest_of_vehicle_capex()
+        )
+        * (hd_af() + vehicle_insurance())
+        / hd_annual_km()
     )
 
 
@@ -129,34 +137,39 @@ def hd_be_energy_usage():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "hd_be_capex": 1,
-        "hd_af": 1,
-        "vehicle_insurance": 1,
-        "hd_annual_km": 1,
-        "hd_be_opex": 1,
-        "hd_be_energy_usage": 1,
-        "grid_electricity_price": 1,
-        "charging_efficiency": 1,
-        "battery_weight_penalty": 1,
-    },
+    depends_on={"hd_be_capex": 1, "hd_be_opex": 1, "battery_weight_penalty": 1},
 )
 def hd_be_lco():
-    return (
-        hd_be_capex() * (hd_af() + vehicle_insurance()) / hd_annual_km()
-        + hd_be_opex()
-        + (hd_be_energy_usage() / charging_efficiency()) * grid_electricity_price()
-    ) * battery_weight_penalty()
+    return (hd_be_capex() + hd_be_opex()) * battery_weight_penalty()
 
 
 @component.add(
-    name="HD BE OPEX", units="€/km", comp_type="Constant", comp_subtype="Normal"
+    name="HD BE OM", units="€/km", comp_type="Constant", comp_subtype="Normal"
 )
-def hd_be_opex():
+def hd_be_om():
     """
     Sourced from results graph in source.
     """
     return 0.074
+
+
+@component.add(
+    name="HD BE OPEX",
+    units="€/km",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "hd_be_om": 1,
+        "hd_be_energy_usage": 1,
+        "grid_electricity_price": 1,
+        "charging_efficiency": 1,
+    },
+)
+def hd_be_opex():
+    return (
+        hd_be_om()
+        + (hd_be_energy_usage() / charging_efficiency()) * grid_electricity_price()
+    )
 
 
 @component.add(
@@ -196,13 +209,13 @@ def hd_be_storage_capex():
 
 
 @component.add(
-    name="HD BE weight penalty ON", comp_type="Constant", comp_subtype="Normal"
+    name="HD BE weight penalty switch", comp_type="Constant", comp_subtype="Normal"
 )
-def hd_be_weight_penalty_on():
+def hd_be_weight_penalty_switch():
     """
     1 if activated, 0 if not
     """
-    return 1
+    return 0
 
 
 @component.add(
@@ -237,16 +250,24 @@ def hd_ev_efficiency():
 
 @component.add(
     name="HD FC CAPEX",
+    units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "hd_fc_powertrain_capex": 1,
         "hd_fc_storage_capex": 1,
         "hd_rest_of_vehicle_capex": 1,
+        "vehicle_insurance": 1,
+        "hd_af": 1,
+        "hd_annual_km": 1,
     },
 )
 def hd_fc_capex():
-    return hd_fc_powertrain_capex() + hd_fc_storage_capex() + hd_rest_of_vehicle_capex()
+    return (
+        (hd_fc_powertrain_capex() + hd_fc_storage_capex() + hd_rest_of_vehicle_capex())
+        * (hd_af() + vehicle_insurance())
+        / hd_annual_km()
+    )
 
 
 @component.add(
@@ -270,7 +291,7 @@ def hd_fc_energy_usage():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hd_fc_lco_without_h2": 1, "hd_h2_cost": 1, "hd_fc_energy_usage": 1},
+    depends_on={"hd_fc_lco_without_h2": 1, "hd_fc_energy_usage": 1, "hd_h2_cost": 1},
 )
 def hd_fc_lco():
     return hd_fc_lco_without_h2() + hd_fc_energy_usage() * hd_h2_cost()
@@ -281,24 +302,16 @@ def hd_fc_lco():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "hd_fc_capex": 1,
-        "hd_af": 1,
-        "vehicle_insurance": 1,
-        "hd_annual_km": 1,
-        "hd_fc_opex": 1,
-    },
+    depends_on={"hd_fc_capex": 1, "hd_fc_om": 1},
 )
 def hd_fc_lco_without_h2():
-    return (
-        hd_fc_capex() * (hd_af() + vehicle_insurance()) / hd_annual_km() + hd_fc_opex()
-    )
+    return hd_fc_capex() + hd_fc_om()
 
 
 @component.add(
-    name="HD FC OPEX", units="€/km", comp_type="Constant", comp_subtype="Normal"
+    name="HD FC OM", units="€/km", comp_type="Constant", comp_subtype="Normal"
 )
-def hd_fc_opex():
+def hd_fc_om():
     """
     Sourced from results graph in source - assumed similar to BE OPEX.
     """
@@ -359,17 +372,27 @@ def hd_fcev_efficiency():
 
 @component.add(
     name="HD ICE CAPEX",
+    units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "hd_ice_powertrain_capex": 1,
         "hd_ice_storage_capex": 1,
         "hd_rest_of_vehicle_capex": 1,
+        "vehicle_insurance": 1,
+        "hd_af": 1,
+        "hd_annual_km": 1,
     },
 )
 def hd_ice_capex():
     return (
-        hd_ice_powertrain_capex() + hd_ice_storage_capex() + hd_rest_of_vehicle_capex()
+        (
+            hd_ice_powertrain_capex()
+            + hd_ice_storage_capex()
+            + hd_rest_of_vehicle_capex()
+        )
+        * (hd_af() + vehicle_insurance())
+        / hd_annual_km()
     )
 
 
@@ -396,32 +419,31 @@ def hd_ice_engine_cost():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "hd_ice_capex": 1,
-        "hd_af": 1,
-        "vehicle_insurance": 1,
-        "hd_annual_km": 1,
-        "hd_ice_opex": 1,
-        "diesel_price": 1,
-        "hd_ice_energy_usage": 1,
-    },
+    depends_on={"hd_ice_capex": 1, "hd_ice_opex": 1},
 )
 def hd_ice_lco():
-    return (
-        hd_ice_capex() * (hd_af() + vehicle_insurance()) / hd_annual_km()
-        + hd_ice_opex()
-        + hd_ice_energy_usage() * diesel_price()
-    )
+    return hd_ice_capex() + hd_ice_opex()
 
 
 @component.add(
-    name="HD ICE OPEX", units="€/km", comp_type="Constant", comp_subtype="Normal"
+    name="HD ICE OM", units="€/km", comp_type="Constant", comp_subtype="Normal"
 )
-def hd_ice_opex():
+def hd_ice_om():
     """
     Sourced from results graph in source.
     """
     return 0.11
+
+
+@component.add(
+    name="HD ICE OPEX",
+    units="€/km",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"hd_ice_om": 1, "hd_ice_energy_usage": 1, "diesel_price": 1},
+)
+def hd_ice_opex():
+    return hd_ice_om() + hd_ice_energy_usage() * diesel_price()
 
 
 @component.add(
@@ -524,16 +546,24 @@ def ld_annual_km():
 
 @component.add(
     name="LD BE CAPEX",
+    units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "ld_be_engine_capex": 1,
         "ld_be_storage_capex": 1,
         "ld_rest_of_vehicle_capex": 1,
+        "vehicle_insurance": 1,
+        "ld_af": 1,
+        "ld_annual_km": 1,
     },
 )
 def ld_be_capex():
-    return ld_be_engine_capex() + ld_be_storage_capex() + ld_rest_of_vehicle_capex()
+    return (
+        (ld_be_engine_capex() + ld_be_storage_capex() + ld_rest_of_vehicle_capex())
+        * (ld_af() + vehicle_insurance())
+        / ld_annual_km()
+    )
 
 
 @component.add(
@@ -562,35 +592,39 @@ def ld_be_engine_capex():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "ld_be_capex": 1,
-        "vehicle_insurance": 1,
-        "ld_af": 1,
-        "ld_annual_km": 1,
-        "ld_be_opex": 1,
-        "charging_efficiency": 1,
-        "ld_be_energy_usage": 1,
-        "electricity_taxes": 1,
-        "grid_electricity_price": 1,
-    },
+    depends_on={"ld_be_capex": 1, "ld_be_opex": 1},
 )
 def ld_be_lco():
-    return (
-        ld_be_capex() * (ld_af() + vehicle_insurance()) / ld_annual_km()
-        + ld_be_opex()
-        + (ld_be_energy_usage() / charging_efficiency())
-        * (grid_electricity_price() * electricity_taxes())
-    )
+    return ld_be_capex() + ld_be_opex()
 
 
 @component.add(
-    name="LD BE OPEX", units="€/km", comp_type="Constant", comp_subtype="Normal"
+    name="LD BE OM", units="€/km", comp_type="Constant", comp_subtype="Normal"
 )
-def ld_be_opex():
+def ld_be_om():
     """
     Sourced from results graph in source. Assumed to be 1/10th of the O&M associated with a heavy duty truck.
     """
     return 0.074 / 10
+
+
+@component.add(
+    name="LD BE OPEX",
+    units="€/km",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "ld_be_om": 1,
+        "electricity_taxes": 1,
+        "grid_electricity_price": 1,
+        "ld_be_energy_usage": 1,
+        "charging_efficiency": 1,
+    },
+)
+def ld_be_opex():
+    return ld_be_om() + (ld_be_energy_usage() / charging_efficiency()) * (
+        grid_electricity_price() * electricity_taxes()
+    )
 
 
 @component.add(
@@ -658,16 +692,24 @@ def ld_ev_efficiency():
 
 @component.add(
     name="LD FC CAPEX",
+    units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "ld_fc_engine_capex": 1,
         "ld_fc_storage_capex": 1,
         "ld_rest_of_vehicle_capex": 1,
+        "vehicle_insurance": 1,
+        "ld_af": 1,
+        "ld_annual_km": 1,
     },
 )
 def ld_fc_capex():
-    return ld_fc_engine_capex() + ld_fc_storage_capex() + ld_rest_of_vehicle_capex()
+    return (
+        (ld_fc_engine_capex() + ld_fc_storage_capex() + ld_rest_of_vehicle_capex())
+        * (ld_af() + vehicle_insurance())
+        / ld_annual_km()
+    )
 
 
 @component.add(
@@ -705,7 +747,7 @@ def ld_fc_engine_capex():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"ld_fc_lco_without_h2": 1, "ld_h2_cost": 1, "ld_fc_energy_usage": 1},
+    depends_on={"ld_fc_lco_without_h2": 1, "ld_fc_energy_usage": 1, "ld_h2_cost": 1},
 )
 def ld_fc_lco():
     return ld_fc_lco_without_h2() + ld_fc_energy_usage() * ld_h2_cost()
@@ -716,24 +758,16 @@ def ld_fc_lco():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "ld_fc_capex": 1,
-        "vehicle_insurance": 1,
-        "ld_af": 1,
-        "ld_annual_km": 1,
-        "ld_fc_opex": 1,
-    },
+    depends_on={"ld_fc_capex": 1, "ld_fc_om": 1},
 )
 def ld_fc_lco_without_h2():
-    return (
-        ld_fc_capex() * (ld_af() + vehicle_insurance()) / ld_annual_km() + ld_fc_opex()
-    )
+    return ld_fc_capex() + ld_fc_om()
 
 
 @component.add(
-    name="LD FC OPEX", units="€/km", comp_type="Constant", comp_subtype="Normal"
+    name="LD FC OM", units="€/km", comp_type="Constant", comp_subtype="Normal"
 )
-def ld_fc_opex():
+def ld_fc_om():
     """
     Sourced from results graph in source - assumed similar to BE OPEX. Assumed to be 1/10th of the O&M associated with a heavy duty truck.
     """
@@ -791,16 +825,24 @@ def ld_fcev_efficiency():
 
 @component.add(
     name="LD ICE CAPEX",
+    units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "ld_ice_engine_capex": 1,
         "ld_ice_storage_capex": 1,
         "ld_rest_of_vehicle_capex": 1,
+        "vehicle_insurance": 1,
+        "ld_af": 1,
+        "ld_annual_km": 1,
     },
 )
 def ld_ice_capex():
-    return ld_ice_engine_capex() + ld_ice_storage_capex() + ld_rest_of_vehicle_capex()
+    return (
+        (ld_ice_engine_capex() + ld_ice_storage_capex() + ld_rest_of_vehicle_capex())
+        * (ld_af() + vehicle_insurance())
+        / ld_annual_km()
+    )
 
 
 @component.add(
@@ -836,32 +878,31 @@ def ld_ice_engine_cost():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "ld_ice_capex": 1,
-        "vehicle_insurance": 1,
-        "ld_af": 1,
-        "ld_annual_km": 1,
-        "ld_ice_opex": 1,
-        "diesel_price": 1,
-        "ld_ice_energy_usage": 1,
-    },
+    depends_on={"ld_ice_capex": 1, "ld_ice_opex": 1},
 )
 def ld_ice_lco():
-    return (
-        ld_ice_capex() * (ld_af() + vehicle_insurance()) / ld_annual_km()
-        + ld_ice_opex()
-        + ld_ice_energy_usage() * diesel_price()
-    )
+    return ld_ice_capex() + ld_ice_opex()
 
 
 @component.add(
-    name="LD ICE OPEX", units="€/km", comp_type="Constant", comp_subtype="Normal"
+    name="LD ICE OM", units="€/km", comp_type="Constant", comp_subtype="Normal"
 )
-def ld_ice_opex():
+def ld_ice_om():
     """
     Sourced from results graph in source. Assumed to be 1/10th of the O&M associated with a heavy duty truck.
     """
     return 0.11 / 10
+
+
+@component.add(
+    name="LD ICE OPEX",
+    units="€/km",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"ld_ice_om": 1, "ld_ice_energy_usage": 1, "diesel_price": 1},
+)
+def ld_ice_opex():
+    return ld_ice_om() + ld_ice_energy_usage() * diesel_price()
 
 
 @component.add(

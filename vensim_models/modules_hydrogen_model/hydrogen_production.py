@@ -15,7 +15,7 @@ def aec_af():
 
 @component.add(
     name="AEC CAPEX",
-    units="€/kW",
+    units="€/kWe",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
@@ -84,27 +84,44 @@ def aec_opex():
 
 
 @component.add(
+    name="Blue H2 CAPEX",
+    units="€/kgH2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"grey_h2_capex": 1, "smr_emission_factor": 1, "ccs_capex": 1},
+)
+def blue_h2_capex():
+    return grey_h2_capex() + smr_emission_factor() / 1000 * ccs_capex()
+
+
+@component.add(
     name="Blue H2 cost",
     units="€/kgH2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "grey_h2_cost": 1,
-        "ccs_cost": 1,
-        "carbon_tax": 1,
-        "cc_capture_rate": 1,
-        "smr_emission_factor": 1,
-    },
+    depends_on={"blue_h2_capex": 1, "blue_h2_opex": 1},
 )
 def blue_h2_cost():
-    return grey_h2_cost() + smr_emission_factor() / 1000 * (
-        ccs_cost() - cc_capture_rate() * carbon_tax()
+    return blue_h2_capex() + blue_h2_opex()
+
+
+@component.add(
+    name="Blue H2 OPEX",
+    units="€/kgH2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "grey_h2_opex": 1,
+        "smr_emission_factor": 1,
+        "ccs_opex": 1,
+        "carbon_tax": 1,
+        "cc_capture_rate": 1,
+    },
+)
+def blue_h2_opex():
+    return grey_h2_opex() + smr_emission_factor() / 1000 * (
+        ccs_opex() - cc_capture_rate() * carbon_tax()
     )
-
-
-@component.add(name="CAPEX multiplier", comp_type="Constant", comp_subtype="Normal")
-def capex_multiplier():
-    return 1
 
 
 @component.add(
@@ -155,6 +172,29 @@ def green_h2_actual_subsidy():
 
 
 @component.add(
+    name="Green H2 CAPEX",
+    units="€/kgH2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "aec_capex": 1,
+        "aec_af": 1,
+        "electrolyser_operating_hours": 1,
+        "aec_efficiency": 1,
+        "h2_lhv": 1,
+    },
+)
+def green_h2_capex():
+    return (
+        aec_capex()
+        * aec_af()
+        / electrolyser_operating_hours()
+        / aec_efficiency()
+        * h2_lhv()
+    )
+
+
+@component.add(
     name="Green H2 cost",
     units="€/kgH2",
     comp_type="Auxiliary",
@@ -169,6 +209,31 @@ def green_h2_cost():
 
 
 @component.add(
+    name="Green H2 OPEX",
+    units="€/kgH2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "aec_capex": 1,
+        "aec_opex": 1,
+        "electrolyser_operating_hours": 1,
+        "renewable_electricity_price": 1,
+        "aec_efficiency": 1,
+        "h2_lhv": 1,
+    },
+)
+def green_h2_opex():
+    return (
+        (
+            aec_capex() * aec_opex() / electrolyser_operating_hours()
+            + renewable_electricity_price()
+        )
+        / aec_efficiency()
+        * h2_lhv()
+    )
+
+
+@component.add(
     name="Green H2 subsidy",
     units="€/kgH2",
     comp_type="Auxiliary",
@@ -176,8 +241,8 @@ def green_h2_cost():
     depends_on={
         "yearly_total_subsidies_limit": 1,
         "total_subsidies_ytd": 1,
-        "pulse_h2_subsidy": 1,
         "green_h2_subsidy_size": 1,
+        "pulse_h2_subsidy": 1,
     },
 )
 def green_h2_subsidy():
@@ -199,34 +264,56 @@ def green_h2_subsidy_size():
 
 
 @component.add(
+    name="Grey H2 CAPEX",
+    units="€/kgH2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"smr_capex": 1, "smr_af": 1, "smr_operating_hours": 1, "h2_lhv": 1},
+)
+def grey_h2_capex():
+    return smr_capex() * smr_af() / smr_operating_hours() * h2_lhv()
+
+
+@component.add(
     name="Grey H2 cost",
     units="€/kgH2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "smr_capex": 1,
-        "smr_af": 1,
-        "smr_opex": 1,
-        "smr_operating_hours": 1,
-        "smr_efficiency": 1,
-        "gas_price": 1,
-        "carbon_tax": 1,
-        "smr_emission_factor": 1,
-    },
+    depends_on={"grey_h2_capex": 1, "grey_h2_opex": 1},
 )
 def grey_h2_cost():
     """
     €/kg grey H2
     """
-    return (
-        smr_capex() * (smr_af() + smr_opex()) / smr_operating_hours()
-        + (gas_price() / 1000 * 3.6) / smr_efficiency()
-        + (carbon_tax() / 1000) * (smr_emission_factor() / 33.33)
-    ) * 33.33
+    return grey_h2_capex() + grey_h2_opex()
 
 
 @component.add(
-    name="H2 LHV", units="kWh/kg", comp_type="Constant", comp_subtype="Normal"
+    name="Grey H2 OPEX",
+    units="€/kgH2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "smr_capex": 1,
+        "smr_opex": 1,
+        "smr_operating_hours": 1,
+        "gas_price": 1,
+        "smr_efficiency": 1,
+        "smr_emission_factor": 1,
+        "h2_lhv": 2,
+        "carbon_tax": 1,
+    },
+)
+def grey_h2_opex():
+    return (
+        smr_capex() * smr_opex() / smr_operating_hours()
+        + (gas_price() / 1000 * 3.6) / smr_efficiency()
+        + (carbon_tax() / 1000) * (smr_emission_factor() / h2_lhv())
+    ) * h2_lhv()
+
+
+@component.add(
+    name="H2 LHV", units="kWh/kg", comp_type="Constant", comp_subtype="Unchangeable"
 )
 def h2_lhv():
     """
@@ -289,26 +376,10 @@ def pulse_h2_subsidy():
     units="€/kgH2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "aec_capex": 1,
-        "aec_af": 1,
-        "aec_opex": 1,
-        "electrolyser_operating_hours": 1,
-        "aec_efficiency": 2,
-        "capex_multiplier": 1,
-        "renewable_electricity_price": 1,
-        "h2_lhv": 1,
-    },
+    depends_on={"green_h2_capex": 1, "green_h2_opex": 1},
 )
 def raw_green_h2_cost():
-    return (
-        aec_capex()
-        * (aec_af() + aec_opex())
-        / electrolyser_operating_hours()
-        / aec_efficiency()
-        * capex_multiplier()
-        + renewable_electricity_price() / aec_efficiency()
-    ) * h2_lhv()
+    return green_h2_capex() + green_h2_opex()
 
 
 @component.add(

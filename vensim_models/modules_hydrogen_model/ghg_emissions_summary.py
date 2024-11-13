@@ -4,6 +4,17 @@ Translated using PySD version 3.14.0
 """
 
 @component.add(
+    name="CUMULATED CARBON TAX REVENUE",
+    units="M€",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"industry_ct_revenue": 1, "transportation_ct_revenue": 1},
+)
+def cumulated_carbon_tax_revenue():
+    return industry_ct_revenue() + transportation_ct_revenue()
+
+
+@component.add(
     name="domestic aviation CT revenue",
     units="M€",
     comp_type="Stateful",
@@ -335,17 +346,6 @@ _integ_steel_ct_revenue = Integ(
     lambda: 0,
     "_integ_steel_ct_revenue",
 )
-
-
-@component.add(
-    name="TOTAL CARBON TAX REVENUE",
-    units="M€",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"industry_ct_revenue": 1, "transportation_ct_revenue": 1},
-)
-def total_carbon_tax_revenue():
-    return industry_ct_revenue() + transportation_ct_revenue()
 
 
 @component.add(

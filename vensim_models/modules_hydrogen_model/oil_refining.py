@@ -34,6 +34,9 @@ _integ_blue_refinery = Integ(
     depends_on={"grey_h2_cost": 1, "blue_h2_cost": 2, "refinery_h2_cost": 1},
 )
 def blue_refinery_competitiveness():
+    """
+    Old: MIN( Grey H2 cost / Blue H2 cost , refinery H2 cost / Blue H2 cost )
+    """
     return np.minimum(
         grey_h2_cost() / blue_h2_cost(), refinery_h2_cost() / blue_h2_cost()
     )
@@ -61,47 +64,22 @@ def blue_refinery_imitators():
 
 @component.add(
     name="Blue refinery inno switch",
-    comp_type="Stateful",
-    comp_subtype="Smooth",
-    depends_on={"_smooth_blue_refinery_inno_switch": 1},
-    other_deps={
-        "_smooth_blue_refinery_inno_switch": {
-            "initial": {
-                "blue_refinery_competitiveness": 2,
-                "inno_switch_level": 1,
-                "early_switch_level": 1,
-            },
-            "step": {
-                "blue_refinery_competitiveness": 2,
-                "inno_switch_level": 1,
-                "early_switch_level": 1,
-            },
-        }
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "blue_refinery_competitiveness": 2,
+        "inno_switch_level": 1,
+        "early_switch_level": 1,
     },
 )
 def blue_refinery_inno_switch():
-    return _smooth_blue_refinery_inno_switch()
-
-
-_smooth_blue_refinery_inno_switch = Smooth(
-    lambda: if_then_else(
+    return if_then_else(
         blue_refinery_competitiveness() > inno_switch_level(),
         lambda: if_then_else(
             blue_refinery_competitiveness() > early_switch_level(), lambda: 3, lambda: 1
         ),
         lambda: 0,
-    ),
-    lambda: 2,
-    lambda: if_then_else(
-        blue_refinery_competitiveness() > inno_switch_level(),
-        lambda: if_then_else(
-            blue_refinery_competitiveness() > early_switch_level(), lambda: 3, lambda: 1
-        ),
-        lambda: 0,
-    ),
-    lambda: 3,
-    "_smooth_blue_refinery_inno_switch",
-)
+    )
 
 
 @component.add(
@@ -153,18 +131,17 @@ def blue_refinery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "blue_refinery_competitiveness": 1,
         "cross_innovation": 1,
-        "blue_refinery": 1,
+        "blue_refinery_competitiveness": 1,
         "sum_refining": 1,
+        "blue_refinery": 1,
     },
 )
 def blue_refinery_level():
     return (
         1
         / (1 + np.exp(slope() * (cross_innovation() - blue_refinery_competitiveness())))
-        * blue_refinery()
-        / sum_refining()
+        * (blue_refinery() / sum_refining()) ** 0.8
     )
 
 
@@ -255,6 +232,9 @@ _integ_green_refinery = Integ(
     depends_on={"blue_h2_cost": 1, "refinery_h2_cost": 2, "grey_h2_cost": 1},
 )
 def green_refinery_competitiveness():
+    """
+    MIN( Blue H2 cost / refinery H2 cost , Grey H2 cost / refinery H2 cost )
+    """
     return np.minimum(
         blue_h2_cost() / refinery_h2_cost(), grey_h2_cost() / refinery_h2_cost()
     )
@@ -262,6 +242,7 @@ def green_refinery_competitiveness():
 
 @component.add(
     name="Green refinery decay",
+    units="MT H2/Year",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={"green_refinery": 1, "aec_lifetime": 1},
@@ -282,30 +263,16 @@ def green_refinery_imitators():
 
 @component.add(
     name="Green refinery inno switch",
-    comp_type="Stateful",
-    comp_subtype="Smooth",
-    depends_on={"_smooth_green_refinery_inno_switch": 1},
-    other_deps={
-        "_smooth_green_refinery_inno_switch": {
-            "initial": {
-                "green_refinery_competitiveness": 2,
-                "inno_switch_level": 1,
-                "early_switch_level": 1,
-            },
-            "step": {
-                "green_refinery_competitiveness": 2,
-                "inno_switch_level": 1,
-                "early_switch_level": 1,
-            },
-        }
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "green_refinery_competitiveness": 2,
+        "inno_switch_level": 1,
+        "early_switch_level": 1,
     },
 )
 def green_refinery_inno_switch():
-    return _smooth_green_refinery_inno_switch()
-
-
-_smooth_green_refinery_inno_switch = Smooth(
-    lambda: if_then_else(
+    return if_then_else(
         green_refinery_competitiveness() > inno_switch_level(),
         lambda: if_then_else(
             green_refinery_competitiveness() > early_switch_level(),
@@ -313,20 +280,7 @@ _smooth_green_refinery_inno_switch = Smooth(
             lambda: 1,
         ),
         lambda: 0,
-    ),
-    lambda: 2,
-    lambda: if_then_else(
-        green_refinery_competitiveness() > inno_switch_level(),
-        lambda: if_then_else(
-            green_refinery_competitiveness() > early_switch_level(),
-            lambda: 3,
-            lambda: 1,
-        ),
-        lambda: 0,
-    ),
-    lambda: 3,
-    "_smooth_green_refinery_inno_switch",
-)
+    )
 
 
 @component.add(
@@ -378,10 +332,10 @@ def green_refinery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "green_refinery_competitiveness": 1,
         "cross_innovation": 1,
-        "green_refinery": 1,
+        "green_refinery_competitiveness": 1,
         "sum_refining": 1,
+        "green_refinery": 1,
     },
 )
 def green_refinery_level():
@@ -391,8 +345,7 @@ def green_refinery_level():
             1
             + np.exp(slope() * (cross_innovation() - green_refinery_competitiveness()))
         )
-        * green_refinery()
-        / sum_refining()
+        * (green_refinery() / sum_refining()) ** 0.8
     )
 
 
@@ -438,8 +391,8 @@ def grey_refinery_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "grey_refinery": 1,
-        "smr_lifetime": 1,
         "grey_refinery_early_decommission_rate": 1,
+        "smr_lifetime": 1,
     },
 )
 def grey_refinery_decay():
@@ -487,8 +440,8 @@ def grey_refinery_investment_level():
         "slope": 1,
         "grey_refinery_competitiveness": 1,
         "cross_conventional": 1,
-        "grey_refinery": 1,
         "sum_refining": 1,
+        "grey_refinery": 1,
     },
 )
 def grey_refinery_level():
@@ -498,8 +451,7 @@ def grey_refinery_level():
             1
             + np.exp(slope() * (cross_conventional() - grey_refinery_competitiveness()))
         )
-        * grey_refinery()
-        / sum_refining()
+        * (grey_refinery() / sum_refining()) ** 0.8
     )
 
 
@@ -513,8 +465,8 @@ def grey_refinery_level():
         "blue_h2_cost": 1,
         "refinery_h2_cost": 1,
         "green_refinery": 1,
-        "grey_refinery": 1,
         "grey_h2_cost": 1,
+        "grey_refinery": 1,
         "sum_refining": 1,
     },
 )

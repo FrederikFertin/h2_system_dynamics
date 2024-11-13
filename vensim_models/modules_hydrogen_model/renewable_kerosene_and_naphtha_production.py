@@ -36,29 +36,34 @@ def biokero_capex():
 
 @component.add(
     name="BioKero cost",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hvo_jet_total_costs": 1, "biokero_fraction": 1},
+    depends_on={
+        "hvo_jet_total_costs": 1,
+        "biokero_fraction": 1,
+        "biokero_revenue_fraction": 1,
+    },
 )
 def biokero_cost():
     """
-    20% of the production costs is assumed covered through coproduct selling of naphtha and LPG.
+    10% of the production costs is assumed covered through coproduct selling of naphtha and LPG.
     """
-    return hvo_jet_total_costs() / biokero_fraction() * 0.8
+    return hvo_jet_total_costs() / biokero_fraction() * biokero_revenue_fraction()
 
 
 @component.add(
     name="BioKero cost without H2",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "biokero_cost": 1,
-        "biokero_h2_usage": 1,
         "biokero_fraction": 1,
-        "ft_h2_cost": 1,
+        "biokero_revenue_fraction": 1,
         "h2_lhv": 1,
+        "ft_h2_cost": 1,
+        "biokero_h2_usage": 1,
     },
 )
 def biokero_cost_without_h2():
@@ -68,8 +73,8 @@ def biokero_cost_without_h2():
         * ft_h2_cost()
         / h2_lhv()
         * biokero_h2_usage()
-        / 3600
-        * 0.8
+        / 3.6
+        * biokero_revenue_fraction()
         / biokero_fraction()
     )
 
@@ -134,14 +139,20 @@ def biokero_gas_usage():
     depends_on={
         "jetfuel_cost": 1,
         "biokero_cost_without_h2": 1,
-        "biokero_h2_usage": 1,
         "biokero_fraction": 1,
         "h2_lhv": 1,
+        "biokero_revenue_fraction": 1,
+        "biokero_h2_usage": 1,
     },
 )
 def biokero_h2_price_break():
     return (jetfuel_cost() - biokero_cost_without_h2()) / (
-        1000 / h2_lhv() * biokero_h2_usage() / 3600 * 0.8 / biokero_fraction()
+        1000
+        / h2_lhv()
+        * biokero_h2_usage()
+        / 3.6
+        * biokero_revenue_fraction()
+        / biokero_fraction()
     )
 
 
@@ -189,6 +200,19 @@ def biokero_opex():
 
 
 @component.add(
+    name="BioKero revenue fraction",
+    units="percent",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def biokero_revenue_fraction():
+    """
+    Fraction of revenues expected from bio kerosene
+    """
+    return 0.9
+
+
+@component.add(
     name="BioKero variable", units="€/MWh", comp_type="Constant", comp_subtype="Normal"
 )
 def biokero_variable():
@@ -203,13 +227,19 @@ def biokero_variable():
     units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hvo_jet_total_costs": 1, "naphtha_fraction_bio": 1},
+    depends_on={
+        "hvo_jet_total_costs": 1,
+        "naphtha_fraction_bio": 1,
+        "bionaphtha_revenue_fraction": 1,
+    },
 )
 def bionaphtha_cost():
     """
-    The naphtha coproduct sale cover 10% of the production costs. The LPG coproduct sale cover the remaining 10% of the production costs. Note here is that the naphtha output is quite low, which does not motivate this as the primary method to produce biogenic naphtha.
+    The naphtha coproduct sale cover 7.5% of the production costs. The LPG coproduct sale cover the remaining 2.5% of the production costs. Note here is that the naphtha output is quite low, which does not motivate this as the primary method to produce biogenic naphtha.
     """
-    return hvo_jet_total_costs() / naphtha_fraction_bio() * 0.1 * 1000
+    return (
+        hvo_jet_total_costs() / naphtha_fraction_bio() * bionaphtha_revenue_fraction()
+    )
 
 
 @component.add(
@@ -219,21 +249,22 @@ def bionaphtha_cost():
     comp_subtype="Normal",
     depends_on={
         "bionaphtha_cost": 1,
-        "biokero_h2_usage": 1,
+        "h2_lhv": 1,
         "naphtha_fraction_bio": 1,
         "ft_h2_cost": 1,
-        "h2_lhv": 1,
+        "bionaphtha_revenue_fraction": 1,
+        "biokero_h2_usage": 1,
     },
 )
 def bionaphtha_cost_without_h2():
     return (
         bionaphtha_cost()
-        - 10**6
+        - 1000
         * ft_h2_cost()
         / h2_lhv()
         * biokero_h2_usage()
-        / 3600
-        * 0.1
+        / 3.6
+        * bionaphtha_revenue_fraction()
         / naphtha_fraction_bio()
     )
 
@@ -246,9 +277,9 @@ def bionaphtha_cost_without_h2():
     depends_on={
         "naphtha_cost": 1,
         "bionaphtha_cost_without_h2": 1,
-        "biokero_h2_usage": 1,
-        "naphtha_fraction_bio": 1,
         "h2_lhv": 1,
+        "naphtha_fraction_bio": 1,
+        "biokero_h2_usage": 1,
     },
 )
 def bionaphtha_h2_price_break():
@@ -258,8 +289,18 @@ def bionaphtha_h2_price_break():
 
 
 @component.add(
+    name="BioNaphtha revenue fraction",
+    units="percent",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def bionaphtha_revenue_fraction():
+    return 0.075
+
+
+@component.add(
     name="HVO Jet Total Costs",
-    units="€/MJ input",
+    units="€/GJ input",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
@@ -268,16 +309,16 @@ def bionaphtha_h2_price_break():
         "biokero_gas_usage": 1,
         "biogas_cost": 1,
         "biokero_biomass_usage": 1,
-        "oil_biomass_price": 1,
+        "uco_price": 1,
         "biokero_h2_usage": 1,
         "ft_h2_cost": 1,
         "h2_lhv": 1,
         "heat_cost": 1,
         "biokero_excess_heat": 1,
         "biokero_fraction": 1,
-        "biokero_opex": 1,
-        "biokero_operating_hours": 1,
         "biokero_variable": 1,
+        "biokero_operating_hours": 1,
+        "biokero_opex": 1,
         "biokero_capex": 1,
         "biokero_af": 1,
     },
@@ -287,7 +328,7 @@ def hvo_jet_total_costs():
         (
             biokero_electricity_usage() * renewable_electricity_price() * 1000
             + biokero_gas_usage() * biogas_cost() * 3.6
-            + biokero_biomass_usage() * oil_biomass_price() * 3.6
+            + biokero_biomass_usage() * uco_price() * 3.6
             + biokero_h2_usage() * ft_h2_cost() / h2_lhv() * 1000
             - biokero_excess_heat() * heat_cost()
         )
@@ -297,11 +338,11 @@ def hvo_jet_total_costs():
             + biokero_variable()
         )
         * biokero_fraction()
-    ) / 3600
+    ) / 3.6
 
 
 @component.add(
-    name="Jetfuel LHV", units="MJ/kg", comp_type="Constant", comp_subtype="Normal"
+    name="Jetfuel LHV", units="MJ/kg", comp_type="Constant", comp_subtype="Unchangeable"
 )
 def jetfuel_lhv():
     """
@@ -377,7 +418,7 @@ def synkero_co2_usage():
 
 @component.add(
     name="SynKero cost",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
@@ -385,16 +426,16 @@ def synkero_co2_usage():
         "cc_capture_rate": 1,
         "synkero_co2_usage": 1,
         "jetfuel_lhv": 1,
-        "synkero_h2_usage": 1,
-        "synkero_output": 1,
-        "h2_lhv": 1,
-        "synkero_electricity_usage": 1,
-        "renewable_electricity_price": 1,
         "synkero_excess_heat": 1,
-        "heat_cost": 1,
+        "h2_lhv": 1,
         "ft_h2_cost": 1,
-        "synkero_operating_hours": 1,
+        "renewable_electricity_price": 1,
+        "synkero_h2_usage": 1,
+        "heat_cost": 1,
+        "synkero_output": 1,
+        "synkero_electricity_usage": 1,
         "synkero_capex": 1,
+        "synkero_operating_hours": 1,
         "synkero_af": 1,
         "synkero_opex": 1,
         "synkero_variable": 1,
@@ -420,22 +461,22 @@ def synkero_cost():
         )
         / synkero_fraction()
         * 0.8
-        / 3600
+        / 3.6
     )
 
 
 @component.add(
     name="SynKero cost without H2",
-    units="€/MJ",
+    units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "synkero_cost": 1,
+        "h2_lhv": 1,
+        "ft_h2_cost": 1,
+        "synkero_fraction": 1,
         "synkero_h2_usage": 1,
         "synkero_output": 1,
-        "h2_lhv": 1,
-        "synkero_fraction": 1,
-        "ft_h2_cost": 1,
     },
 )
 def synkero_cost_without_h2():
@@ -448,7 +489,7 @@ def synkero_cost_without_h2():
         / synkero_output()
         / synkero_fraction()
         * 0.8
-        / 3600
+        / 3.6
     )
 
 
@@ -501,8 +542,8 @@ def synkero_fraction():
         "jetfuel_cost": 1,
         "synkero_cost_without_h2": 1,
         "synkero_h2_usage": 1,
-        "synkero_output": 1,
         "h2_lhv": 1,
+        "synkero_output": 1,
         "synkero_fraction": 1,
     },
 )
@@ -514,7 +555,7 @@ def synkero_h2_price_break():
         / synkero_output()
         / synkero_fraction()
         * 0.8
-        / 3600
+        / 3.6
     )
 
 
@@ -604,9 +645,7 @@ def synnaphtha_cost():
     """
     Assume that 80 % of the costs are covered by the jetfuel revenue (jetfuel is 60% of the output) - then assume that 30 % of the output is suitable as naphtha and sell that, covering the 20% remaining costs.
     """
-    return (
-        (synkero_cost() / 0.8 * synkero_fraction()) * 0.2 / synnaphtha_fraction() * 1000
-    )
+    return (synkero_cost() / 0.8 * synkero_fraction()) * 0.2 / synnaphtha_fraction()
 
 
 @component.add(
@@ -625,18 +664,21 @@ def synnaphtha_cost_without_h2():
         (synkero_cost_without_h2() / 0.8 * synkero_fraction())
         * 0.2
         / synnaphtha_fraction()
-        * 1000
     )
 
 
 @component.add(
     name="SynNaphtha fraction",
     units="percent",
-    comp_type="Constant",
+    comp_type="Auxiliary",
     comp_subtype="Normal",
+    depends_on={"synkero_fraction": 1},
 )
 def synnaphtha_fraction():
-    return 0.3
+    """
+    Assumes that 75% of the remaining Fischer Tropsch liquids can be used as naphtha. If the kerosene fraction is 60% (base assumption) then this leaves 10 % of FT liquids as byproducts which are probably light products (LPG/fuel gas).
+    """
+    return (1 - synkero_fraction()) * 0.75
 
 
 @component.add(
@@ -648,9 +690,9 @@ def synnaphtha_fraction():
         "naphtha_cost": 1,
         "synnaphtha_cost_without_h2": 1,
         "synkero_h2_usage": 1,
-        "synkero_output": 1,
-        "synnaphtha_fraction": 1,
         "h2_lhv": 1,
+        "synnaphtha_fraction": 1,
+        "synkero_output": 1,
         "synkero_fraction": 1,
     },
 )
@@ -664,3 +706,17 @@ def synnaphtha_h2_price_break():
         * 0.2
         / synnaphtha_fraction()
     ) + synkero_fraction() * 0
+
+
+@component.add(
+    name="UCO PRICE",
+    units="€/GJ",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"biomass_price": 1, "usd_to_eur": 1, "biomass_price_init": 1},
+)
+def uco_price():
+    """
+    UCO: used cooking oil. Price assumed to develop similarly to biomass. Source for historical cost: (around 900 $/t (25 $/GJ assuming LHV of 36 GJ/t) in 2024) https://www.spglobal.com/commodityinsights/en/market-insights/latest-news/a griculture/100423-global-uco-supply-to-double-by-2030-as-us-eu-policies-dri ve-asian-supply
+    """
+    return biomass_price() * (25 * usd_to_eur()) / biomass_price_init()

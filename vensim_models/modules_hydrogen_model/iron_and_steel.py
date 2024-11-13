@@ -487,8 +487,8 @@ def hdri_eaf_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "hdri_eaf_competitiveness": 1,
         "cross_innovation": 1,
+        "hdri_eaf_competitiveness": 1,
         "hdri_eaf": 1,
         "sum_steel": 1,
     },
@@ -547,10 +547,10 @@ def secondary_sector_growth():
     depends_on={
         "coal_bf_bof": 1,
         "bf_coal_cost": 1,
-        "bf_ccs_cost": 1,
         "coal_bf_bof_ccs": 1,
-        "hdri_cost": 1,
+        "bf_ccs_cost": 1,
         "hdri_eaf": 1,
+        "hdri_cost": 1,
         "sum_steel": 1,
     },
 )
@@ -593,26 +593,6 @@ def steel_emissions():
 )
 def steel_equalizer():
     return 1 / (bf_coal_level() + hdri_eaf_level() + bf_ccs_level())
-
-
-@component.add(
-    name="steel H2 price break",
-    units="€/kg",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "bf_ccs_cost": 1,
-        "bf_coal_cost": 1,
-        "hdri_cost_without_h2": 1,
-        "h2_to_steel": 1,
-    },
-)
-def steel_h2_price_break():
-    return (
-        (np.minimum(bf_ccs_cost(), bf_coal_cost()) - hdri_cost_without_h2())
-        / 1000
-        / h2_to_steel()
-    )
 
 
 @component.add(
