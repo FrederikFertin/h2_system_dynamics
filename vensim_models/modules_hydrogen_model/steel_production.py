@@ -12,8 +12,8 @@ Translated using PySD version 3.14.0
         "bf_coal_cost": 1,
         "bf_coal_emission_factor": 1,
         "carbon_tax": 1,
-        "cc_capture_rate": 1,
         "ccs_cost": 1,
+        "cc_capture_rate": 1,
     },
 )
 def bf_ccs_cost():
@@ -41,8 +41,8 @@ def bf_coal_capex():
         "carbon_tax": 1,
         "bf_coal_emission_factor": 1,
         "coal_to_steel": 1,
-        "coal_lhv": 1,
         "coal_price": 1,
+        "coal_lhv": 1,
         "grid_electricity_price": 1,
         "el_to_steel_bf_coal": 1,
         "foundry_af": 1,
@@ -260,9 +260,9 @@ def h2dri_cost():
     depends_on={
         "grid_electricity_price": 1,
         "el_to_steel_h2dri": 1,
+        "foundry_operating_hours": 1,
         "h2dri_capex_subsidy": 1,
         "h2dri_capex": 1,
-        "foundry_operating_hours": 1,
     },
 )
 def h2dri_cost_without_h2():
@@ -336,12 +336,12 @@ def ngdri_capex():
     depends_on={
         "carbon_tax": 1,
         "ngdri_emission_factor": 1,
-        "gas_to_steel": 1,
         "gas_price": 1,
-        "grid_electricity_price": 1,
+        "gas_to_steel": 1,
         "el_to_steel_ngdri": 1,
-        "foundry_af": 1,
+        "grid_electricity_price": 1,
         "ngdri_capex": 1,
+        "foundry_af": 1,
         "foundry_operating_hours": 1,
     },
 )
@@ -378,6 +378,7 @@ def ngdri_emission_factor():
     depends_on={
         "bf_ccs_cost": 1,
         "bf_coal_cost": 1,
+        "ngdri_cost": 1,
         "renewable_electricity_price": 1,
         "el_to_steel_h2dri": 1,
         "h2_to_steel": 1,
@@ -386,7 +387,7 @@ def ngdri_emission_factor():
 def steel_h2_marginal_wtp():
     return (
         (
-            np.minimum(bf_ccs_cost(), bf_coal_cost())
+            np.minimum(np.minimum(bf_ccs_cost(), bf_coal_cost()), ngdri_cost())
             - (renewable_electricity_price() * 1000) * (el_to_steel_h2dri() / 3.6)
         )
         / 1000
@@ -402,13 +403,17 @@ def steel_h2_marginal_wtp():
     depends_on={
         "bf_ccs_cost": 1,
         "bf_coal_cost": 1,
+        "ngdri_cost": 1,
         "h2dri_cost_without_h2": 1,
         "h2_to_steel": 1,
     },
 )
 def steel_h2_wtp():
     return (
-        (np.minimum(bf_ccs_cost(), bf_coal_cost()) - h2dri_cost_without_h2())
+        (
+            np.minimum(np.minimum(bf_ccs_cost(), bf_coal_cost()), ngdri_cost())
+            - h2dri_cost_without_h2()
+        )
         / 1000
         / h2_to_steel()
     )

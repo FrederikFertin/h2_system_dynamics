@@ -46,8 +46,8 @@ _integ_domestic_aviation_subsidy = Integ(
                 "time": 1,
                 "time_step": 2,
                 "ft_h2_actual_subsidy": 1,
-                "green_h2_actual_subsidy": 1,
                 "domestic_aviation_hydrogen_demand": 1,
+                "green_h2_actual_subsidy": 1,
                 "domestic_aviation_subsidy_ytd": 1,
             },
         }
@@ -109,8 +109,8 @@ _integ_domestic_shipping_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_actual_subsidy": 1,
                 "domestic_shipping_hydrogen_demand": 1,
+                "green_h2_actual_subsidy": 1,
                 "domestic_shipping_subsidy_ytd": 1,
             },
         }
@@ -142,8 +142,8 @@ _integ_domestic_shipping_subsidy_ytd = Integ(
             "initial": {},
             "step": {
                 "fertilizer_hydrogen_demand": 1,
-                "fertilizer_h2_actual_subsidy": 1,
                 "green_h2_actual_subsidy": 1,
+                "fertilizer_h2_actual_subsidy": 1,
             },
         }
     },
@@ -173,9 +173,9 @@ _integ_fertilizer_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "fertilizer_hydrogen_demand": 1,
-                "fertilizer_h2_actual_subsidy": 1,
                 "green_h2_actual_subsidy": 1,
+                "fertilizer_h2_actual_subsidy": 1,
+                "fertilizer_hydrogen_demand": 1,
                 "fertilizer_subsidy_ytd": 1,
             },
         }
@@ -307,9 +307,9 @@ _integ_high_temperature_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
+                "nm_h2_actual_subsidy": 1,
                 "high_temperature_hydrogen_demand": 1,
                 "green_h2_actual_subsidy": 1,
-                "nm_h2_actual_subsidy": 1,
                 "high_temperature_subsidy_ytd": 1,
             },
         }
@@ -504,9 +504,9 @@ _integ_light_duty_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "ld_h2_actual_subsidy": 1,
                 "green_h2_actual_subsidy": 1,
                 "light_duty_hydrogen_demand": 1,
+                "ld_h2_actual_subsidy": 1,
                 "light_duty_subsidy_ytd": 1,
             },
         }
@@ -565,8 +565,8 @@ _integ_meoh_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_actual_subsidy": 1,
                 "meoh_hydrogen_demand": 1,
+                "green_h2_actual_subsidy": 1,
                 "meoh_subsidy_ytd": 1,
             },
         }
@@ -630,8 +630,8 @@ _integ_naphtha_subsidy = Integ(
                 "time": 1,
                 "time_step": 2,
                 "ft_h2_actual_subsidy": 1,
-                "green_h2_actual_subsidy": 1,
                 "naphtha_hydrogen_demand": 1,
+                "green_h2_actual_subsidy": 1,
                 "naphtha_subsidy_ytd": 1,
             },
         }
@@ -822,8 +822,8 @@ _integ_shipping_meoh_subsidy = Integ(
                 "time": 1,
                 "time_step": 2,
                 "shipping_meoh_h2_actual_subsidy": 1,
-                "shipping_meoh_hydrogen_demand": 1,
                 "green_h2_actual_subsidy": 1,
+                "shipping_meoh_hydrogen_demand": 1,
                 "shipping_meoh_subsidy_ytd": 1,
             },
         }
@@ -888,9 +888,9 @@ _integ_shipping_nh3_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "international_shipping_nh3_hydrogen_demand": 1,
                 "shipping_nh3_h2_actual_subsidy": 1,
                 "green_h2_actual_subsidy": 1,
+                "international_shipping_nh3_hydrogen_demand": 1,
                 "shipping_nh3_subsidy_ytd": 1,
             },
         }
@@ -955,8 +955,8 @@ _integ_steel_subsidy = Integ(
             "step": {
                 "time": 1,
                 "time_step": 2,
-                "green_h2_actual_subsidy": 1,
                 "steel_h2_actual_subsidy": 1,
+                "green_h2_actual_subsidy": 1,
                 "steel_hydrogen_demand": 1,
                 "steel_subsidy_ytd": 1,
             },

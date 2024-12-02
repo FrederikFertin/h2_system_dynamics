@@ -20,8 +20,8 @@ def aec_af():
     comp_subtype="Normal",
     depends_on={
         "electrolyser_capacity": 3,
-        "learning_rate": 1,
         "one_gw_aec_capex": 2,
+        "learning_rate": 1,
         "initial_gw_aec_capex": 2,
     },
 )
@@ -42,7 +42,7 @@ def aec_capex():
     name="AEC CAPEX BASE", units="€/kW", comp_type="Constant", comp_subtype="Normal"
 )
 def aec_capex_base():
-    return 1900
+    return 1400
 
 
 @component.add(
@@ -165,10 +165,10 @@ def blue_h2_cost():
     comp_subtype="Normal",
     depends_on={
         "grey_h2_opex": 1,
-        "smr_emission_factor": 1,
-        "carbon_tax": 1,
         "cc_capture_rate": 1,
+        "smr_emission_factor": 1,
         "ccs_opex": 1,
+        "carbon_tax": 1,
     },
 )
 def blue_h2_opex():
@@ -382,8 +382,8 @@ def grey_h2_cost():
         "smr_af": 1,
         "smr_opex": 1,
         "smr_operating_hours": 1,
-        "smr_efficiency": 1,
         "gas_price": 1,
+        "smr_efficiency": 1,
         "h2_lhv": 1,
     },
 )
@@ -406,11 +406,11 @@ def grey_h2_cost_wo_co2():
         "smr_capex": 1,
         "smr_opex": 1,
         "smr_operating_hours": 1,
-        "smr_efficiency": 1,
         "gas_price": 1,
-        "carbon_tax": 1,
+        "smr_efficiency": 1,
         "h2_lhv": 2,
         "smr_emission_factor": 1,
+        "carbon_tax": 1,
     },
 )
 def grey_h2_opex():

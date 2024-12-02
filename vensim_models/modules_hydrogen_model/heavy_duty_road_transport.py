@@ -67,12 +67,12 @@ _integ_error_int_hd_rt = Integ(
     depends_on={
         "hd_bev_consumption": 1,
         "hd_be_lco": 1,
-        "hd_fcev_consumption": 1,
         "hd_fc_lco": 1,
+        "hd_fcev_consumption": 1,
         "hd_fossil_consumption": 1,
         "hd_ice_lco": 1,
-        "diesel_lhv": 1,
         "hd_ice_energy_usage": 1,
+        "diesel_lhv": 1,
         "sum_hd_rt": 1,
     },
 )
@@ -200,8 +200,8 @@ _smooth_hd_bev_inno_switch = Smooth(
         "hd_bev_inno_switch": 1,
         "hd_rt_reinvestment": 1,
         "innovators": 1,
-        "sum_hd_rt": 2,
         "hd_bev_consumption": 1,
+        "sum_hd_rt": 2,
     },
 )
 def hd_bev_innovators():
@@ -363,8 +363,8 @@ _smooth_hd_fcev_inno_switch = Smooth(
         "hd_rt_reinvestment": 1,
         "innovators": 1,
         "hd_fcev_inno_switch": 1,
-        "hd_fcev_consumption": 1,
         "sum_hd_rt": 2,
+        "hd_fcev_consumption": 1,
     },
 )
 def hd_fcev_innovators():
@@ -462,8 +462,8 @@ _integ_hd_fossil_consumption = Integ(
     comp_subtype="Normal",
     depends_on={
         "hd_fossil_consumption": 1,
-        "hd_fossil_early_decommission_rate": 1,
         "truck_lifetime": 1,
+        "hd_fossil_early_decommission_rate": 1,
     },
 )
 def hd_fossil_decay():
@@ -622,11 +622,11 @@ _integ_hd_rt_reinvestment = Integ(
     depends_on={
         "hd_fossil_consumption": 1,
         "diesel_emission_factor": 1,
-        "charging_efficiency": 1,
-        "hd_ice_efficiency": 1,
-        "hd_bev_consumption": 1,
-        "electricity_emission_factor": 1,
         "hd_ev_efficiency": 1,
+        "hd_bev_consumption": 1,
+        "charging_efficiency": 1,
+        "electricity_emission_factor": 1,
+        "hd_ice_efficiency": 1,
     },
 )
 def heavy_duty_emissions():

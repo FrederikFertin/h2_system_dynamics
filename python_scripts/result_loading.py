@@ -40,11 +40,13 @@ class result_loading_class:
     price_break_list = ["steel H2 WTP",
                     "SynNaphtha H2 WTP", 
                     "BioNaphtha H2 WTP", 
+                    "eMeOH H2 WTP",
+                    "bioMeOH H2 WTP",
                     "BioKero H2 WTP",
                     "SynKero H2 WTP", 
                     "fertilizer H2 WTP", 
                     "refinery H2 WTP", 
-                    "NM H2 WTP",
+                    "high temperature H2 WTP",
                     "LD H2 WTP", 
                     "HD H2 WTP", 
                     "NH3 containership H2 WTP", 
@@ -56,9 +58,9 @@ class result_loading_class:
     # Define the dictionary of sectors, include a key for each sector which defines the unit used in the sector
     industry_sector_dict = {"steel": {"unit": "MT", "stocks" : steel_sector, "h2 demand" : "steel hydrogen demand", "emissions" : "steel emissions", "subsidy": "steel subsidy", "WTP": "steel H2 WTP", "CT revenue": "steel CT revenue", "costs": steel_costs},
                             "naphtha": {"unit": "MT", "stocks" : hvc_sector, "h2 demand" : "naphtha hydrogen demand", "emissions" : "naphtha emissions", "biomass": "naphtha biomass demand", "subsidy": "naphtha subsidy", "WTP": "SynNaphtha H2 WTP", "WTP 2": "BioNaphtha H2 WTP", "CT revenue": "naphtha CT revenue", "costs": hvc_costs},
-                            "MeOH": {"unit": "MT", "stocks" : meoh_sector, "h2 demand" : "MeOH hydrogen demand", "emissions" : "MeOH emissions", "biomass": "MeOH biomass demand", "subsidy": "MeOH subsidy", "WTP": "MeOH H2 WTP", "WTP 2": "BioMeOH H2 WTP", "CT revenue": "MeOH CT revenue", "costs": meoh_costs},
+                            "MeOH": {"unit": "MT", "stocks" : meoh_sector, "h2 demand" : "MeOH hydrogen demand", "emissions" : "MeOH emissions", "biomass": "MeOH biomass demand", "subsidy": "MeOH subsidy", "WTP": "eMeOH H2 WTP", "WTP 2": "bioMeOH H2 WTP", "CT revenue": "MeOH CT revenue", "costs": meoh_costs},
                             "fertilizer": {"unit": "MT", "stocks" : fertilizer_sector, "h2 demand" : "fertilizer hydrogen demand", "emissions" : "fertilizer emissions", "subsidy": "fertilizer subsidy", "WTP": "fertilizer H2 WTP", "CT revenue": "fertilizer CT revenue", "costs": fertilizer_costs},
-                            "high temperature": {"unit": "GWh", "stocks" : temp_sector, "h2 demand" : "high temperature hydrogen demand", "emissions" : "high temperature emissions", "biomass": "high temperature biomass demand", "subsidy": "high temperature subsidy", "WTP": "NM H2 WTP", "CT revenue": "high temperature CT revenue", "costs": temp_costs},
+                            "high temperature": {"unit": "GWh", "stocks" : temp_sector, "h2 demand" : "high temperature hydrogen demand", "emissions" : "high temperature emissions", "biomass": "high temperature biomass demand", "subsidy": "high temperature subsidy", "WTP": "high temperature H2 WTP", "CT revenue": "high temperature CT revenue", "costs": temp_costs},
                             "refining": {"unit": "MT", "stocks" : refining_sector, "h2 demand" : "refinery hydrogen demand", "emissions" : "refinery emissions", "subsidy": "refinery subsidy", "WTP": "refinery H2 WTP", "CT revenue": "refinery CT revenue", "costs": refining_costs}}
 
     transport_sector_dict = {"int_aviation": {"unit": "GWh", "stocks" : int_aviation_sector, "h2 demand" : "international aviation hydrogen demand", "emissions" : "international aviation emissions", "biomass": "international aviation biomass demand", "subsidy": "international aviation subsidy", "WTP": "SynKero H2 WTP", "WTP 2": "BioKero H2 WTP", "CT revenue": "international aviation CT revenue", "costs": int_aviation_costs},

@@ -169,8 +169,8 @@ def bio_kerosene_investment_level_dom():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "bio_kerosene_competitiveness_dom": 1,
+        "cross": 1,
         "bio_kerosene_consumption_dom": 1,
         "sum_domestic_aviation": 1,
     },
