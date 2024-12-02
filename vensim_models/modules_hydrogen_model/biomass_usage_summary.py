@@ -11,7 +11,7 @@ Translated using PySD version 3.14.0
 )
 def biomass_availability():
     """
-    18350 PJ of biomass available in 2030. Hazardous wood waste not included. Source: S2Biom SEAMAPS also has numbers on this. 18.35 EJ is not a high availability limit compared to their estimates (LB: 30 EJ, UB: 90 EJ).
+    18350 PJ of biomass available in 2030. Hazardous wood waste not included. Source: S2Biom SEAMAPS also has numbers on this. 18.35 EJ is not a high availability limit compared to their estimates (LB: 30 EJ, UB: 90 EJ). Remaining question is, how much of this is currently utilized elsewhere? Probably most.
     """
     return 18350 / 3600 * 10**6
 
@@ -52,6 +52,7 @@ def biomass_price_scaler():
         "international_aviation_biomass_demand": 1,
         "high_temperature_biomass_demand": 1,
         "naphtha_biomass_demand": 1,
+        "meoh_biomass_demand": 1,
     },
 )
 def biomass_used():
@@ -62,4 +63,5 @@ def biomass_used():
         + international_aviation_biomass_demand()
         + high_temperature_biomass_demand()
         + naphtha_biomass_demand()
+        + meoh_biomass_demand()
     )

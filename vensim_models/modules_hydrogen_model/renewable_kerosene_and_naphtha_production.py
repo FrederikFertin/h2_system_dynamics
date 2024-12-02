@@ -59,11 +59,11 @@ def biokero_cost():
     comp_subtype="Normal",
     depends_on={
         "biokero_cost": 1,
+        "ft_h2_cost": 1,
+        "h2_lhv": 1,
+        "biokero_h2_usage": 1,
         "biokero_fraction": 1,
         "biokero_revenue_fraction": 1,
-        "h2_lhv": 1,
-        "ft_h2_cost": 1,
-        "biokero_h2_usage": 1,
     },
 )
 def biokero_cost_without_h2():
@@ -132,31 +132,6 @@ def biokero_gas_usage():
 
 
 @component.add(
-    name="BioKero H2 price break",
-    units="€/kg",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "jetfuel_cost": 1,
-        "biokero_cost_without_h2": 1,
-        "biokero_fraction": 1,
-        "h2_lhv": 1,
-        "biokero_revenue_fraction": 1,
-        "biokero_h2_usage": 1,
-    },
-)
-def biokero_h2_price_break():
-    return (jetfuel_cost() - biokero_cost_without_h2()) / (
-        1000
-        / h2_lhv()
-        * biokero_h2_usage()
-        / 3.6
-        * biokero_revenue_fraction()
-        / biokero_fraction()
-    )
-
-
-@component.add(
     name="BioKero H2 Usage",
     units="MWh/MWh",
     comp_type="Constant",
@@ -167,6 +142,31 @@ def biokero_h2_usage():
     MWh H2 per MWh energy input
     """
     return 0.099
+
+
+@component.add(
+    name="BioKero H2 WTP",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "jetfuel_cost": 1,
+        "biokero_cost_without_h2": 1,
+        "biokero_revenue_fraction": 1,
+        "biokero_fraction": 1,
+        "h2_lhv": 1,
+        "biokero_h2_usage": 1,
+    },
+)
+def biokero_h2_wtp():
+    return (jetfuel_cost() - biokero_cost_without_h2()) / (
+        1000
+        / h2_lhv()
+        * biokero_h2_usage()
+        / 3.6
+        * biokero_revenue_fraction()
+        / biokero_fraction()
+    )
 
 
 @component.add(
@@ -249,11 +249,11 @@ def bionaphtha_cost():
     comp_subtype="Normal",
     depends_on={
         "bionaphtha_cost": 1,
-        "h2_lhv": 1,
-        "naphtha_fraction_bio": 1,
         "ft_h2_cost": 1,
-        "bionaphtha_revenue_fraction": 1,
+        "h2_lhv": 1,
         "biokero_h2_usage": 1,
+        "bionaphtha_revenue_fraction": 1,
+        "naphtha_fraction_bio": 1,
     },
 )
 def bionaphtha_cost_without_h2():
@@ -270,19 +270,19 @@ def bionaphtha_cost_without_h2():
 
 
 @component.add(
-    name="BioNaphtha H2 price break",
+    name="BioNaphtha H2 WTP",
     units="€/kg",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "naphtha_cost": 1,
         "bionaphtha_cost_without_h2": 1,
+        "biokero_h2_usage": 1,
         "h2_lhv": 1,
         "naphtha_fraction_bio": 1,
-        "biokero_h2_usage": 1,
     },
 )
-def bionaphtha_h2_price_break():
+def bionaphtha_h2_wtp():
     return (naphtha_cost() - bionaphtha_cost_without_h2()) / (
         10**6 / h2_lhv() * biokero_h2_usage() / 3600 * 0.1 / naphtha_fraction_bio()
     )
@@ -306,20 +306,20 @@ def bionaphtha_revenue_fraction():
     depends_on={
         "biokero_electricity_usage": 1,
         "renewable_electricity_price": 1,
-        "biokero_gas_usage": 1,
         "biogas_cost": 1,
+        "biokero_gas_usage": 1,
         "biokero_biomass_usage": 1,
         "uco_price": 1,
-        "biokero_h2_usage": 1,
         "ft_h2_cost": 1,
         "h2_lhv": 1,
-        "heat_cost": 1,
+        "biokero_h2_usage": 1,
         "biokero_excess_heat": 1,
-        "biokero_fraction": 1,
-        "biokero_variable": 1,
-        "biokero_operating_hours": 1,
-        "biokero_opex": 1,
+        "heat_cost": 1,
         "biokero_capex": 1,
+        "biokero_operating_hours": 1,
+        "biokero_fraction": 1,
+        "biokero_opex": 1,
+        "biokero_variable": 1,
         "biokero_af": 1,
     },
 )
@@ -427,12 +427,12 @@ def synkero_co2_usage():
         "synkero_co2_usage": 1,
         "jetfuel_lhv": 1,
         "synkero_excess_heat": 1,
-        "h2_lhv": 1,
         "ft_h2_cost": 1,
+        "synkero_output": 1,
+        "h2_lhv": 1,
         "renewable_electricity_price": 1,
         "synkero_h2_usage": 1,
         "heat_cost": 1,
-        "synkero_output": 1,
         "synkero_electricity_usage": 1,
         "synkero_capex": 1,
         "synkero_operating_hours": 1,
@@ -472,11 +472,11 @@ def synkero_cost():
     comp_subtype="Normal",
     depends_on={
         "synkero_cost": 1,
-        "h2_lhv": 1,
         "ft_h2_cost": 1,
+        "synkero_output": 1,
+        "h2_lhv": 1,
         "synkero_fraction": 1,
         "synkero_h2_usage": 1,
-        "synkero_output": 1,
     },
 )
 def synkero_cost_without_h2():
@@ -534,32 +534,6 @@ def synkero_fraction():
 
 
 @component.add(
-    name="SynKero H2 price break",
-    units="€/kg",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "jetfuel_cost": 1,
-        "synkero_cost_without_h2": 1,
-        "synkero_h2_usage": 1,
-        "h2_lhv": 1,
-        "synkero_output": 1,
-        "synkero_fraction": 1,
-    },
-)
-def synkero_h2_price_break():
-    return (jetfuel_cost() - synkero_cost_without_h2()) / (
-        1000
-        / h2_lhv()
-        * synkero_h2_usage()
-        / synkero_output()
-        / synkero_fraction()
-        * 0.8
-        / 3.6
-    )
-
-
-@component.add(
     name="SynKero H2 Usage",
     units="MWh/MWh",
     comp_type="Constant",
@@ -570,6 +544,32 @@ def synkero_h2_usage():
     MWh H2 per MWh energy input
     """
     return 0.995
+
+
+@component.add(
+    name="SynKero H2 WTP",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "jetfuel_cost": 1,
+        "synkero_cost_without_h2": 1,
+        "synkero_h2_usage": 1,
+        "synkero_output": 1,
+        "h2_lhv": 1,
+        "synkero_fraction": 1,
+    },
+)
+def synkero_h2_wtp():
+    return (jetfuel_cost() - synkero_cost_without_h2()) / (
+        1000
+        / h2_lhv()
+        * synkero_h2_usage()
+        / synkero_output()
+        / synkero_fraction()
+        * 0.8
+        / 3.6
+    )
 
 
 @component.add(
@@ -682,21 +682,21 @@ def synnaphtha_fraction():
 
 
 @component.add(
-    name="SynNaphtha H2 price break",
+    name="SynNaphtha H2 WTP",
     units="€/kg",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "naphtha_cost": 1,
         "synnaphtha_cost_without_h2": 1,
-        "synkero_h2_usage": 1,
-        "h2_lhv": 1,
         "synnaphtha_fraction": 1,
         "synkero_output": 1,
+        "synkero_h2_usage": 1,
+        "h2_lhv": 1,
         "synkero_fraction": 1,
     },
 )
-def synnaphtha_h2_price_break():
+def synnaphtha_h2_wtp():
     return (naphtha_cost() - synnaphtha_cost_without_h2()) / (
         10**6
         / h2_lhv()

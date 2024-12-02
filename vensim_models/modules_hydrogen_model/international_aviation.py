@@ -154,7 +154,7 @@ def bio_kerosene_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "bio_kerosene_competitiveness": 1,
         "bio_kerosene_consumption": 1,
         "sum_international_aviation": 1,
@@ -163,7 +163,7 @@ def bio_kerosene_investment_level():
 def bio_kerosene_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - bio_kerosene_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - bio_kerosene_competitiveness())))
         * bio_kerosene_consumption()
         / sum_international_aviation()
     )
@@ -242,8 +242,8 @@ _integ_errorint_international_aviation = Integ(
         "biokero_cost": 1,
         "jetfuel_cost": 1,
         "jetfuel_consumption": 1,
-        "synkero_cost": 1,
         "syn_kerosene_consumption": 1,
+        "synkero_cost": 1,
         "sum_international_aviation": 1,
     },
 )
@@ -573,8 +573,8 @@ _integ_jetfuel_consumption = Integ(
     comp_subtype="Normal",
     depends_on={
         "jetfuel_consumption": 1,
-        "jetfuel_early_decommission_rate": 1,
         "jetfuel_lockin_period": 1,
+        "jetfuel_early_decommission_rate": 1,
     },
 )
 def jetfuel_decay():
@@ -623,8 +623,8 @@ def jetfuel_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
+        "cross": 1,
         "jetfuel_competitiveness": 1,
-        "cross_conventional": 1,
         "jetfuel_consumption": 1,
         "sum_international_aviation": 1,
     },
@@ -632,7 +632,7 @@ def jetfuel_investment_level():
 def jetfuel_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_conventional() - jetfuel_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - jetfuel_competitiveness())))
         * jetfuel_consumption()
         / sum_international_aviation()
     )
@@ -645,7 +645,7 @@ def jetfuel_level():
     comp_subtype="Normal",
 )
 def jetfuel_lockin_period():
-    return 10
+    return 5
 
 
 @component.add(
@@ -816,7 +816,7 @@ def syn_kerosene_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "syn_kerosene_competitiveness": 1,
         "syn_kerosene_consumption": 1,
         "sum_international_aviation": 1,
@@ -825,7 +825,7 @@ def syn_kerosene_investment_level():
 def syn_kerosene_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - syn_kerosene_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - syn_kerosene_competitiveness())))
         * syn_kerosene_consumption()
         / sum_international_aviation()
     )

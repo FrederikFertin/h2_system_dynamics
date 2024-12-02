@@ -169,7 +169,7 @@ def bio_kerosene_investment_level_dom():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "bio_kerosene_competitiveness_dom": 1,
         "bio_kerosene_consumption_dom": 1,
         "sum_domestic_aviation": 1,
@@ -178,12 +178,7 @@ def bio_kerosene_investment_level_dom():
 def bio_kerosene_level_dom():
     return (
         1
-        / (
-            1
-            + np.exp(
-                slope() * (cross_innovation() - bio_kerosene_competitiveness_dom())
-            )
-        )
+        / (1 + np.exp(slope() * (cross() - bio_kerosene_competitiveness_dom())))
         * bio_kerosene_consumption_dom()
         / sum_domestic_aviation()
     )
@@ -754,7 +749,7 @@ def hydrogen_investment_level_dom():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "hydrogen_competitiveness_dom": 1,
         "hydrogen_consumption_dom": 1,
         "sum_domestic_aviation": 1,
@@ -763,7 +758,7 @@ def hydrogen_investment_level_dom():
 def hydrogen_level_dom():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - hydrogen_competitiveness_dom())))
+        / (1 + np.exp(slope() * (cross() - hydrogen_competitiveness_dom())))
         * hydrogen_consumption_dom()
         / sum_domestic_aviation()
     )
@@ -820,8 +815,8 @@ _integ_jetfuel_consumption_dom = Integ(
     comp_subtype="Normal",
     depends_on={
         "jetfuel_consumption_dom": 1,
-        "jetfuel_early_decommission_rate_dom": 1,
         "jetfuel_lockin_period": 1,
+        "jetfuel_early_decommission_rate_dom": 1,
     },
 )
 def jetfuel_decay_dom():
@@ -867,8 +862,8 @@ def jetfuel_investment_level_dom():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
+        "cross": 1,
         "jetfuel_competitiveness_dom": 1,
-        "cross_conventional": 1,
         "jetfuel_consumption_dom": 1,
         "sum_domestic_aviation": 1,
     },
@@ -876,7 +871,7 @@ def jetfuel_investment_level_dom():
 def jetfuel_level_dom():
     return (
         1
-        / (1 + np.exp(slope() * (cross_conventional() - jetfuel_competitiveness_dom())))
+        / (1 + np.exp(slope() * (cross() - jetfuel_competitiveness_dom())))
         * jetfuel_consumption_dom()
         / sum_domestic_aviation()
     )
@@ -1069,7 +1064,7 @@ def syn_kerosene_investment_level_dom():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "syn_kerosene_competitiveness_dom": 1,
         "syn_kerosene_consumption_dom": 1,
         "sum_domestic_aviation": 1,
@@ -1078,12 +1073,7 @@ def syn_kerosene_investment_level_dom():
 def syn_kerosene_level_dom():
     return (
         1
-        / (
-            1
-            + np.exp(
-                slope() * (cross_innovation() - syn_kerosene_competitiveness_dom())
-            )
-        )
+        / (1 + np.exp(slope() * (cross() - syn_kerosene_competitiveness_dom())))
         * syn_kerosene_consumption_dom()
         / sum_domestic_aviation()
     )

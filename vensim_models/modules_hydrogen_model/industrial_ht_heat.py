@@ -116,8 +116,8 @@ _smooth_biogas_nm_inno_switch = Smooth(
         "nm_reinvestment": 1,
         "innovators": 1,
         "biogas_nm_inno_switch": 1,
-        "sum_nm": 2,
         "biogas_nm": 1,
+        "sum_nm": 2,
     },
 )
 def biogas_nm_innovators():
@@ -156,7 +156,7 @@ def biogas_nm_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "biogas_nm_competitiveness": 1,
         "biogas_nm": 1,
         "sum_nm": 1,
@@ -165,7 +165,7 @@ def biogas_nm_investment_level():
 def biogas_nm_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - biogas_nm_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - biogas_nm_competitiveness())))
         * biogas_nm()
         / sum_nm()
     )
@@ -194,6 +194,29 @@ _integ_blue_ng_nm = Integ(
 
 
 @component.add(
+    name="Blue NG NM CO2 WTP",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "biogas_cost": 1,
+        "nm_h2_gj_cost": 1,
+        "grey_ng_cost": 1,
+        "gas_price": 1,
+        "gas_emission_factor": 2,
+        "ccs_cost": 1,
+        "cc_capture_rate": 1,
+    },
+)
+def blue_ng_nm_co2_wtp():
+    return (
+        np.minimum(np.minimum(biogas_cost(), nm_h2_gj_cost()), grey_ng_cost())
+        - gas_price()
+        - gas_emission_factor() * ccs_cost()
+    ) / (gas_emission_factor() * (1 - cc_capture_rate()))
+
+
+@component.add(
     name="Blue NG NM competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -219,6 +242,17 @@ def blue_ng_nm_competitiveness():
 )
 def blue_ng_nm_decay():
     return blue_ng_nm() / (cc_lifetime() / 2)
+
+
+@component.add(
+    name="Blue NG NM emissions",
+    units="tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"blue_ng_nm": 1, "cc_capture_rate": 1, "gas_emission_factor": 1},
+)
+def blue_ng_nm_emissions():
+    return blue_ng_nm() * (1 - cc_capture_rate()) * gas_emission_factor() * 3600
 
 
 @component.add(
@@ -325,7 +359,7 @@ def blue_ng_nm_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "blue_ng_nm_competitiveness": 1,
         "blue_ng_nm": 1,
         "sum_nm": 1,
@@ -334,7 +368,7 @@ def blue_ng_nm_investment_level():
 def blue_ng_nm_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - blue_ng_nm_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - blue_ng_nm_competitiveness())))
         * blue_ng_nm()
         / sum_nm()
     )
@@ -397,6 +431,135 @@ def gas_lockin_period():
     equivalent lifetime of technology - based on assumptions that the same furnaces can run on NG / blue NG / H2.
     """
     return 5
+
+
+@component.add(
+    name="Grey NG NM",
+    units="GWh",
+    comp_type="Stateful",
+    comp_subtype="Integ",
+    depends_on={"_integ_grey_ng_nm": 1},
+    other_deps={
+        "_integ_grey_ng_nm": {
+            "initial": {"nm_gas_consumption": 1},
+            "step": {"grey_ng_nm_investment": 1, "grey_ng_nm_decay": 1},
+        }
+    },
+)
+def grey_ng_nm():
+    return _integ_grey_ng_nm()
+
+
+_integ_grey_ng_nm = Integ(
+    lambda: grey_ng_nm_investment() - grey_ng_nm_decay(),
+    lambda: nm_gas_consumption(),
+    "_integ_grey_ng_nm",
+)
+
+
+@component.add(
+    name="Grey NG NM CO2 WTP",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "biogas_cost": 1,
+        "nm_h2_gj_cost": 1,
+        "blue_ng_cost": 1,
+        "gas_price": 1,
+        "gas_emission_factor": 1,
+    },
+)
+def grey_ng_nm_co2_wtp():
+    return (
+        np.minimum(np.minimum(biogas_cost(), nm_h2_gj_cost()), blue_ng_cost())
+        - gas_price()
+    ) / gas_emission_factor()
+
+
+@component.add(
+    name="Grey NG NM competitiveness",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "blue_ng_cost": 1,
+        "grey_ng_cost": 3,
+        "nm_h2_gj_cost": 1,
+        "biogas_cost": 1,
+    },
+)
+def grey_ng_nm_competitiveness():
+    return np.minimum(
+        np.minimum(blue_ng_cost() / grey_ng_cost(), nm_h2_gj_cost() / grey_ng_cost()),
+        biogas_cost() / grey_ng_cost(),
+    )
+
+
+@component.add(
+    name="Grey NG NM decay",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "grey_ng_nm": 1,
+        "ng_nm_early_decommission_rate": 1,
+        "gas_lockin_period": 1,
+    },
+)
+def grey_ng_nm_decay():
+    return grey_ng_nm() * (ng_nm_early_decommission_rate() + 1 / gas_lockin_period())
+
+
+@component.add(
+    name="Grey NG NM emissions",
+    units="tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"grey_ng_nm": 1, "gas_emission_factor": 1},
+)
+def grey_ng_nm_emissions():
+    return grey_ng_nm() * gas_emission_factor() * 3600
+
+
+@component.add(
+    name="Grey NG NM investment",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"grey_ng_nm_investment_level": 1, "nm_reinvestment": 1},
+)
+def grey_ng_nm_investment():
+    return grey_ng_nm_investment_level() * nm_reinvestment()
+
+
+@component.add(
+    name="Grey NG NM investment level",
+    units="percent",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"nm_equalizer": 1, "grey_ng_nm_level": 1},
+)
+def grey_ng_nm_investment_level():
+    return nm_equalizer() * grey_ng_nm_level()
+
+
+@component.add(
+    name="Grey NG NM level",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "slope": 1,
+        "cross": 1,
+        "grey_ng_nm_competitiveness": 1,
+        "grey_ng_nm": 1,
+        "sum_nm": 1,
+    },
+)
+def grey_ng_nm_level():
+    return (
+        1
+        / (1 + np.exp(slope() * (cross() - grey_ng_nm_competitiveness())))
+        * grey_ng_nm()
+        / sum_nm()
+    )
 
 
 @component.add(
@@ -553,8 +716,8 @@ def h2_nm_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
+        "cross": 1,
         "h2_nm_competitiveness": 1,
-        "cross_innovation": 1,
         "h2_nm": 1,
         "sum_nm": 1,
     },
@@ -562,7 +725,7 @@ def h2_nm_investment_level():
 def h2_nm_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - h2_nm_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - h2_nm_competitiveness())))
         * h2_nm()
         / sum_nm()
     )
@@ -578,7 +741,7 @@ def h2_nm_level():
         "biogas_cost": 1,
         "blue_ng_nm": 1,
         "blue_ng_cost": 1,
-        "ng_nm": 1,
+        "grey_ng_nm": 1,
         "grey_ng_cost": 1,
         "nm_h2_gj_cost": 1,
         "h2_nm": 1,
@@ -593,7 +756,7 @@ def high_temperature_average_cost():
         (
             biogas_nm() * biogas_cost()
             + blue_ng_nm() * blue_ng_cost()
-            + ng_nm() * grey_ng_cost()
+            + grey_ng_nm() * grey_ng_cost()
             + h2_nm() * nm_h2_gj_cost()
         )
         / 1000
@@ -618,18 +781,24 @@ def high_temperature_biomass_demand():
     units="tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "ng_nm": 1,
-        "blue_ng_nm": 1,
-        "cc_capture_rate": 1,
-        "gas_emission_factor": 1,
-    },
+    depends_on={"blue_ng_nm_emissions": 1, "grey_ng_nm_emissions": 1},
 )
 def high_temperature_emissions():
+    return blue_ng_nm_emissions() + grey_ng_nm_emissions()
+
+
+@component.add(
+    name="high temperature H2 WTP",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"biogas_cost": 1, "blue_ng_cost": 1, "grey_ng_cost": 1},
+)
+def high_temperature_h2_wtp():
     return (
-        (ng_nm() + blue_ng_nm() * (1 - cc_capture_rate()))
-        * gas_emission_factor()
-        * 3600
+        np.minimum(np.minimum(biogas_cost(), blue_ng_cost()), grey_ng_cost())
+        * 120
+        / 1000
     )
 
 
@@ -648,107 +817,13 @@ def high_temperature_hydrogen_demand():
 
 
 @component.add(
-    name="NG NM",
-    units="GWh",
-    comp_type="Stateful",
-    comp_subtype="Integ",
-    depends_on={"_integ_ng_nm": 1},
-    other_deps={
-        "_integ_ng_nm": {
-            "initial": {"nm_gas_consumption": 1},
-            "step": {"ng_nm_investment": 1, "ng_nm_decay": 1},
-        }
-    },
-)
-def ng_nm():
-    return _integ_ng_nm()
-
-
-_integ_ng_nm = Integ(
-    lambda: ng_nm_investment() - ng_nm_decay(),
-    lambda: nm_gas_consumption(),
-    "_integ_ng_nm",
-)
-
-
-@component.add(
-    name="NG NM competitiveness",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "blue_ng_cost": 1,
-        "grey_ng_cost": 3,
-        "nm_h2_gj_cost": 1,
-        "biogas_cost": 1,
-    },
-)
-def ng_nm_competitiveness():
-    return np.minimum(
-        np.minimum(blue_ng_cost() / grey_ng_cost(), nm_h2_gj_cost() / grey_ng_cost()),
-        biogas_cost() / grey_ng_cost(),
-    )
-
-
-@component.add(
-    name="NG NM decay",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"ng_nm": 1, "ng_nm_early_decommission_rate": 1, "gas_lockin_period": 1},
-)
-def ng_nm_decay():
-    return ng_nm() * (ng_nm_early_decommission_rate() + 1 / gas_lockin_period())
-
-
-@component.add(
     name="NG NM early decommission rate",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"ng_nm_competitiveness": 1},
+    depends_on={"grey_ng_nm_competitiveness": 1},
 )
 def ng_nm_early_decommission_rate():
-    return 1 / (1 + np.exp(-5 * -ng_nm_competitiveness())) * 0
-
-
-@component.add(
-    name="NG NM investment",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"ng_nm_investment_level": 1, "nm_reinvestment": 1},
-)
-def ng_nm_investment():
-    return ng_nm_investment_level() * nm_reinvestment()
-
-
-@component.add(
-    name="NG NM investment level",
-    units="percent",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"nm_equalizer": 1, "ng_nm_level": 1},
-)
-def ng_nm_investment_level():
-    return nm_equalizer() * ng_nm_level()
-
-
-@component.add(
-    name="NG NM level",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "slope": 1,
-        "ng_nm_competitiveness": 1,
-        "cross_conventional": 1,
-        "ng_nm": 1,
-        "sum_nm": 1,
-    },
-)
-def ng_nm_level():
-    return (
-        1
-        / (1 + np.exp(slope() * (cross_conventional() - ng_nm_competitiveness())))
-        * ng_nm()
-        / sum_nm()
-    )
+    return 1 / (1 + np.exp(-5 * -grey_ng_nm_competitiveness())) * 0
 
 
 @component.add(
@@ -756,14 +831,16 @@ def ng_nm_level():
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "ng_nm_level": 1,
+        "grey_ng_nm_level": 1,
         "h2_nm_level": 1,
         "blue_ng_nm_level": 1,
         "biogas_nm_level": 1,
     },
 )
 def nm_equalizer():
-    return 1 / (ng_nm_level() + h2_nm_level() + blue_ng_nm_level() + biogas_nm_level())
+    return 1 / (
+        grey_ng_nm_level() + h2_nm_level() + blue_ng_nm_level() + biogas_nm_level()
+    )
 
 
 @component.add(
@@ -774,21 +851,6 @@ def nm_gas_consumption():
     207 TWh/year - assumed constant moving forward.
     """
     return 207000
-
-
-@component.add(
-    name="NM H2 price break",
-    units="€/kg",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"biogas_cost": 1, "blue_ng_cost": 1, "grey_ng_cost": 1},
-)
-def nm_h2_price_break():
-    return (
-        np.minimum(np.minimum(biogas_cost(), blue_ng_cost()), grey_ng_cost())
-        * 120
-        / 1000
-    )
 
 
 @component.add(
@@ -805,11 +867,11 @@ def nm_h2_price_break():
                 "blue_ng_nm_decay": 1,
                 "demand_change_nm": 1,
                 "h2_nm_decay": 1,
-                "ng_nm_decay": 1,
+                "grey_ng_nm_decay": 1,
                 "biogas_nm_investment": 1,
                 "blue_ng_nm_investment": 1,
                 "h2_nm_investment": 1,
-                "ng_nm_investment": 1,
+                "grey_ng_nm_investment": 1,
             },
         }
     },
@@ -823,11 +885,11 @@ _integ_nm_reinvestment = Integ(
     + blue_ng_nm_decay()
     + demand_change_nm()
     + h2_nm_decay()
-    + ng_nm_decay()
+    + grey_ng_nm_decay()
     - biogas_nm_investment()
     - blue_ng_nm_investment()
     - h2_nm_investment()
-    - ng_nm_investment(),
+    - grey_ng_nm_investment(),
     lambda: nm_gas_consumption() / gas_lockin_period() * 0.8,
     "_integ_nm_reinvestment",
 )
@@ -838,7 +900,7 @@ _integ_nm_reinvestment = Integ(
     units="GWh",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"ng_nm": 1, "h2_nm": 1, "blue_ng_nm": 1, "biogas_nm": 1},
+    depends_on={"grey_ng_nm": 1, "h2_nm": 1, "blue_ng_nm": 1, "biogas_nm": 1},
 )
 def sum_nm():
-    return ng_nm() + h2_nm() + blue_ng_nm() + biogas_nm()
+    return grey_ng_nm() + h2_nm() + blue_ng_nm() + biogas_nm()

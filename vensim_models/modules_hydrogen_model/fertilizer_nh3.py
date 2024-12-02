@@ -110,8 +110,8 @@ _smooth_blue_nh3_inno_switch = Smooth(
         "nh3_reinvestment": 1,
         "innovators": 1,
         "blue_nh3_inno_switch": 1,
-        "blue_nh3": 1,
         "sum_fertilizer": 2,
+        "blue_nh3": 1,
     },
 )
 def blue_nh3_innovators():
@@ -151,7 +151,7 @@ def blue_nh3_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "blue_nh3_competitiveness": 1,
         "blue_nh3": 1,
         "sum_fertilizer": 1,
@@ -160,7 +160,7 @@ def blue_nh3_investment_level():
 def blue_nh3_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - blue_nh3_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - blue_nh3_competitiveness())))
         * blue_nh3()
         / sum_fertilizer()
     )
@@ -228,8 +228,8 @@ _integ_errorint_fertilizer = Integ(
     depends_on={
         "blue_nh3": 1,
         "blue_nh3_cost": 1,
-        "green_nh3": 1,
         "fertilizer_nh3_cost": 1,
+        "green_nh3": 1,
         "grey_nh3": 1,
         "grey_nh3_cost": 1,
         "sum_fertilizer": 1,
@@ -250,8 +250,8 @@ def fertilizer_average_cost():
     comp_subtype="Normal",
     depends_on={
         "grey_nh3": 2,
-        "blue_nh3": 2,
         "cc_capture_rate": 1,
+        "blue_nh3": 2,
         "nh3_h2_usage": 1,
         "smr_emission_factor": 1,
         "electricity_emission_factor": 1,
@@ -264,6 +264,17 @@ def fertilizer_emissions():
     ) / nh3_h2_usage() * smr_emission_factor() * 10**6 + (
         grey_nh3() + blue_nh3()
     ) * electricity_emission_factor() * 10**9 * nh3_el_usage()
+
+
+@component.add(
+    name="fertilizer grey and blue hydrogen demand",
+    units="t H2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"blue_nh3": 1, "grey_nh3": 1, "nh3_h2_usage": 1},
+)
+def fertilizer_grey_and_blue_hydrogen_demand():
+    return (blue_nh3() + grey_nh3()) * 10**6 / nh3_h2_usage()
 
 
 @component.add(
@@ -428,7 +439,7 @@ def green_nh3_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "green_nh3_competitiveness": 1,
         "green_nh3": 1,
         "sum_fertilizer": 1,
@@ -437,7 +448,7 @@ def green_nh3_investment_level():
 def green_nh3_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - green_nh3_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - green_nh3_competitiveness())))
         * green_nh3()
         / sum_fertilizer()
     )
@@ -530,8 +541,8 @@ def grey_nh3_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
+        "cross": 1,
         "grey_nh3_competitiveness": 1,
-        "cross_conventional": 1,
         "grey_nh3": 1,
         "sum_fertilizer": 1,
     },
@@ -539,7 +550,7 @@ def grey_nh3_investment_level():
 def grey_nh3_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_conventional() - grey_nh3_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - grey_nh3_competitiveness())))
         * grey_nh3()
         / sum_fertilizer()
     )

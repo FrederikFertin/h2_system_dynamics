@@ -4,6 +4,17 @@ Translated using PySD version 3.14.0
 """
 
 @component.add(
+    name="all hydrogen",
+    units="TWh",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"carbon_hydrogen_twh": 1, "total_twh": 1},
+)
+def all_hydrogen():
+    return carbon_hydrogen_twh() + total_twh()
+
+
+@component.add(
     name="BioKero hydrogen demand",
     units="t H2",
     comp_type="Auxiliary",
@@ -21,6 +32,28 @@ def biokero_hydrogen_demand():
 
 
 @component.add(
+    name="carbon hydrogen TWH",
+    units="TWh",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "h2_lhv": 1,
+        "fertilizer_grey_and_blue_hydrogen_demand": 1,
+        "refinery_grey_and_blue_hydrogen_demand": 1,
+    },
+)
+def carbon_hydrogen_twh():
+    return (
+        h2_lhv()
+        * (
+            fertilizer_grey_and_blue_hydrogen_demand()
+            + refinery_grey_and_blue_hydrogen_demand()
+        )
+        / 10**6
+    )
+
+
+@component.add(
     name="industry hydrogen demand",
     units="t H2",
     comp_type="Auxiliary",
@@ -31,6 +64,7 @@ def biokero_hydrogen_demand():
         "high_temperature_hydrogen_demand": 1,
         "refinery_hydrogen_demand": 1,
         "steel_hydrogen_demand": 1,
+        "meoh_hydrogen_demand": 1,
     },
 )
 def industry_hydrogen_demand():
@@ -40,6 +74,7 @@ def industry_hydrogen_demand():
         + high_temperature_hydrogen_demand()
         + refinery_hydrogen_demand()
         + steel_hydrogen_demand()
+        + meoh_hydrogen_demand()
     )
 
 

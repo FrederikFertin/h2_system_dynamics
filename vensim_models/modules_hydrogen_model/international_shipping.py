@@ -82,8 +82,8 @@ def hfo_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "hfo_shipping_consumption": 1,
-        "hfo_early_decommission_rate": 1,
         "ship_lifetime": 1,
+        "hfo_early_decommission_rate": 1,
     },
 )
 def hfo_decay():
@@ -129,8 +129,8 @@ def hfo_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
+        "cross": 1,
         "hfo_competitiveness": 1,
-        "cross_conventional": 1,
         "hfo_shipping_consumption": 1,
         "sum_int_shipping": 1,
     },
@@ -138,7 +138,7 @@ def hfo_investment_level():
 def hfo_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_conventional() - hfo_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - hfo_competitiveness())))
         * hfo_shipping_consumption()
         / sum_int_shipping()
     )
@@ -326,8 +326,8 @@ _hardcodedlookup_int_shipping_consumption_forecast = HardcodedLookups(
         "hfo_containership_cost": 1,
         "meoh_shipping_consumption": 1,
         "meoh_containership_cost": 1,
-        "nh3_containership_cost": 1,
         "nh3_shipping_consumption": 1,
+        "nh3_containership_cost": 1,
         "yearly_containership_consumption": 1,
         "sum_int_shipping": 1,
     },
@@ -353,13 +353,13 @@ def international_shipping_average_cost():
     units="GWh Biomass",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"meoh_shipping_consumption": 1, "meoh_biomass_usage": 1},
+    depends_on={"meoh_shipping_consumption": 1, "biomeoh_biomass_usage": 1},
 )
 def international_shipping_biomass_demand():
     """
     Convert from GWh MeOH to GWh biomass
     """
-    return meoh_shipping_consumption() * meoh_biomass_usage()
+    return meoh_shipping_consumption() * biomeoh_biomass_usage()
 
 
 @component.add(
@@ -412,13 +412,13 @@ def international_shipping_hydrogen_demand():
     units="t H2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"meoh_shipping_consumption": 1, "meoh_lhv": 1, "meoh_h2_usage": 1},
+    depends_on={"meoh_shipping_consumption": 1, "meoh_lhv": 1, "biomeoh_h2_usage": 1},
 )
 def international_shipping_meoh_hydrogen_demand():
     """
     Convert from GWh to GJ, then from GJ to tons fuel, then from tons fuel to tons H2. Example 1: MeOH cons. [GWh] * 3600 [GJ/GWh] / 19.9 [GJ/t] / 15.7 [t MeOH/t H2] Example 2: NH3 cons. [GWh] * 3600 [GJ/GWh] / 18.6 [GJ/t] / 5.56 [t NH3/t H2]
     """
-    return meoh_shipping_consumption() * 3600 / meoh_lhv() / meoh_h2_usage()
+    return meoh_shipping_consumption() * 3600 / meoh_lhv() / biomeoh_h2_usage()
 
 
 @component.add(
@@ -453,7 +453,7 @@ def meoh_competitiveness():
 
 
 @component.add(
-    name="MeOH containership H2 price break",
+    name="MeOH containership H2 WTP",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
@@ -463,11 +463,11 @@ def meoh_competitiveness():
         "ship_engine_af": 1,
         "yearly_containership_consumption": 1,
         "biomeoh_cost_without_h2": 1,
-        "meoh_h2_usage": 1,
+        "biomeoh_h2_usage": 1,
         "meoh_lhv": 1,
     },
 )
-def meoh_containership_h2_price_break():
+def meoh_containership_h2_wtp():
     return (
         (
             (
@@ -478,7 +478,7 @@ def meoh_containership_h2_price_break():
             / yearly_containership_consumption()
             - biomeoh_cost_without_h2()
         )
-        * meoh_h2_usage()
+        * biomeoh_h2_usage()
         * meoh_lhv()
     )
 
@@ -597,7 +597,7 @@ def meoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "meoh_competitiveness": 1,
         "meoh_shipping_consumption": 1,
         "sum_int_shipping": 1,
@@ -606,7 +606,7 @@ def meoh_investment_level():
 def meoh_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - meoh_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - meoh_competitiveness())))
         * meoh_shipping_consumption()
         / sum_int_shipping()
     )
@@ -654,22 +654,22 @@ def nh3_competitiveness():
 
 
 @component.add(
-    name="NH3 containership H2 price break",
+    name="NH3 containership H2 WTP",
     units="€/kg",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "hfo_containership_cost": 1,
-        "nh3_ship_capex": 1,
-        "containership_opex": 1,
         "ship_engine_af": 1,
+        "containership_opex": 1,
+        "nh3_ship_capex": 1,
         "yearly_containership_consumption": 1,
         "green_nh3_cost_without_h2": 1,
         "nh3_h2_usage": 1,
         "nh3_lhv": 1,
     },
 )
-def nh3_containership_h2_price_break():
+def nh3_containership_h2_wtp():
     return (
         (
             (
@@ -758,8 +758,8 @@ _smooth_nh3_inno_switch = Smooth(
         "shipping_reinvestment": 1,
         "innovators": 1,
         "nh3_inno_switch": 1,
-        "sum_int_shipping": 2,
         "nh3_shipping_consumption": 1,
+        "sum_int_shipping": 2,
     },
 )
 def nh3_innovators():
@@ -799,7 +799,7 @@ def nh3_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "nh3_competitiveness": 1,
         "nh3_shipping_consumption": 1,
         "sum_int_shipping": 1,
@@ -808,7 +808,7 @@ def nh3_investment_level():
 def nh3_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - nh3_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - nh3_competitiveness())))
         * nh3_shipping_consumption()
         / sum_int_shipping()
     )

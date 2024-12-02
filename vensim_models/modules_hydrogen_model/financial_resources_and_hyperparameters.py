@@ -147,26 +147,6 @@ def cross():
 
 
 @component.add(
-    name="CROSS CONVENTIONAL",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"cross": 1},
-)
-def cross_conventional():
-    return cross()
-
-
-@component.add(
-    name="CROSS INNOVATION",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"cross": 1},
-)
-def cross_innovation():
-    return cross()
-
-
-@component.add(
     name="DISCOUNT RATE", units="percent", comp_type="Constant", comp_subtype="Normal"
 )
 def discount_rate():
@@ -266,8 +246,8 @@ _hardcodedlookup_gas_price_lookup = HardcodedLookups(
     depends_on={
         "time": 1,
         "electricity_price_lookup": 1,
-        "electricity_emission_factor": 1,
         "carbon_tax": 1,
+        "electricity_emission_factor": 1,
         "electricity_sensitivity": 1,
     },
 )

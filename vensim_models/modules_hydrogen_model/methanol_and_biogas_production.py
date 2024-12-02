@@ -51,8 +51,8 @@ def biogas_capex():
         "biogas_operating_hours": 1,
         "renewable_electricity_price": 1,
         "biogas_electricity_usage": 1,
-        "heat_cost": 1,
         "biogas_heat_usage": 1,
+        "heat_cost": 1,
         "biomass_price": 1,
         "biogas_biomass_usage": 1,
     },
@@ -135,23 +135,57 @@ def biogas_opex():
 
 
 @component.add(
+    name="bioMeOH AF",
+    units="percent",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"discount_rate": 2, "biomeoh_lifetime": 1},
+)
+def biomeoh_af():
+    return 1 / ((1 - (1 + discount_rate()) ** -biomeoh_lifetime()) / discount_rate())
+
+
+@component.add(
+    name="bioMeOH biomass usage",
+    units="kWh biomass/kWh MeOH",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def biomeoh_biomass_usage():
+    """
+    kWh biomass/kWh MeOH Source:https://doi.org/10.1016/j.energy.2020.118432
+    """
+    return 0.73
+
+
+@component.add(
+    name="bioMeOH CAPEX",
+    units="€/kgMeOH/h",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def biomeoh_capex():
+    return 20000
+
+
+@component.add(
     name="bioMeOH cost without H2",
     units="€/MJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "meoh_learning": 1,
-        "meoh_capex": 1,
-        "meoh_opex": 1,
-        "meoh_af": 1,
+        "biomeoh_learning": 1,
+        "biomeoh_capex": 1,
+        "biomeoh_af": 1,
+        "biomeoh_opex": 1,
         "meoh_lhv": 2,
-        "meoh_operating_hours": 1,
-        "heat_cost": 1,
-        "meoh_excess_heat": 1,
-        "meoh_electricity_usage": 1,
+        "biomeoh_operating_hours": 1,
         "renewable_electricity_price": 1,
+        "biomeoh_electricity_usage": 1,
+        "heat_cost": 1,
+        "biomeoh_excess_heat": 1,
         "biomass_price": 1,
-        "meoh_biomass_usage": 1,
+        "biomeoh_biomass_usage": 1,
     },
 )
 def biomeoh_cost_without_h2():
@@ -159,17 +193,138 @@ def biomeoh_cost_without_h2():
     €/MJ MeOH [ [kgBM/kgMeOH] * [€/GJ] * [MJ/kgBM ] / [MJ/GJ] + [€/kgH2] / [kgMeOH/kgH2] + [€/kWh * kWh/kgMeOH] ] / [MJ/kgMeOH]
     """
     return (
-        meoh_learning()
-        * meoh_capex()
-        * (meoh_af() + meoh_opex())
-        / (meoh_operating_hours() * meoh_lhv())
+        biomeoh_learning()
+        * biomeoh_capex()
+        * (biomeoh_af() + biomeoh_opex())
+        / (biomeoh_operating_hours() * meoh_lhv())
         + (
-            renewable_electricity_price() * meoh_electricity_usage()
-            - heat_cost() / 1000 * meoh_excess_heat()
+            renewable_electricity_price() * biomeoh_electricity_usage()
+            - heat_cost() / 1000 * biomeoh_excess_heat()
         )
         / meoh_lhv()
-        + meoh_biomass_usage() * biomass_price() / 1000
+        + biomeoh_biomass_usage() * biomass_price() / 1000
     )
+
+
+@component.add(
+    name="bioMeOH electricity usage",
+    units="kWh/kgMeOH",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def biomeoh_electricity_usage():
+    """
+    kWhe/kgMeOH
+    """
+    return 0.64
+
+
+@component.add(
+    name="bioMeOH excess heat",
+    units="kWh/kgMeOH",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def biomeoh_excess_heat():
+    return 0.428
+
+
+@component.add(
+    name="bioMeOH H2 usage",
+    units="kgMeOH/kgH2",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def biomeoh_h2_usage():
+    """
+    kg MeOH per kg H2
+    """
+    return 15.7
+
+
+@component.add(
+    name="bioMeOH H2 WTP",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "min_alternative_meoh_cost": 1,
+        "biomeoh_cost_without_h2": 1,
+        "meoh_lhv": 1,
+        "biomeoh_h2_usage": 1,
+    },
+)
+def biomeoh_h2_wtp():
+    return (
+        (min_alternative_meoh_cost() - biomeoh_cost_without_h2())
+        * meoh_lhv()
+        * biomeoh_h2_usage()
+    )
+
+
+@component.add(
+    name="bioMeOH learning",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "biomeoh_plant_size": 2,
+        "meoh_shipping_consumption": 1,
+        "domestic_meoh_shipping_consumption": 1,
+        "biomeoh_learning_rate": 1,
+    },
+)
+def biomeoh_learning():
+    return (
+        np.maximum(
+            biomeoh_plant_size(),
+            domestic_meoh_shipping_consumption() + meoh_shipping_consumption(),
+        )
+        / biomeoh_plant_size()
+    ) ** (np.log(1 - biomeoh_learning_rate()) / np.log(2))
+
+
+@component.add(
+    name="bioMeOH learning rate", comp_type="Constant", comp_subtype="Normal"
+)
+def biomeoh_learning_rate():
+    return 0.08
+
+
+@component.add(
+    name="bioMeOH lifetime", units="years", comp_type="Constant", comp_subtype="Normal"
+)
+def biomeoh_lifetime():
+    return 20
+
+
+@component.add(
+    name="bioMeOH operating hours",
+    units="h",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def biomeoh_operating_hours():
+    return 8000
+
+
+@component.add(
+    name="bioMeOH OPEX", units="percent", comp_type="Constant", comp_subtype="Normal"
+)
+def biomeoh_opex():
+    """
+    Percentage of CAPEX
+    """
+    return 0.04
+
+
+@component.add(
+    name="bioMeOH plant size",
+    units="GWh/Year",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def biomeoh_plant_size():
+    return 400 * 1000 * 19.9 / 3600
 
 
 @component.add(
@@ -180,12 +335,12 @@ def biomeoh_cost_without_h2():
     depends_on={
         "biomeoh_cost_without_h2": 1,
         "meoh_lhv": 1,
+        "biomeoh_h2_usage": 1,
         "blue_h2_cost": 1,
-        "meoh_h2_usage": 1,
     },
 )
 def blue_biomeoh_cost():
-    return biomeoh_cost_without_h2() + blue_h2_cost() / meoh_h2_usage() / meoh_lhv()
+    return biomeoh_cost_without_h2() + blue_h2_cost() / biomeoh_h2_usage() / meoh_lhv()
 
 
 @component.add(
@@ -196,13 +351,33 @@ def blue_biomeoh_cost():
     depends_on={
         "emeoh_cost_without_hydrogen": 1,
         "meoh_lhv": 1,
-        "blue_h2_cost": 1,
         "emeoh_h2_usage": 1,
+        "blue_h2_cost": 1,
     },
 )
 def blue_emeoh_cost():
     return (
         emeoh_cost_without_hydrogen() + blue_h2_cost() / emeoh_h2_usage() / meoh_lhv()
+    )
+
+
+@component.add(
+    name="Blue MeOH cost",
+    units="€/MJ",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "convmeoh_cost": 1,
+        "meoh_lhv": 1,
+        "carbon_tax": 1,
+        "convmeoh_emission_factor": 1,
+        "cc_capture_rate": 1,
+        "ccs_cost": 1,
+    },
+)
+def blue_meoh_cost():
+    return convmeoh_cost() + convmeoh_emission_factor() / 1000 / meoh_lhv() * (
+        ccs_cost() - cc_capture_rate() * carbon_tax()
     )
 
 
@@ -232,13 +407,13 @@ def convmeoh_capex():
     depends_on={
         "convmeoh_electricity_usage": 1,
         "grid_electricity_price": 1,
-        "convmeoh_emission_factor": 1,
         "carbon_tax": 1,
-        "gas_price": 1,
+        "convmeoh_emission_factor": 1,
         "convmeoh_gas_usage": 1,
+        "gas_price": 1,
         "convmeoh_opex": 1,
-        "convmeoh_capex": 1,
         "convmeoh_af": 1,
+        "convmeoh_capex": 1,
         "meoh_lhv": 1,
     },
 )
@@ -346,15 +521,15 @@ def emeoh_co2_usage():
         "emeoh_capex": 1,
         "emeoh_af": 1,
         "emeoh_opex": 1,
-        "emeoh_operating_hours": 1,
         "meoh_lhv": 2,
-        "emeoh_excess_heat": 1,
-        "cc_capture_rate": 1,
-        "emeoh_co2_usage": 1,
-        "renewable_electricity_price": 1,
-        "heat_cost": 1,
+        "emeoh_operating_hours": 1,
         "emeoh_electricity_usage": 1,
         "ps_cc_cost": 1,
+        "renewable_electricity_price": 1,
+        "heat_cost": 1,
+        "emeoh_co2_usage": 1,
+        "emeoh_excess_heat": 1,
+        "cc_capture_rate": 1,
     },
 )
 def emeoh_cost_without_hydrogen():
@@ -411,6 +586,26 @@ def emeoh_h2_usage():
 
 
 @component.add(
+    name="eMeOH H2 WTP",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "min_alternative_meoh_cost": 1,
+        "emeoh_cost_without_hydrogen": 1,
+        "emeoh_h2_usage": 1,
+        "meoh_lhv": 1,
+    },
+)
+def emeoh_h2_wtp():
+    return (
+        (min_alternative_meoh_cost() - emeoh_cost_without_hydrogen())
+        * emeoh_h2_usage()
+        * meoh_lhv()
+    )
+
+
+@component.add(
     name="eMeOH lifetime", units="years", comp_type="Constant", comp_subtype="Normal"
 )
 def emeoh_lifetime():
@@ -441,13 +636,13 @@ def emeoh_opex():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_cost_without_h2": 1,
-        "green_h2_cost": 1,
-        "meoh_h2_usage": 1,
         "meoh_lhv": 1,
+        "biomeoh_h2_usage": 1,
+        "green_h2_cost": 1,
     },
 )
 def green_biomeoh_cost():
-    return biomeoh_cost_without_h2() + green_h2_cost() / meoh_h2_usage() / meoh_lhv()
+    return biomeoh_cost_without_h2() + green_h2_cost() / biomeoh_h2_usage() / meoh_lhv()
 
 
 @component.add(
@@ -457,9 +652,9 @@ def green_biomeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "emeoh_cost_without_hydrogen": 1,
+        "meoh_lhv": 1,
         "green_h2_cost": 1,
         "emeoh_h2_usage": 1,
-        "meoh_lhv": 1,
     },
 )
 def green_emeoh_cost():
@@ -475,13 +670,13 @@ def green_emeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_cost_without_h2": 1,
-        "grey_h2_cost": 1,
-        "meoh_h2_usage": 1,
         "meoh_lhv": 1,
+        "biomeoh_h2_usage": 1,
+        "grey_h2_cost": 1,
     },
 )
 def grey_biomeoh_cost():
-    return biomeoh_cost_without_h2() + grey_h2_cost() / meoh_h2_usage() / meoh_lhv()
+    return biomeoh_cost_without_h2() + grey_h2_cost() / biomeoh_h2_usage() / meoh_lhv()
 
 
 @component.add(
@@ -491,108 +686,15 @@ def grey_biomeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "emeoh_cost_without_hydrogen": 1,
-        "grey_h2_cost": 1,
-        "emeoh_h2_usage": 1,
         "meoh_lhv": 1,
+        "emeoh_h2_usage": 1,
+        "grey_h2_cost": 1,
     },
 )
 def grey_emeoh_cost():
     return (
         emeoh_cost_without_hydrogen() + grey_h2_cost() / emeoh_h2_usage() / meoh_lhv()
     )
-
-
-@component.add(
-    name="MeOH AF",
-    units="percent",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"discount_rate": 2, "meoh_lifetime": 1},
-)
-def meoh_af():
-    return 1 / ((1 - (1 + discount_rate()) ** -meoh_lifetime()) / discount_rate())
-
-
-@component.add(
-    name="MeOH biomass usage",
-    units="kWh biomass/kWh MeOH",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def meoh_biomass_usage():
-    """
-    kWh biomass/kWh MeOH Source:https://doi.org/10.1016/j.energy.2020.118432
-    """
-    return 0.73
-
-
-@component.add(
-    name="MeOH CAPEX", units="€/kgMeOH/h", comp_type="Constant", comp_subtype="Normal"
-)
-def meoh_capex():
-    return 20000
-
-
-@component.add(
-    name="MeOH electricity usage",
-    units="kWh/kgMeOH",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def meoh_electricity_usage():
-    """
-    kWhe/kgMeOH
-    """
-    return 0.64
-
-
-@component.add(
-    name="MeOH excess heat",
-    units="kWh/kgMeOH",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def meoh_excess_heat():
-    return 0.428
-
-
-@component.add(
-    name="MeOH H2 usage",
-    units="kgMeOH/kgH2",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def meoh_h2_usage():
-    """
-    kg MeOH per kg H2
-    """
-    return 15.7
-
-
-@component.add(
-    name="MeOH learning",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "meoh_plant_size": 2,
-        "meoh_shipping_consumption": 1,
-        "domestic_meoh_shipping_consumption": 1,
-        "meoh_learning_rate": 1,
-    },
-)
-def meoh_learning():
-    return (
-        np.maximum(
-            meoh_plant_size(),
-            domestic_meoh_shipping_consumption() + meoh_shipping_consumption(),
-        )
-        / meoh_plant_size()
-    ) ** (np.log(1 - meoh_learning_rate()) / np.log(2))
-
-
-@component.add(name="MeOH learning rate", comp_type="Constant", comp_subtype="Normal")
-def meoh_learning_rate():
-    return 0.08
 
 
 @component.add(
@@ -603,37 +705,14 @@ def meoh_lhv():
 
 
 @component.add(
-    name="MeOH lifetime", units="years", comp_type="Constant", comp_subtype="Normal"
-)
-def meoh_lifetime():
-    return 20
-
-
-@component.add(
-    name="MeOH operating hours", units="h", comp_type="Constant", comp_subtype="Normal"
-)
-def meoh_operating_hours():
-    return 8000
-
-
-@component.add(
-    name="MeOH OPEX", units="percent", comp_type="Constant", comp_subtype="Normal"
-)
-def meoh_opex():
-    """
-    Percentage of CAPEX
-    """
-    return 0.04
-
-
-@component.add(
-    name="MeOH plant size",
-    units="GWh/Year",
-    comp_type="Constant",
+    name="min alternative MeOH cost",
+    units="€/MJ",
+    comp_type="Auxiliary",
     comp_subtype="Normal",
+    depends_on={"blue_meoh_cost": 1, "convmeoh_cost": 1},
 )
-def meoh_plant_size():
-    return 400 * 1000 * 19.9 / 3600
+def min_alternative_meoh_cost():
+    return np.minimum(blue_meoh_cost(), convmeoh_cost())
 
 
 @component.add(
@@ -644,12 +723,12 @@ def meoh_plant_size():
     depends_on={
         "biomeoh_cost_without_h2": 1,
         "meoh_lhv": 1,
+        "biomeoh_h2_usage": 1,
         "shipping_meoh_h2_cost": 1,
-        "meoh_h2_usage": 1,
     },
 )
 def shipping_biomeoh_cost():
     return (
         biomeoh_cost_without_h2()
-        + shipping_meoh_h2_cost() / meoh_h2_usage() / meoh_lhv()
+        + shipping_meoh_h2_cost() / biomeoh_h2_usage() / meoh_lhv()
     )

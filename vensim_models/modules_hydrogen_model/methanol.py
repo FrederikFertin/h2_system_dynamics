@@ -30,7 +30,7 @@ _integ_biomeoh = Integ(
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "blue_biomeoh_cost": 1,
+        "blue_meoh_cost": 1,
         "green_biomeoh_cost": 3,
         "convmeoh_cost": 1,
         "green_emeoh_cost": 1,
@@ -39,7 +39,7 @@ _integ_biomeoh = Integ(
 def biomeoh_competitiveness():
     return np.minimum(
         np.minimum(
-            blue_biomeoh_cost() / green_biomeoh_cost(),
+            blue_meoh_cost() / green_biomeoh_cost(),
             convmeoh_cost() / green_biomeoh_cost(),
         ),
         green_emeoh_cost() / green_biomeoh_cost(),
@@ -119,8 +119,8 @@ _smooth_biomeoh_inno_switch = Smooth(
         "meoh_reinvestment": 1,
         "innovators": 1,
         "biomeoh_inno_switch": 1,
-        "sum_meoh": 2,
         "biomeoh": 1,
+        "sum_meoh": 2,
     },
 )
 def biomeoh_innovators():
@@ -160,7 +160,7 @@ def biomeoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "biomeoh_competitiveness": 1,
         "biomeoh": 1,
         "sum_meoh": 1,
@@ -169,7 +169,7 @@ def biomeoh_investment_level():
 def biomeoh_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - biomeoh_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - biomeoh_competitiveness())))
         * biomeoh()
         / sum_meoh()
     )
@@ -203,7 +203,7 @@ _integ_blue_meoh = Integ(
     comp_subtype="Normal",
     depends_on={
         "convmeoh_cost": 1,
-        "blue_biomeoh_cost": 3,
+        "blue_meoh_cost": 3,
         "green_biomeoh_cost": 1,
         "green_emeoh_cost": 1,
     },
@@ -211,10 +211,9 @@ _integ_blue_meoh = Integ(
 def blue_meoh_competitiveness():
     return np.minimum(
         np.minimum(
-            convmeoh_cost() / blue_biomeoh_cost(),
-            green_biomeoh_cost() / blue_biomeoh_cost(),
+            convmeoh_cost() / blue_meoh_cost(), green_biomeoh_cost() / blue_meoh_cost()
         ),
-        green_emeoh_cost() / blue_biomeoh_cost(),
+        green_emeoh_cost() / blue_meoh_cost(),
     )
 
 
@@ -291,8 +290,8 @@ _smooth_blue_meoh_inno_switch = Smooth(
         "meoh_reinvestment": 1,
         "innovators": 1,
         "blue_meoh_inno_switch": 1,
-        "blue_meoh": 1,
         "sum_meoh": 2,
+        "blue_meoh": 1,
     },
 )
 def blue_meoh_innovators():
@@ -332,7 +331,7 @@ def blue_meoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "blue_meoh_competitiveness": 1,
         "blue_meoh": 1,
         "sum_meoh": 1,
@@ -341,7 +340,7 @@ def blue_meoh_investment_level():
 def blue_meoh_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - blue_meoh_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - blue_meoh_competitiveness())))
         * blue_meoh()
         / sum_meoh()
     )
@@ -395,7 +394,7 @@ _integ_emeoh = Integ(
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "blue_biomeoh_cost": 1,
+        "blue_meoh_cost": 1,
         "green_emeoh_cost": 3,
         "convmeoh_cost": 1,
         "green_biomeoh_cost": 1,
@@ -404,8 +403,7 @@ _integ_emeoh = Integ(
 def emeoh_competitiveness():
     return np.minimum(
         np.minimum(
-            blue_biomeoh_cost() / green_emeoh_cost(),
-            convmeoh_cost() / green_emeoh_cost(),
+            blue_meoh_cost() / green_emeoh_cost(), convmeoh_cost() / green_emeoh_cost()
         ),
         green_biomeoh_cost() / green_emeoh_cost(),
     )
@@ -484,8 +482,8 @@ _smooth_emeoh_inno_switch = Smooth(
         "meoh_reinvestment": 1,
         "innovators": 1,
         "emeoh_inno_switch": 1,
-        "sum_meoh": 2,
         "emeoh": 1,
+        "sum_meoh": 2,
     },
 )
 def emeoh_innovators():
@@ -524,7 +522,7 @@ def emeoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "emeoh_competitiveness": 1,
         "emeoh": 1,
         "sum_meoh": 1,
@@ -533,7 +531,7 @@ def emeoh_investment_level():
 def emeoh_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - emeoh_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - emeoh_competitiveness())))
         * emeoh()
         / sum_meoh()
     )
@@ -644,7 +642,7 @@ _integ_grey_meoh = Integ(
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "blue_biomeoh_cost": 1,
+        "blue_meoh_cost": 1,
         "convmeoh_cost": 3,
         "green_biomeoh_cost": 1,
         "green_emeoh_cost": 1,
@@ -653,8 +651,7 @@ _integ_grey_meoh = Integ(
 def grey_meoh_competitiveness():
     return np.minimum(
         np.minimum(
-            blue_biomeoh_cost() / convmeoh_cost(),
-            green_biomeoh_cost() / convmeoh_cost(),
+            blue_meoh_cost() / convmeoh_cost(), green_biomeoh_cost() / convmeoh_cost()
         ),
         green_emeoh_cost() / convmeoh_cost(),
     )
@@ -697,8 +694,8 @@ def grey_meoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
+        "cross": 1,
         "grey_meoh_competitiveness": 1,
-        "cross_conventional": 1,
         "grey_meoh": 1,
         "sum_meoh": 1,
     },
@@ -706,7 +703,7 @@ def grey_meoh_investment_level():
 def grey_meoh_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_conventional() - grey_meoh_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - grey_meoh_competitiveness())))
         * grey_meoh()
         / sum_meoh()
     )
@@ -721,9 +718,9 @@ def grey_meoh_level():
         "biomeoh": 1,
         "green_biomeoh_cost": 1,
         "blue_meoh": 1,
-        "blue_biomeoh_cost": 1,
-        "convmeoh_cost": 1,
+        "blue_meoh_cost": 1,
         "grey_meoh": 1,
+        "convmeoh_cost": 1,
         "emeoh": 1,
         "green_emeoh_cost": 1,
         "sum_meoh": 1,
@@ -732,7 +729,7 @@ def grey_meoh_level():
 def meoh_average_cost():
     return (
         biomeoh() * green_biomeoh_cost()
-        + blue_meoh() * blue_biomeoh_cost()
+        + blue_meoh() * blue_meoh_cost()
         + grey_meoh() * convmeoh_cost()
         + emeoh() * green_emeoh_cost()
     ) / sum_meoh()
@@ -743,13 +740,13 @@ def meoh_average_cost():
     units="GWh Biomass",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"biomeoh": 1, "meoh_lhv": 1, "meoh_biomass_usage": 1},
+    depends_on={"biomeoh": 1, "meoh_lhv": 1, "biomeoh_biomass_usage": 1},
 )
 def meoh_biomass_demand():
     """
     Convert from MT MeOH to GWh MeOH to GWh biomass
     """
-    return biomeoh() * (meoh_lhv() / 3.6 * 1000) * meoh_biomass_usage()
+    return biomeoh() * (meoh_lhv() / 3.6 * 1000) * biomeoh_biomass_usage()
 
 
 @component.add(
@@ -758,30 +755,23 @@ def meoh_biomass_demand():
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "grey_meoh": 1,
+        "grey_meoh": 2,
+        "blue_meoh": 2,
         "electricity_emission_factor": 1,
-        "convmeoh_emission_factor": 1,
         "convmeoh_electricity_usage": 1,
-        "blue_meoh": 1,
-        "meoh_h2_usage": 1,
         "cc_capture_rate": 1,
-        "smr_emission_factor": 1,
+        "convmeoh_emission_factor": 1,
     },
 )
 def meoh_emissions():
     return (
-        grey_meoh()
-        * (
-            convmeoh_emission_factor()
-            + electricity_emission_factor() * 1000 * convmeoh_electricity_usage()
-        )
-        * 10**6
-        + blue_meoh()
-        / meoh_h2_usage()
-        * (1 - cc_capture_rate())
-        * smr_emission_factor()
-        * 10**6
-    )
+        (grey_meoh() + blue_meoh())
+        * electricity_emission_factor()
+        * 1000
+        * convmeoh_electricity_usage()
+        + (grey_meoh() + blue_meoh() * (1 - cc_capture_rate()))
+        * convmeoh_emission_factor()
+    ) * 10**6
 
 
 @component.add(
@@ -789,13 +779,13 @@ def meoh_emissions():
     units="t H2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"biomeoh": 1, "meoh_h2_usage": 1, "emeoh": 1, "emeoh_h2_usage": 1},
+    depends_on={"biomeoh": 1, "biomeoh_h2_usage": 1, "emeoh": 1, "emeoh_h2_usage": 1},
 )
 def meoh_hydrogen_demand():
     """
     Convert from GWh to GJ, then from GJ to tons fuel, then from tons fuel to tons H2. Example 1: MeOH cons. [GWh] * 3600 [GJ/GWh] / 19.9 [GJ/t] / 15.7 [t MeOH/t H2] Example 2: NH3 cons. [GWh] * 3600 [GJ/GWh] / 18.6 [GJ/t] / 5.56 [t NH3/t H2]
     """
-    return (biomeoh() / meoh_h2_usage() + emeoh() / emeoh_h2_usage()) * 10**6
+    return (biomeoh() / biomeoh_h2_usage() + emeoh() / emeoh_h2_usage()) * 10**6
 
 
 @component.add(name="MeOH plant lifetime", comp_type="Constant", comp_subtype="Normal")
@@ -850,9 +840,9 @@ _integ_meoh_reinvestment = Integ(
 )
 def methanol_demand():
     """
-    European MeOH demand. Primary assumption: To not double count MeOH demand for chemicals, plastics, and fuels the demand is assumed constant moving forward. Based on 2023 level of 11.3 MT. Forecasted 3.96% CAGR from 2023 to 2034. Assumed 3% CAGR from 2034 to 2050. Extrapolated back to 2019 with same growth as forecast (3.96%). Source: https://www.chemanalyst.com/industry-report/europe-methanol-market-215
+    European MeOH demand. Primary assumption: To not double count MeOH demand for chemicals, plastics, and fuels the demand is assumed constant moving forward. Source: Deloitte - Clean Hydrogen Europe. (https://www.clean-hydrogen.europa.eu/document/download/9fef29ac-6f95-465b- bb6e-1365526f43c4_en?filename=Study%20on%20hydrogen%20in%20ports%20and%20in dustrial%20coastal%20areas.pdf) Based on 2023 level of 11.3 MT. Forecasted 3.96% CAGR from 2023 to 2034. Assumed 3% CAGR from 2034 to 2050. Extrapolated back to 2019 with same growth as forecast (3.96%). Source: https://www.chemanalyst.com/industry-report/europe-methanol-market-215
     """
-    return 11.3
+    return 2.9
 
 
 @component.add(

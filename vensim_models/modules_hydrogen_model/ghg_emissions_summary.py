@@ -168,6 +168,7 @@ def industry_ct_revenue():
         "high_temperature_emissions": 1,
         "refinery_emissions": 1,
         "steel_emissions": 1,
+        "meoh_emissions": 1,
     },
 )
 def industry_emissions():
@@ -177,6 +178,7 @@ def industry_emissions():
         + high_temperature_emissions()
         + refinery_emissions()
         + steel_emissions()
+        + meoh_emissions()
     )
 
 

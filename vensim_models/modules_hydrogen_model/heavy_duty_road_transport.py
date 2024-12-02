@@ -67,12 +67,12 @@ _integ_error_int_hd_rt = Integ(
     depends_on={
         "hd_bev_consumption": 1,
         "hd_be_lco": 1,
-        "hd_fc_lco": 1,
         "hd_fcev_consumption": 1,
+        "hd_fc_lco": 1,
         "hd_fossil_consumption": 1,
         "hd_ice_lco": 1,
-        "hd_ice_energy_usage": 1,
         "diesel_lhv": 1,
+        "hd_ice_energy_usage": 1,
         "sum_hd_rt": 1,
     },
 )
@@ -241,7 +241,7 @@ def hd_bev_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "hd_bev_competitiveness": 1,
         "hd_bev_consumption": 1,
         "sum_hd_rt": 1,
@@ -250,7 +250,7 @@ def hd_bev_investment_level():
 def hd_bev_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - hd_bev_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - hd_bev_competitiveness())))
         * hd_bev_consumption()
         / sum_hd_rt()
     )
@@ -363,8 +363,8 @@ _smooth_hd_fcev_inno_switch = Smooth(
         "hd_rt_reinvestment": 1,
         "innovators": 1,
         "hd_fcev_inno_switch": 1,
-        "sum_hd_rt": 2,
         "hd_fcev_consumption": 1,
+        "sum_hd_rt": 2,
     },
 )
 def hd_fcev_innovators():
@@ -404,7 +404,7 @@ def hd_fcev_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "hd_fcev_competitiveness": 1,
         "hd_fcev_consumption": 1,
         "sum_hd_rt": 1,
@@ -413,7 +413,7 @@ def hd_fcev_investment_level():
 def hd_fcev_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - hd_fcev_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - hd_fcev_competitiveness())))
         * hd_fcev_consumption()
         / sum_hd_rt()
     )
@@ -462,8 +462,8 @@ _integ_hd_fossil_consumption = Integ(
     comp_subtype="Normal",
     depends_on={
         "hd_fossil_consumption": 1,
-        "truck_lifetime": 1,
         "hd_fossil_early_decommission_rate": 1,
+        "truck_lifetime": 1,
     },
 )
 def hd_fossil_decay():
@@ -509,8 +509,8 @@ def hd_fossil_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
+        "cross": 1,
         "hd_fossil_competitiveness": 1,
-        "cross_conventional": 1,
         "hd_fossil_consumption": 1,
         "sum_hd_rt": 1,
     },
@@ -518,14 +518,14 @@ def hd_fossil_investment_level():
 def hd_fossil_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_conventional() - hd_fossil_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - hd_fossil_competitiveness())))
         * hd_fossil_consumption()
         / sum_hd_rt()
     )
 
 
 @component.add(
-    name="HD H2 price break",
+    name="HD H2 WTP",
     units="€/kg",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -536,7 +536,7 @@ def hd_fossil_level():
         "hd_fc_energy_usage": 1,
     },
 )
-def hd_h2_price_break():
+def hd_h2_wtp():
     return (
         np.minimum(hd_be_lco(), hd_ice_lco()) - hd_fc_lco_without_h2()
     ) / hd_fc_energy_usage()
@@ -622,11 +622,11 @@ _integ_hd_rt_reinvestment = Integ(
     depends_on={
         "hd_fossil_consumption": 1,
         "diesel_emission_factor": 1,
-        "hd_bev_consumption": 1,
         "charging_efficiency": 1,
-        "hd_ev_efficiency": 1,
-        "electricity_emission_factor": 1,
         "hd_ice_efficiency": 1,
+        "hd_bev_consumption": 1,
+        "electricity_emission_factor": 1,
+        "hd_ev_efficiency": 1,
     },
 )
 def heavy_duty_emissions():

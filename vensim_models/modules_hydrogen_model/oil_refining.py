@@ -28,6 +28,17 @@ _integ_blue_refinery = Integ(
 
 
 @component.add(
+    name="Blue refinery CO2 WTP",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"blue_h2_co2_wtp": 1},
+)
+def blue_refinery_co2_wtp():
+    return blue_h2_co2_wtp()
+
+
+@component.add(
     name="Blue refinery competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -50,6 +61,17 @@ def blue_refinery_competitiveness():
 )
 def blue_refinery_decay():
     return blue_refinery() / smr_lifetime()
+
+
+@component.add(
+    name="Blue refinery emissions",
+    units="tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"blue_refinery": 1, "cc_capture_rate": 1, "smr_emission_factor": 1},
+)
+def blue_refinery_emissions():
+    return blue_refinery() * (1 - cc_capture_rate()) * smr_emission_factor() * 10**6
 
 
 @component.add(
@@ -90,8 +112,8 @@ def blue_refinery_inno_switch():
         "refinery_reinvestment": 1,
         "innovators": 1,
         "blue_refinery_inno_switch": 1,
-        "sum_refining": 2,
         "blue_refinery": 1,
+        "sum_refining": 2,
     },
 )
 def blue_refinery_innovators():
@@ -131,16 +153,16 @@ def blue_refinery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "blue_refinery_competitiveness": 1,
-        "sum_refining": 1,
         "blue_refinery": 1,
+        "sum_refining": 1,
     },
 )
 def blue_refinery_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - blue_refinery_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - blue_refinery_competitiveness())))
         * (blue_refinery() / sum_refining()) ** 0.8
     )
 
@@ -332,19 +354,16 @@ def green_refinery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "green_refinery_competitiveness": 1,
-        "sum_refining": 1,
         "green_refinery": 1,
+        "sum_refining": 1,
     },
 )
 def green_refinery_level():
     return (
         1
-        / (
-            1
-            + np.exp(slope() * (cross_innovation() - green_refinery_competitiveness()))
-        )
+        / (1 + np.exp(slope() * (cross() - green_refinery_competitiveness())))
         * (green_refinery() / sum_refining()) ** 0.8
     )
 
@@ -371,6 +390,17 @@ _integ_grey_refinery = Integ(
     lambda: refinery_consumption(),
     "_integ_grey_refinery",
 )
+
+
+@component.add(
+    name="Grey refinery CO2 WTP",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"grey_h2_co2_wtp": 1},
+)
+def grey_refinery_co2_wtp():
+    return grey_h2_co2_wtp()
 
 
 @component.add(
@@ -412,6 +442,17 @@ def grey_refinery_early_decommission_rate():
 
 
 @component.add(
+    name="Grey refinery emissions",
+    units="tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"grey_refinery": 1, "smr_emission_factor": 1},
+)
+def grey_refinery_emissions():
+    return grey_refinery() * smr_emission_factor() * 10**6
+
+
+@component.add(
     name="Grey refinery investment",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -438,19 +479,16 @@ def grey_refinery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
+        "cross": 1,
         "grey_refinery_competitiveness": 1,
-        "cross_conventional": 1,
-        "sum_refining": 1,
         "grey_refinery": 1,
+        "sum_refining": 1,
     },
 )
 def grey_refinery_level():
     return (
         1
-        / (
-            1
-            + np.exp(slope() * (cross_conventional() - grey_refinery_competitiveness()))
-        )
+        / (1 + np.exp(slope() * (cross() - grey_refinery_competitiveness())))
         * (grey_refinery() / sum_refining()) ** 0.8
     )
 
@@ -465,8 +503,8 @@ def grey_refinery_level():
         "blue_h2_cost": 1,
         "refinery_h2_cost": 1,
         "green_refinery": 1,
-        "grey_h2_cost": 1,
         "grey_refinery": 1,
+        "grey_h2_cost": 1,
         "sum_refining": 1,
     },
 )
@@ -561,19 +599,10 @@ def refinery_consumption():
     units="tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "grey_refinery": 1,
-        "cc_capture_rate": 1,
-        "blue_refinery": 1,
-        "smr_emission_factor": 1,
-    },
+    depends_on={"blue_refinery_emissions": 1, "grey_refinery_emissions": 1},
 )
 def refinery_emissions():
-    return (
-        (grey_refinery() + blue_refinery() * (1 - cc_capture_rate()))
-        * smr_emission_factor()
-        * 10**6
-    )
+    return blue_refinery_emissions() + grey_refinery_emissions()
 
 
 @component.add(
@@ -591,14 +620,25 @@ def refinery_equalizer():
 
 
 @component.add(
-    name="refinery H2 price break",
+    name="refinery grey and blue hydrogen demand",
+    units="t H2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"blue_refinery": 1, "grey_refinery": 1},
+)
+def refinery_grey_and_blue_hydrogen_demand():
+    return (blue_refinery() + grey_refinery()) * 10**6
+
+
+@component.add(
+    name="refinery H2 WTP",
     units="€/kg",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"blue_h2_cost": 1, "grey_h2_cost": 1},
+    depends_on={"green_h2_h2_wtp": 1},
 )
-def refinery_h2_price_break():
-    return np.minimum(blue_h2_cost(), grey_h2_cost())
+def refinery_h2_wtp():
+    return green_h2_h2_wtp()
 
 
 @component.add(

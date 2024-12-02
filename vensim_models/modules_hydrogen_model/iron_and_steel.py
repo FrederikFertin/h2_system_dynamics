@@ -7,10 +7,13 @@ Translated using PySD version 3.14.0
     name="BF CCS competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"bf_coal_cost": 1, "bf_ccs_cost": 2, "hdri_cost": 1},
+    depends_on={"ngdri_cost": 1, "bf_ccs_cost": 3, "h2dri_cost": 1, "bf_coal_cost": 1},
 )
 def bf_ccs_competitiveness():
-    return np.minimum(bf_coal_cost() / bf_ccs_cost(), hdri_cost() / bf_ccs_cost())
+    return np.minimum(
+        ngdri_cost() / bf_ccs_cost(),
+        np.minimum(bf_coal_cost() / bf_ccs_cost(), h2dri_cost() / bf_ccs_cost()),
+    )
 
 
 @component.add(
@@ -86,8 +89,8 @@ _smooth_bf_ccs_inno_switch = Smooth(
         "foundry_reinvestment": 1,
         "innovators": 1,
         "bf_ccs_inno_switch": 1,
-        "coal_bf_bof_ccs": 1,
         "sum_steel": 2,
+        "coal_bf_bof_ccs": 1,
     },
 )
 def bf_ccs_innovators():
@@ -127,7 +130,7 @@ def bf_ccs_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
+        "cross": 1,
         "bf_ccs_competitiveness": 1,
         "coal_bf_bof_ccs": 1,
         "sum_steel": 1,
@@ -136,7 +139,7 @@ def bf_ccs_investment_level():
 def bf_ccs_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - bf_ccs_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - bf_ccs_competitiveness())))
         * coal_bf_bof_ccs()
         / sum_steel()
     )
@@ -146,10 +149,13 @@ def bf_ccs_level():
     name="BF Coal competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"bf_ccs_cost": 1, "bf_coal_cost": 2, "hdri_cost": 1},
+    depends_on={"ngdri_cost": 1, "bf_coal_cost": 3, "h2dri_cost": 1, "bf_ccs_cost": 1},
 )
 def bf_coal_competitiveness():
-    return np.minimum(bf_ccs_cost() / bf_coal_cost(), hdri_cost() / bf_coal_cost())
+    return np.minimum(
+        ngdri_cost() / bf_coal_cost(),
+        np.minimum(bf_ccs_cost() / bf_coal_cost(), h2dri_cost() / bf_coal_cost()),
+    )
 
 
 @component.add(
@@ -158,8 +164,8 @@ def bf_coal_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "coal_bf_bof": 1,
-        "bf_coal_early_decommission_rate": 1,
         "foundry_lifetime": 1,
+        "bf_coal_early_decommission_rate": 1,
     },
 )
 def bf_coal_decay():
@@ -203,8 +209,8 @@ def bf_coal_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
+        "cross": 1,
         "bf_coal_competitiveness": 1,
-        "cross_conventional": 1,
         "coal_bf_bof": 1,
         "sum_steel": 1,
     },
@@ -212,7 +218,7 @@ def bf_coal_investment_level():
 def bf_coal_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_conventional() - bf_coal_competitiveness())))
+        / (1 + np.exp(slope() * (cross() - bf_coal_competitiveness())))
         * coal_bf_bof()
         / sum_steel()
     )
@@ -262,6 +268,34 @@ def coal_bf_bof_ccs():
 _integ_coal_bf_bof_ccs = Integ(
     lambda: bf_ccs_investment() - bf_ccs_decay(), lambda: 0, "_integ_coal_bf_bof_ccs"
 )
+
+
+@component.add(
+    name="Coal BF BOF CCS emissions",
+    units="tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "coal_bf_bof_ccs": 1,
+        "cc_capture_rate": 1,
+        "bf_coal_emission_factor": 1,
+    },
+)
+def coal_bf_bof_ccs_emissions():
+    return (
+        coal_bf_bof_ccs() * (1 - cc_capture_rate()) * bf_coal_emission_factor() * 10**6
+    )
+
+
+@component.add(
+    name="Coal BF BOF emissions",
+    units="tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"coal_bf_bof": 1, "bf_coal_emission_factor": 1},
+)
+def coal_bf_bof_emissions():
+    return coal_bf_bof() * bf_coal_emission_factor() * 10**6
 
 
 @component.add(
@@ -334,10 +368,12 @@ def foundry_lifetime():
                 "bf_ccs_decay": 1,
                 "bf_coal_decay": 1,
                 "demand_change_steel": 1,
-                "hdri_eaf_decay": 1,
+                "h2dri_eaf_decay": 1,
+                "ngdri_eaf_decay": 1,
                 "bf_ccs_investment": 1,
                 "bf_coal_investment": 1,
-                "hdri_eaf_investment": 1,
+                "h2dri_eaf_investment": 1,
+                "ngdri_eaf_investment": 1,
             },
         }
     },
@@ -350,10 +386,12 @@ _integ_foundry_reinvestment = Integ(
     lambda: bf_ccs_decay()
     + bf_coal_decay()
     + demand_change_steel()
-    + hdri_eaf_decay()
+    + h2dri_eaf_decay()
+    + ngdri_eaf_decay()
     - bf_ccs_investment()
     - bf_coal_investment()
-    - hdri_eaf_investment(),
+    - h2dri_eaf_investment()
+    - ngdri_eaf_investment(),
     lambda: primary_sector() / foundry_lifetime(),
     "_integ_foundry_reinvestment",
 )
@@ -367,137 +405,309 @@ def h2_to_steel():
 
 
 @component.add(
-    name="HDRI EAF",
+    name="H2DRI EAF",
     units="Mtsteel",
     comp_type="Stateful",
     comp_subtype="Integ",
-    depends_on={"_integ_hdri_eaf": 1},
+    depends_on={"_integ_h2dri_eaf": 1},
     other_deps={
-        "_integ_hdri_eaf": {
+        "_integ_h2dri_eaf": {
             "initial": {},
-            "step": {"hdri_eaf_investment": 1, "hdri_eaf_decay": 1},
+            "step": {"h2dri_eaf_investment": 1, "h2dri_eaf_decay": 1},
         }
     },
 )
-def hdri_eaf():
-    return _integ_hdri_eaf()
+def h2dri_eaf():
+    return _integ_h2dri_eaf()
 
 
-_integ_hdri_eaf = Integ(
-    lambda: hdri_eaf_investment() - hdri_eaf_decay(), lambda: 0, "_integ_hdri_eaf"
+_integ_h2dri_eaf = Integ(
+    lambda: h2dri_eaf_investment() - h2dri_eaf_decay(), lambda: 0, "_integ_h2dri_eaf"
 )
 
 
 @component.add(
-    name="HDRI EAF competitiveness",
+    name="H2DRI EAF competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"bf_coal_cost": 1, "hdri_cost": 2, "bf_ccs_cost": 1},
+    depends_on={"ngdri_cost": 1, "h2dri_cost": 3, "bf_coal_cost": 1, "bf_ccs_cost": 1},
 )
-def hdri_eaf_competitiveness():
-    return np.minimum(bf_coal_cost() / hdri_cost(), bf_ccs_cost() / hdri_cost())
+def h2dri_eaf_competitiveness():
+    return np.minimum(
+        ngdri_cost() / h2dri_cost(),
+        np.minimum(bf_coal_cost() / h2dri_cost(), bf_ccs_cost() / h2dri_cost()),
+    )
 
 
 @component.add(
-    name="HDRI EAF decay",
+    name="H2DRI EAF decay",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hdri_eaf": 1, "foundry_lifetime": 1},
+    depends_on={"h2dri_eaf": 1, "foundry_lifetime": 1},
 )
-def hdri_eaf_decay():
-    return hdri_eaf() / foundry_lifetime()
+def h2dri_eaf_decay():
+    return h2dri_eaf() / foundry_lifetime()
 
 
 @component.add(
-    name="HDRI EAF imitators",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"foundry_reinvestment": 1, "hdri_eaf_investment_level": 1},
-)
-def hdri_eaf_imitators():
-    return foundry_reinvestment() * hdri_eaf_investment_level()
-
-
-@component.add(
-    name="HDRI EAF inno switch",
+    name="H2DRI EAF emissions",
+    units="tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "hdri_eaf_competitiveness": 2,
+        "h2dri_eaf": 1,
+        "el_to_steel_h2dri": 1,
+        "electricity_emission_factor": 1,
+    },
+)
+def h2dri_eaf_emissions():
+    return (
+        h2dri_eaf()
+        * (el_to_steel_h2dri() / 3.6 * electricity_emission_factor() * 1000)
+        * 10**6
+    )
+
+
+@component.add(
+    name="H2DRI EAF imitators",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"foundry_reinvestment": 1, "h2dri_eaf_investment_level": 1},
+)
+def h2dri_eaf_imitators():
+    return foundry_reinvestment() * h2dri_eaf_investment_level()
+
+
+@component.add(
+    name="H2DRI EAF inno switch",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "h2dri_eaf_competitiveness": 2,
         "inno_switch_level": 1,
         "early_switch_level": 1,
     },
 )
-def hdri_eaf_inno_switch():
+def h2dri_eaf_inno_switch():
     return if_then_else(
-        hdri_eaf_competitiveness() > inno_switch_level(),
+        h2dri_eaf_competitiveness() > inno_switch_level(),
         lambda: if_then_else(
-            hdri_eaf_competitiveness() > early_switch_level(), lambda: 3, lambda: 1
+            h2dri_eaf_competitiveness() > early_switch_level(), lambda: 3, lambda: 1
         ),
         lambda: 0,
     )
 
 
 @component.add(
-    name="HDRI EAF innovators",
+    name="H2DRI EAF innovators",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "foundry_reinvestment": 1,
         "innovators": 1,
-        "hdri_eaf_inno_switch": 1,
+        "h2dri_eaf_inno_switch": 1,
+        "h2dri_eaf": 1,
         "sum_steel": 2,
-        "hdri_eaf": 1,
     },
 )
-def hdri_eaf_innovators():
+def h2dri_eaf_innovators():
     return (
         foundry_reinvestment()
         * innovators()
-        * hdri_eaf_inno_switch()
-        * (sum_steel() - hdri_eaf())
+        * h2dri_eaf_inno_switch()
+        * (sum_steel() - h2dri_eaf())
         / sum_steel()
     )
 
 
 @component.add(
-    name="HDRI EAF investment",
+    name="H2DRI EAF investment",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hdri_eaf_imitators": 1, "hdri_eaf_innovators": 1},
+    depends_on={"h2dri_eaf_imitators": 1, "h2dri_eaf_innovators": 1},
 )
-def hdri_eaf_investment():
-    return hdri_eaf_imitators() + hdri_eaf_innovators()
+def h2dri_eaf_investment():
+    return h2dri_eaf_imitators() + h2dri_eaf_innovators()
 
 
 @component.add(
-    name="HDRI EAF investment level",
+    name="H2DRI EAF investment level",
     units="percent",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"steel_equalizer": 1, "hdri_eaf_level": 1},
+    depends_on={"steel_equalizer": 1, "h2dri_eaf_level": 1},
 )
-def hdri_eaf_investment_level():
-    return steel_equalizer() * hdri_eaf_level()
+def h2dri_eaf_investment_level():
+    return steel_equalizer() * h2dri_eaf_level()
 
 
 @component.add(
-    name="HDRI EAF level",
+    name="H2DRI EAF level",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross_innovation": 1,
-        "hdri_eaf_competitiveness": 1,
-        "hdri_eaf": 1,
+        "cross": 1,
+        "h2dri_eaf_competitiveness": 1,
+        "h2dri_eaf": 1,
         "sum_steel": 1,
     },
 )
-def hdri_eaf_level():
+def h2dri_eaf_level():
     return (
         1
-        / (1 + np.exp(slope() * (cross_innovation() - hdri_eaf_competitiveness())))
-        * hdri_eaf()
+        / (1 + np.exp(slope() * (cross() - h2dri_eaf_competitiveness())))
+        * h2dri_eaf()
+        / sum_steel()
+    )
+
+
+@component.add(
+    name="NGDRI EAF",
+    units="Mtsteel",
+    comp_type="Stateful",
+    comp_subtype="Integ",
+    depends_on={"_integ_ngdri_eaf": 1},
+    other_deps={
+        "_integ_ngdri_eaf": {
+            "initial": {},
+            "step": {"ngdri_eaf_investment": 1, "ngdri_eaf_decay": 1},
+        }
+    },
+)
+def ngdri_eaf():
+    return _integ_ngdri_eaf()
+
+
+_integ_ngdri_eaf = Integ(
+    lambda: ngdri_eaf_investment() - ngdri_eaf_decay(), lambda: 0, "_integ_ngdri_eaf"
+)
+
+
+@component.add(
+    name="NGDRI EAF competitiveness",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"h2dri_cost": 1, "ngdri_cost": 3, "bf_coal_cost": 1, "bf_ccs_cost": 1},
+)
+def ngdri_eaf_competitiveness():
+    return np.minimum(
+        h2dri_cost() / ngdri_cost(),
+        np.minimum(bf_coal_cost() / ngdri_cost(), bf_ccs_cost() / ngdri_cost()),
+    )
+
+
+@component.add(
+    name="NGDRI EAF decay",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"ngdri_eaf": 1, "foundry_lifetime": 1},
+)
+def ngdri_eaf_decay():
+    return ngdri_eaf() / foundry_lifetime()
+
+
+@component.add(
+    name="NGDRI EAF emissions",
+    units="tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"ngdri_eaf": 1, "ngdri_emission_factor": 1},
+)
+def ngdri_eaf_emissions():
+    return ngdri_eaf() * ngdri_emission_factor() * 10**6
+
+
+@component.add(
+    name="NGDRI EAF imitators",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"foundry_reinvestment": 1, "ngdri_eaf_investment_level": 1},
+)
+def ngdri_eaf_imitators():
+    return foundry_reinvestment() * ngdri_eaf_investment_level()
+
+
+@component.add(
+    name="NGDRI EAF inno switch",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "ngdri_eaf_competitiveness": 2,
+        "inno_switch_level": 1,
+        "early_switch_level": 1,
+    },
+)
+def ngdri_eaf_inno_switch():
+    return if_then_else(
+        ngdri_eaf_competitiveness() > inno_switch_level(),
+        lambda: if_then_else(
+            ngdri_eaf_competitiveness() > early_switch_level(), lambda: 3, lambda: 1
+        ),
+        lambda: 0,
+    )
+
+
+@component.add(
+    name="NGDRI EAF innovators",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "foundry_reinvestment": 1,
+        "innovators": 1,
+        "ngdri_eaf_inno_switch": 1,
+        "sum_steel": 2,
+        "ngdri_eaf": 1,
+    },
+)
+def ngdri_eaf_innovators():
+    return (
+        foundry_reinvestment()
+        * innovators()
+        * ngdri_eaf_inno_switch()
+        * (sum_steel() - ngdri_eaf())
+        / sum_steel()
+    )
+
+
+@component.add(
+    name="NGDRI EAF investment",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"ngdri_eaf_imitators": 1, "ngdri_eaf_innovators": 1},
+)
+def ngdri_eaf_investment():
+    return ngdri_eaf_imitators() + ngdri_eaf_innovators()
+
+
+@component.add(
+    name="NGDRI EAF investment level",
+    units="percent",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"steel_equalizer": 1, "ngdri_eaf_level": 1},
+)
+def ngdri_eaf_investment_level():
+    return steel_equalizer() * ngdri_eaf_level()
+
+
+@component.add(
+    name="NGDRI EAF level",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "slope": 1,
+        "cross": 1,
+        "ngdri_eaf_competitiveness": 1,
+        "ngdri_eaf": 1,
+        "sum_steel": 1,
+    },
+)
+def ngdri_eaf_level():
+    return (
+        1
+        / (1 + np.exp(slope() * (cross() - ngdri_eaf_competitiveness())))
+        * ngdri_eaf()
         / sum_steel()
     )
 
@@ -549,8 +759,10 @@ def secondary_sector_growth():
         "bf_coal_cost": 1,
         "coal_bf_bof_ccs": 1,
         "bf_ccs_cost": 1,
-        "hdri_eaf": 1,
-        "hdri_cost": 1,
+        "h2dri_eaf": 1,
+        "h2dri_cost": 1,
+        "ngdri_cost": 1,
+        "ngdri_eaf": 1,
         "sum_steel": 1,
     },
 )
@@ -561,7 +773,8 @@ def steel_average_cost():
     return (
         coal_bf_bof() * bf_coal_cost()
         + coal_bf_bof_ccs() * bf_ccs_cost()
-        + hdri_eaf() * hdri_cost()
+        + h2dri_eaf() * h2dri_cost()
+        + ngdri_eaf() * ngdri_cost()
     ) / sum_steel()
 
 
@@ -571,17 +784,18 @@ def steel_average_cost():
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "coal_bf_bof": 1,
-        "coal_bf_bof_ccs": 1,
-        "cc_capture_rate": 1,
-        "bf_coal_emission_factor": 1,
+        "coal_bf_bof_ccs_emissions": 1,
+        "coal_bf_bof_emissions": 1,
+        "h2dri_eaf_emissions": 1,
+        "ngdri_eaf_emissions": 1,
     },
 )
 def steel_emissions():
     return (
-        (coal_bf_bof() + coal_bf_bof_ccs() * (1 - cc_capture_rate()))
-        * bf_coal_emission_factor()
-        * 10**6
+        coal_bf_bof_ccs_emissions()
+        + coal_bf_bof_emissions()
+        + h2dri_eaf_emissions()
+        + ngdri_eaf_emissions()
     )
 
 
@@ -589,10 +803,17 @@ def steel_emissions():
     name="steel equalizer",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"bf_coal_level": 1, "hdri_eaf_level": 1, "bf_ccs_level": 1},
+    depends_on={
+        "bf_coal_level": 1,
+        "h2dri_eaf_level": 1,
+        "bf_ccs_level": 1,
+        "ngdri_eaf_level": 1,
+    },
 )
 def steel_equalizer():
-    return 1 / (bf_coal_level() + hdri_eaf_level() + bf_ccs_level())
+    return 1 / (
+        bf_coal_level() + h2dri_eaf_level() + bf_ccs_level() + ngdri_eaf_level()
+    )
 
 
 @component.add(
@@ -600,10 +821,10 @@ def steel_equalizer():
     units="t H2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hdri_eaf": 1, "h2_to_steel": 1},
+    depends_on={"h2dri_eaf": 1, "h2_to_steel": 1},
 )
 def steel_hydrogen_demand():
-    return hdri_eaf() * 10**6 * h2_to_steel()
+    return h2dri_eaf() * 10**6 * h2_to_steel()
 
 
 @component.add(
@@ -627,7 +848,7 @@ def steel_production_forecast():
     units="GWh",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"coal_bf_bof": 1, "hdri_eaf": 1, "coal_bf_bof_ccs": 1},
+    depends_on={"coal_bf_bof": 1, "h2dri_eaf": 1, "coal_bf_bof_ccs": 1, "ngdri_eaf": 1},
 )
 def sum_steel():
-    return coal_bf_bof() + hdri_eaf() + coal_bf_bof_ccs()
+    return coal_bf_bof() + h2dri_eaf() + coal_bf_bof_ccs() + ngdri_eaf()
