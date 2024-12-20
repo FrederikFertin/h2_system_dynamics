@@ -326,8 +326,8 @@ _hardcodedlookup_int_shipping_consumption_forecast = HardcodedLookups(
         "hfo_containership_cost": 1,
         "meoh_shipping_consumption": 1,
         "meoh_containership_cost": 1,
-        "nh3_containership_cost": 1,
         "nh3_shipping_consumption": 1,
+        "nh3_containership_cost": 1,
         "yearly_containership_consumption": 1,
         "sum_int_shipping": 1,
     },
@@ -454,13 +454,14 @@ def meoh_competitiveness():
 
 @component.add(
     name="MeOH containership H2 WTP",
+    units="€/kg",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "hfo_containership_cost": 1,
-        "meoh_ship_capex": 1,
-        "ship_engine_af": 1,
         "containership_opex": 1,
+        "ship_engine_af": 1,
+        "meoh_ship_capex": 1,
         "yearly_containership_consumption": 1,
         "biomeoh_cost_without_h2": 1,
         "biomeoh_h2_usage": 1,
@@ -476,10 +477,12 @@ def meoh_containership_h2_wtp():
             )
             / 3.6
             / yearly_containership_consumption()
+            * 1000
             - biomeoh_cost_without_h2()
         )
         * biomeoh_h2_usage()
         * meoh_lhv()
+        / 1000
     )
 
 
@@ -637,6 +640,17 @@ _integ_meoh_shipping_consumption = Integ(
 
 
 @component.add(
+    name="min green containership cost",
+    units="M€/Year",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"meoh_containership_cost": 1, "nh3_containership_cost": 1},
+)
+def min_green_containership_cost():
+    return np.minimum(meoh_containership_cost(), nh3_containership_cost())
+
+
+@component.add(
     name="NH3 competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -661,8 +675,8 @@ def nh3_competitiveness():
     depends_on={
         "hfo_containership_cost": 1,
         "nh3_ship_capex": 1,
-        "ship_engine_af": 1,
         "containership_opex": 1,
+        "ship_engine_af": 1,
         "yearly_containership_consumption": 1,
         "green_nh3_cost_without_h2": 1,
         "nh3_h2_usage": 1,
@@ -678,10 +692,12 @@ def nh3_containership_h2_wtp():
             )
             / 3.6
             / yearly_containership_consumption()
+            * 1000
             - green_nh3_cost_without_h2()
         )
         * nh3_h2_usage()
         * nh3_lhv()
+        / 1000
     )
 
 
@@ -758,8 +774,8 @@ _smooth_nh3_inno_switch = Smooth(
         "shipping_reinvestment": 1,
         "innovators": 1,
         "nh3_inno_switch": 1,
-        "nh3_shipping_consumption": 1,
         "sum_int_shipping": 2,
+        "nh3_shipping_consumption": 1,
     },
 )
 def nh3_innovators():

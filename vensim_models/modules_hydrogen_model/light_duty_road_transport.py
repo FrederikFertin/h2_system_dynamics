@@ -150,6 +150,29 @@ def ld_bev_decay():
 
 
 @component.add(
+    name="LD BEV emissions",
+    units="tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "ld_bev_consumption": 1,
+        "ld_ice_efficiency": 1,
+        "charging_efficiency": 1,
+        "ld_ev_efficiency": 1,
+        "electricity_emission_factor": 1,
+    },
+)
+def ld_bev_emissions():
+    return (
+        ld_bev_consumption()
+        * ld_ice_efficiency()
+        / (charging_efficiency() * ld_ev_efficiency())
+        * electricity_emission_factor()
+        * 1000
+    )
+
+
+@component.add(
     name="LD BEV imitators",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -212,8 +235,8 @@ _smooth_ld_bev_inno_switch = Smooth(
         "ld_rt_reinvestment": 1,
         "innovators": 1,
         "ld_bev_inno_switch": 1,
-        "sum_ld_rt": 2,
         "ld_bev_consumption": 1,
+        "sum_ld_rt": 2,
     },
 )
 def ld_bev_innovators():
@@ -474,8 +497,8 @@ _integ_ld_fossil_consumption = Integ(
     comp_subtype="Normal",
     depends_on={
         "ld_fossil_consumption": 1,
-        "ld_fossil_early_decommission_rate": 1,
         "ld_lifetime": 1,
+        "ld_fossil_early_decommission_rate": 1,
     },
 )
 def ld_fossil_decay():
@@ -521,11 +544,11 @@ def ld_fossil_investment_level():
     comp_subtype="Normal",
     depends_on={
         "ice_car_ban": 1,
-        "sum_ld_rt": 1,
-        "ld_fossil_consumption": 1,
-        "cross": 1,
         "slope": 1,
+        "sum_ld_rt": 1,
+        "cross": 1,
         "ld_fossil_competitiveness": 1,
+        "ld_fossil_consumption": 1,
     },
 )
 def ld_fossil_level():
@@ -568,6 +591,17 @@ def ld_ice_efficiency():
     Builds on assumption that the ICE car can drive 20 km/l, while the EV car can drive 5 km/kWh and has an assumed efficiency of 85%
     """
     return 0.32
+
+
+@component.add(
+    name="LD ICE emissions",
+    units="tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"ld_fossil_consumption": 1, "diesel_emission_factor": 1},
+)
+def ld_ice_emissions():
+    return ld_fossil_consumption() * diesel_emission_factor() * 10**6
 
 
 @component.add(
@@ -634,24 +668,10 @@ _integ_ld_rt_reinvestment = Integ(
     units="tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "ld_fossil_consumption": 1,
-        "diesel_emission_factor": 1,
-        "ld_ice_efficiency": 1,
-        "charging_efficiency": 1,
-        "ld_ev_efficiency": 1,
-        "ld_bev_consumption": 1,
-        "electricity_emission_factor": 1,
-    },
+    depends_on={"ld_bev_emissions": 1, "ld_ice_emissions": 1},
 )
 def light_duty_emissions():
-    return (
-        ld_fossil_consumption() * diesel_emission_factor()
-        + ld_bev_consumption()
-        * ld_ice_efficiency()
-        / (charging_efficiency() * ld_ev_efficiency())
-        * electricity_emission_factor()
-    ) * 10**6
+    return ld_bev_emissions() + ld_ice_emissions()
 
 
 @component.add(name="Light duty fraction", comp_type="Constant", comp_subtype="Normal")

@@ -59,11 +59,11 @@ def biokero_cost():
     comp_subtype="Normal",
     depends_on={
         "biokero_cost": 1,
-        "biokero_fraction": 1,
-        "ft_h2_cost": 1,
         "biokero_h2_usage": 1,
-        "h2_lhv": 1,
         "biokero_revenue_fraction": 1,
+        "h2_lhv": 1,
+        "ft_h2_cost": 1,
+        "biokero_fraction": 1,
     },
 )
 def biokero_cost_without_h2():
@@ -153,8 +153,8 @@ def biokero_h2_usage():
         "jetfuel_cost": 1,
         "biokero_cost_without_h2": 1,
         "h2_lhv": 1,
-        "biokero_revenue_fraction": 1,
         "biokero_fraction": 1,
+        "biokero_revenue_fraction": 1,
         "biokero_h2_usage": 1,
     },
 )
@@ -249,11 +249,11 @@ def bionaphtha_cost():
     comp_subtype="Normal",
     depends_on={
         "bionaphtha_cost": 1,
-        "naphtha_fraction_bio": 1,
-        "ft_h2_cost": 1,
-        "h2_lhv": 1,
         "biokero_h2_usage": 1,
         "bionaphtha_revenue_fraction": 1,
+        "h2_lhv": 1,
+        "naphtha_fraction_bio": 1,
+        "ft_h2_cost": 1,
     },
 )
 def bionaphtha_cost_without_h2():
@@ -278,8 +278,8 @@ def bionaphtha_cost_without_h2():
         "naphtha_cost": 1,
         "bionaphtha_cost_without_h2": 1,
         "h2_lhv": 1,
-        "biokero_h2_usage": 1,
         "naphtha_fraction_bio": 1,
+        "biokero_h2_usage": 1,
     },
 )
 def bionaphtha_h2_wtp():
@@ -306,27 +306,27 @@ def bionaphtha_revenue_fraction():
     depends_on={
         "biokero_electricity_usage": 1,
         "renewable_electricity_price": 1,
-        "biogas_cost": 1,
         "biokero_gas_usage": 1,
+        "biogas_cost": 1,
         "biokero_biomass_usage": 1,
         "uco_price": 1,
-        "h2_lhv": 1,
         "biokero_h2_usage": 1,
         "ft_h2_cost": 1,
-        "heat_cost": 1,
+        "h2_lhv": 1,
         "biokero_excess_heat": 1,
+        "heat_cost": 1,
+        "biokero_opex": 1,
+        "biokero_capex": 1,
+        "biokero_variable": 1,
         "biokero_af": 1,
         "biokero_fraction": 1,
-        "biokero_capex": 1,
         "biokero_operating_hours": 1,
-        "biokero_opex": 1,
-        "biokero_variable": 1,
     },
 )
 def hvo_jet_total_costs():
     return (
         (
-            biokero_electricity_usage() * renewable_electricity_price() * 1000
+            biokero_electricity_usage() * renewable_electricity_price()
             + biokero_gas_usage() * biogas_cost() * 3.6
             + biokero_biomass_usage() * uco_price() * 3.6
             + biokero_h2_usage() * ft_h2_cost() / h2_lhv() * 1000
@@ -426,17 +426,17 @@ def synkero_co2_usage():
         "cc_capture_rate": 1,
         "synkero_co2_usage": 1,
         "jetfuel_lhv": 1,
-        "synkero_electricity_usage": 1,
-        "ft_h2_cost": 1,
-        "h2_lhv": 1,
         "heat_cost": 1,
+        "h2_lhv": 1,
+        "ft_h2_cost": 1,
+        "synkero_h2_usage": 1,
         "synkero_excess_heat": 1,
         "renewable_electricity_price": 1,
         "synkero_output": 1,
-        "synkero_h2_usage": 1,
+        "synkero_electricity_usage": 1,
         "synkero_operating_hours": 1,
-        "synkero_af": 1,
         "synkero_capex": 1,
+        "synkero_af": 1,
         "synkero_opex": 1,
         "synkero_variable": 1,
         "synkero_fraction": 1,
@@ -450,7 +450,7 @@ def synkero_cost():
         (
             ps_cc_cost() / cc_capture_rate() * synkero_co2_usage() / jetfuel_lhv() * 3.6
             + (
-                1000 * renewable_electricity_price() * synkero_electricity_usage()
+                renewable_electricity_price() * synkero_electricity_usage()
                 + 1000 * ft_h2_cost() / h2_lhv() * synkero_h2_usage()
                 - heat_cost() * synkero_excess_heat()
             )
@@ -473,9 +473,9 @@ def synkero_cost():
     depends_on={
         "synkero_cost": 1,
         "synkero_fraction": 1,
-        "ft_h2_cost": 1,
         "h2_lhv": 1,
         "synkero_output": 1,
+        "ft_h2_cost": 1,
         "synkero_h2_usage": 1,
     },
 )
@@ -556,8 +556,8 @@ def synkero_h2_usage():
         "synkero_cost_without_h2": 1,
         "h2_lhv": 1,
         "synkero_output": 1,
-        "synkero_fraction": 1,
         "synkero_h2_usage": 1,
+        "synkero_fraction": 1,
     },
 )
 def synkero_h2_wtp():
@@ -691,8 +691,8 @@ def synnaphtha_fraction():
         "synnaphtha_cost_without_h2": 1,
         "h2_lhv": 1,
         "synkero_output": 1,
-        "synnaphtha_fraction": 1,
         "synkero_h2_usage": 1,
+        "synnaphtha_fraction": 1,
         "synkero_fraction": 1,
     },
 )
@@ -713,10 +713,20 @@ def synnaphtha_h2_wtp():
     units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"biomass_price": 1, "usd_to_eur": 1, "biomass_price_init": 1},
+    depends_on={
+        "biomass_price": 1,
+        "usd_to_eur": 1,
+        "biomass_price_init": 1,
+        "inflation_lookup": 1,
+    },
 )
 def uco_price():
     """
-    UCO: used cooking oil. Price assumed to develop similarly to biomass. Source for historical cost: (around 900 $/t (25 $/GJ assuming LHV of 36 GJ/t) in 2024) https://www.spglobal.com/commodityinsights/en/market-insights/latest-news/a griculture/100423-global-uco-supply-to-double-by-2030-as-us-eu-policies-dri ve-asian-supply
+    UCO: used cooking oil. Price is assumed to develop similarly to biomass. Source for historical cost: (around 900 $/t (25 $/GJ assuming LHV of 36 GJ/t) in 2024) https://www.spglobal.com/commodityinsights/en/market-insights/latest-news/a griculture/100423-global-uco-supply-to-double-by-2030-as-us-eu-policies-dri ve-asian-supply
     """
-    return biomass_price() * (25 * usd_to_eur()) / biomass_price_init()
+    return (
+        biomass_price()
+        * (25 * usd_to_eur())
+        / biomass_price_init()
+        * inflation_lookup(2024)
+    )

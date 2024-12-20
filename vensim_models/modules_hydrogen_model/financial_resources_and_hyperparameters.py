@@ -158,7 +158,7 @@ def discount_rate():
 
 @component.add(
     name="ELECTRICITY EMISSION FACTOR",
-    units="tCO2/kWh",
+    units="tCO2/MWh",
     comp_type="Constant",
     comp_subtype="Normal",
 )
@@ -166,26 +166,26 @@ def electricity_emission_factor():
     """
     https://ens.dk/en/our-services/statistics-data-key-figures-and-energy-maps/key-figure s 207 gCO2/kWh
     """
-    return 207 / 10**6
+    return 207 / 10**3
 
 
 @component.add(
     name="ELECTRICITY PRICE LOOKUP",
-    units="€/kWh",
+    units="€/MWh",
     comp_type="Lookup",
     comp_subtype="Normal",
     depends_on={"__lookup__": "_hardcodedlookup_electricity_price_lookup"},
 )
 def electricity_price_lookup(x, final_subs=None):
     """
-    €/kWh Alternative: ([(0,0)-(10,10)],(2019,0.038),(2030,0.05),(2050,0.045) )
+    €/MWh Alternative: ([(0,0)-(10,10)],(2019,38),(2030,50),(2050,45) )
     """
     return _hardcodedlookup_electricity_price_lookup(x, final_subs)
 
 
 _hardcodedlookup_electricity_price_lookup = HardcodedLookups(
-    [2019.0, 2030.0, 2050.0],
-    [0.038, 0.038, 0.038],
+    [2019, 2030, 2050],
+    [38, 38, 38],
     {},
     "interpolate",
     {},
@@ -240,24 +240,193 @@ _hardcodedlookup_gas_price_lookup = HardcodedLookups(
 
 @component.add(
     name="GRID ELECTRICITY PRICE",
-    units="€/kWh",
+    units="€/MWh",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "time": 1,
         "electricity_price_lookup": 1,
+        "electricity_sensitivity": 1,
         "electricity_emission_factor": 1,
         "carbon_tax": 1,
-        "electricity_sensitivity": 1,
     },
 )
 def grid_electricity_price():
     """
-    €/kWh
+    €/MWh
     """
     return (
-        electricity_price_lookup(time()) + electricity_emission_factor() * carbon_tax()
-    ) * electricity_sensitivity()
+        electricity_price_lookup(time()) * electricity_sensitivity()
+        + electricity_emission_factor() * carbon_tax()
+    )
+
+
+@component.add(
+    name="INFLATION LOOKUP",
+    units="scalar",
+    comp_type="Lookup",
+    comp_subtype="Normal",
+    depends_on={"__lookup__": "_hardcodedlookup_inflation_lookup"},
+)
+def inflation_lookup(x, final_subs=None):
+    """
+    Base year 2020
+    """
+    return _hardcodedlookup_inflation_lookup(x, final_subs)
+
+
+_hardcodedlookup_inflation_lookup = HardcodedLookups(
+    [
+        2000.0,
+        2001.0,
+        2002.0,
+        2003.0,
+        2004.0,
+        2005.0,
+        2006.0,
+        2007.0,
+        2008.0,
+        2009.0,
+        2010.0,
+        2011.0,
+        2012.0,
+        2013.0,
+        2014.0,
+        2015.0,
+        2016.0,
+        2017.0,
+        2018.0,
+        2019.0,
+        2020.0,
+        2021.0,
+        2022.0,
+        2023.0,
+        2024.0,
+        2025.0,
+        2026.0,
+        2027.0,
+        2028.0,
+        2029.0,
+        2030.0,
+        2031.0,
+        2032.0,
+        2033.0,
+        2034.0,
+        2035.0,
+        2036.0,
+        2037.0,
+        2038.0,
+        2039.0,
+        2040.0,
+        2041.0,
+        2042.0,
+        2043.0,
+        2044.0,
+        2045.0,
+        2046.0,
+        2047.0,
+        2048.0,
+        2049.0,
+        2050.0,
+        2051.0,
+        2052.0,
+        2053.0,
+        2054.0,
+        2055.0,
+        2056.0,
+        2057.0,
+        2058.0,
+        2059.0,
+        2060.0,
+        2061.0,
+        2062.0,
+        2063.0,
+        2064.0,
+        2065.0,
+        2066.0,
+        2067.0,
+        2068.0,
+        2069.0,
+        2070.0,
+    ],
+    [
+        1.41,
+        1.38,
+        1.35,
+        1.32,
+        1.29,
+        1.27,
+        1.24,
+        1.21,
+        1.18,
+        1.15,
+        1.14,
+        1.13,
+        1.1,
+        1.07,
+        1.06,
+        1.05,
+        1.05,
+        1.05,
+        1.03,
+        1.01,
+        1.0,
+        1.0,
+        0.97,
+        0.89,
+        0.85,
+        0.81,
+        0.8,
+        0.78,
+        0.77,
+        0.75,
+        0.74,
+        0.72,
+        0.71,
+        0.69,
+        0.68,
+        0.67,
+        0.65,
+        0.64,
+        0.63,
+        0.62,
+        0.6,
+        0.59,
+        0.58,
+        0.57,
+        0.56,
+        0.55,
+        0.54,
+        0.53,
+        0.51,
+        0.5,
+        0.49,
+        0.49,
+        0.48,
+        0.47,
+        0.46,
+        0.45,
+        0.44,
+        0.43,
+        0.42,
+        0.41,
+        0.41,
+        0.4,
+        0.39,
+        0.38,
+        0.38,
+        0.37,
+        0.36,
+        0.35,
+        0.35,
+        0.34,
+        0.33,
+    ],
+    {},
+    "interpolate",
+    {},
+    "_hardcodedlookup_inflation_lookup",
+)
 
 
 @component.add(name="k i", comp_type="Constant", comp_subtype="Normal")
@@ -331,7 +500,7 @@ _hardcodedlookup_oil_price_lookup = HardcodedLookups(
 
 @component.add(
     name="RENEWABLE ELECTRICITY PRICE",
-    units="€/kWh",
+    units="€/MWh",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={"time": 1, "electricity_price_lookup": 1, "electricity_sensitivity": 1},
@@ -345,9 +514,11 @@ def seed():
     return 40
 
 
-@component.add(name="SLOPE", comp_type="Constant", comp_subtype="Normal")
+@component.add(
+    name="SLOPE", units="hyperparameter", comp_type="Constant", comp_subtype="Normal"
+)
 def slope():
-    return 5
+    return 10
 
 
 @component.add(

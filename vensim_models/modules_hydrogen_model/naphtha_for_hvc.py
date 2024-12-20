@@ -10,8 +10,8 @@ Translated using PySD version 3.14.0
     depends_on={
         "naphtha_cost": 1,
         "bionaphtha_cost": 3,
-        "synnaphtha_cost": 1,
         "pyrolysisnaphtha_cost": 1,
+        "synnaphtha_cost": 1,
     },
 )
 def bio_naphtha_competitiveness():
@@ -97,8 +97,8 @@ _smooth_bio_naphtha_inno_switch = Smooth(
         "bio_naphtha_inno_switch": 1,
         "naphtha_feedstock_reinvestment": 1,
         "innovators": 1,
-        "sum_naphtha": 2,
         "biogenic_naphtha": 1,
+        "sum_naphtha": 2,
     },
 )
 def bio_naphtha_innovators():
@@ -270,8 +270,8 @@ _integ_errorint_naphtha = Integ(
     depends_on={
         "bionaphtha_cost": 1,
         "naphtha_cost": 3,
-        "synnaphtha_cost": 1,
         "pyrolysisnaphtha_cost": 1,
+        "synnaphtha_cost": 1,
     },
 )
 def f_naphtha_competitiveness():
@@ -289,8 +289,8 @@ def f_naphtha_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "fossil_naphtha": 1,
-        "feedstock_lockin": 1,
         "f_naphtha_early_decommission_rate": 1,
+        "feedstock_lockin": 1,
     },
 )
 def f_naphtha_decay():
@@ -402,12 +402,12 @@ def naphta_olefin_rate():
     depends_on={
         "biogenic_naphtha": 1,
         "bionaphtha_cost": 1,
-        "fossil_naphtha": 1,
         "naphtha_cost": 1,
-        "recycled_naphtha": 1,
+        "fossil_naphtha": 1,
         "pyrolysisnaphtha_cost": 1,
-        "synnaphtha_cost": 1,
+        "recycled_naphtha": 1,
         "synthetic_naphtha": 1,
+        "synnaphtha_cost": 1,
         "sum_naphtha": 1,
     },
 )
@@ -429,6 +429,29 @@ def naphtha_average_cost():
 )
 def naphtha_biomass_demand():
     return biogenic_naphtha() * (naphtha_lhv() / 3600) * 10**6
+
+
+@component.add(
+    name="Naphtha CO2 WTP",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "bionaphtha_cost": 1,
+        "synnaphtha_cost": 1,
+        "naphtha_cost": 1,
+        "naphtha_emission_factor": 2,
+        "carbon_tax": 1,
+    },
+)
+def naphtha_co2_wtp():
+    """
+    €/GJ / (tCO2/GJ)
+    """
+    return (
+        np.minimum(bionaphtha_cost(), synnaphtha_cost())
+        - (naphtha_cost() - carbon_tax() * naphtha_emission_factor())
+    ) / naphtha_emission_factor()
 
 
 @component.add(
@@ -531,8 +554,8 @@ def naphtha_lhv():
         "olefin_production": 1,
         "mto": 1,
         "naphta_olefin_rate": 1,
-        "pulse_naphtha": 1,
         "pulse_size": 1,
+        "pulse_naphtha": 1,
     },
 )
 def naphtha_production():
@@ -666,8 +689,8 @@ _smooth_recycled_inno_switch = Smooth(
         "naphtha_feedstock_reinvestment": 1,
         "innovators": 1,
         "recycled_inno_switch": 1,
-        "sum_naphtha": 2,
         "recycled_naphtha": 1,
+        "sum_naphtha": 2,
     },
 )
 def recycled_innovators():
@@ -707,8 +730,8 @@ def recycled_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "recycled_competitiveness": 1,
         "cross": 1,
+        "recycled_competitiveness": 1,
         "recycled_naphtha": 1,
         "sum_naphtha": 1,
     },
@@ -771,8 +794,8 @@ def sum_naphtha():
     depends_on={
         "naphtha_cost": 1,
         "synnaphtha_cost": 3,
-        "bionaphtha_cost": 1,
         "pyrolysisnaphtha_cost": 1,
+        "bionaphtha_cost": 1,
     },
 )
 def syn_naphtha_competitiveness():
@@ -858,8 +881,8 @@ _smooth_syn_naphtha_inno_switch = Smooth(
         "naphtha_feedstock_reinvestment": 1,
         "innovators": 1,
         "syn_naphtha_inno_switch": 1,
-        "sum_naphtha": 2,
         "synthetic_naphtha": 1,
+        "sum_naphtha": 2,
     },
 )
 def syn_naphtha_innovators():

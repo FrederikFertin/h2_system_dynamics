@@ -203,8 +203,8 @@ _integ_blue_ng_nm = Integ(
         "nm_h2_gj_cost": 1,
         "grey_ng_cost": 1,
         "gas_price": 1,
-        "ccs_cost": 1,
         "gas_emission_factor": 2,
+        "ccs_cost": 1,
         "cc_capture_rate": 1,
     },
 )
@@ -675,8 +675,8 @@ _smooth_h2_nm_inno_switch = Smooth(
         "nm_reinvestment": 1,
         "innovators": 1,
         "h2_nm_inno_switch": 1,
-        "h2_nm": 1,
         "sum_nm": 2,
+        "h2_nm": 1,
     },
 )
 def h2_nm_innovators():
@@ -741,10 +741,10 @@ def h2_nm_level():
         "biogas_cost": 1,
         "blue_ng_nm": 1,
         "blue_ng_cost": 1,
-        "grey_ng_cost": 1,
         "grey_ng_nm": 1,
-        "h2_nm": 1,
+        "grey_ng_cost": 1,
         "nm_h2_gj_cost": 1,
+        "h2_nm": 1,
         "sum_nm": 1,
     },
 )

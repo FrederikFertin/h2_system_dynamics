@@ -160,8 +160,8 @@ def biomeoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "biomeoh_competitiveness": 1,
         "cross": 1,
+        "biomeoh_competitiveness": 1,
         "biomeoh": 1,
         "sum_meoh": 1,
     },
@@ -482,8 +482,8 @@ _smooth_emeoh_inno_switch = Smooth(
         "meoh_reinvestment": 1,
         "innovators": 1,
         "emeoh_inno_switch": 1,
-        "sum_meoh": 2,
         "emeoh": 1,
+        "sum_meoh": 2,
     },
 )
 def emeoh_innovators():
@@ -522,8 +522,8 @@ def emeoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "emeoh_competitiveness": 1,
+        "cross": 1,
         "emeoh": 1,
         "sum_meoh": 1,
     },
@@ -719,8 +719,8 @@ def grey_meoh_level():
         "green_biomeoh_cost": 1,
         "blue_meoh": 1,
         "blue_meoh_cost": 1,
-        "grey_meoh": 1,
         "convmeoh_cost": 1,
+        "grey_meoh": 1,
         "green_emeoh_cost": 1,
         "emeoh": 1,
         "sum_meoh": 1,
@@ -759,8 +759,8 @@ def meoh_biomass_demand():
         "blue_meoh": 2,
         "electricity_emission_factor": 1,
         "convmeoh_electricity_usage": 1,
-        "convmeoh_emission_factor": 1,
         "cc_capture_rate": 1,
+        "convmeoh_emission_factor": 1,
     },
 )
 def meoh_emissions():
@@ -788,9 +788,14 @@ def meoh_hydrogen_demand():
     return (biomeoh() / biomeoh_h2_usage() + emeoh() / emeoh_h2_usage()) * 10**6
 
 
-@component.add(name="MeOH plant lifetime", comp_type="Constant", comp_subtype="Normal")
+@component.add(
+    name="MeOH plant lifetime",
+    units="years",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
 def meoh_plant_lifetime():
-    return 25
+    return 20
 
 
 @component.add(
@@ -843,6 +848,17 @@ def methanol_demand():
     European MeOH demand. Primary assumption: To not double count MeOH demand for chemicals, plastics, and fuels the demand is assumed constant moving forward. Source: Deloitte - Clean Hydrogen Europe. (https://www.clean-hydrogen.europa.eu/document/download/9fef29ac-6f95-465b- bb6e-1365526f43c4_en?filename=Study%20on%20hydrogen%20in%20ports%20and%20in dustrial%20coastal%20areas.pdf) Based on 2023 level of 11.3 MT. Forecasted 3.96% CAGR from 2023 to 2034. Assumed 3% CAGR from 2034 to 2050. Extrapolated back to 2019 with same growth as forecast (3.96%). Source: https://www.chemanalyst.com/industry-report/europe-methanol-market-215
     """
     return 2.9
+
+
+@component.add(
+    name="min green MeOH cost",
+    units="€/GJ",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"green_biomeoh_cost": 1, "green_emeoh_cost": 1},
+)
+def min_green_meoh_cost():
+    return np.minimum(green_biomeoh_cost(), green_emeoh_cost())
 
 
 @component.add(

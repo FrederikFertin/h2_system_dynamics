@@ -138,6 +138,29 @@ def hd_bev_decay():
 
 
 @component.add(
+    name="HD BEV emissions",
+    units="tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "hd_bev_consumption": 1,
+        "hd_ice_efficiency": 1,
+        "charging_efficiency": 1,
+        "hd_ev_efficiency": 1,
+        "electricity_emission_factor": 1,
+    },
+)
+def hd_bev_emissions():
+    return (
+        hd_bev_consumption()
+        * hd_ice_efficiency()
+        / (charging_efficiency() * hd_ev_efficiency())
+        * electricity_emission_factor()
+        * 1000
+    )
+
+
+@component.add(
     name="HD BEV imitators",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -200,8 +223,8 @@ _smooth_hd_bev_inno_switch = Smooth(
         "hd_bev_inno_switch": 1,
         "hd_rt_reinvestment": 1,
         "innovators": 1,
-        "hd_bev_consumption": 1,
         "sum_hd_rt": 2,
+        "hd_bev_consumption": 1,
     },
 )
 def hd_bev_innovators():
@@ -462,8 +485,8 @@ _integ_hd_fossil_consumption = Integ(
     comp_subtype="Normal",
     depends_on={
         "hd_fossil_consumption": 1,
-        "truck_lifetime": 1,
         "hd_fossil_early_decommission_rate": 1,
+        "truck_lifetime": 1,
     },
 )
 def hd_fossil_decay():
@@ -556,6 +579,17 @@ def hd_ice_efficiency():
 
 
 @component.add(
+    name="HD ICE emissions",
+    units="tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"hd_fossil_consumption": 1, "diesel_emission_factor": 1},
+)
+def hd_ice_emissions():
+    return hd_fossil_consumption() * diesel_emission_factor() * 10**6
+
+
+@component.add(
     name="HD RT consumption",
     units="GWh",
     comp_type="Auxiliary",
@@ -619,25 +653,10 @@ _integ_hd_rt_reinvestment = Integ(
     units="tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "hd_fossil_consumption": 1,
-        "diesel_emission_factor": 1,
-        "hd_ev_efficiency": 1,
-        "hd_bev_consumption": 1,
-        "charging_efficiency": 1,
-        "electricity_emission_factor": 1,
-        "hd_ice_efficiency": 1,
-    },
+    depends_on={"hd_bev_emissions": 1, "hd_ice_emissions": 1},
 )
 def heavy_duty_emissions():
-    return (
-        hd_fossil_consumption() * diesel_emission_factor() * 10**6
-        + hd_bev_consumption()
-        * hd_ice_efficiency()
-        / (charging_efficiency() * hd_ev_efficiency())
-        * electricity_emission_factor()
-        * 10**6
-    )
+    return hd_bev_emissions() + hd_ice_emissions()
 
 
 @component.add(

@@ -3,7 +3,8 @@ import os
 
 
 class data_loading_class:
-    """Class to load data from Excel files and add future data points to the data."""
+    """Class to load data from Excel files and add future data points to the data.
+    All prices are in 2020 EUR. """
 
     cwd = os.getcwd()
     ### ------- Load data from Excel files ------- ###
@@ -14,6 +15,9 @@ class data_loading_class:
 
     # Loads biomass forecast prices
     biomass_prices = pd.read_excel(cwd + "\\data\\biomass_prices.xlsx",skiprows=1)
+
+    # Loads the inflation rates
+    inflation = pd.read_excel(cwd + "\\data\\european_inflation_rates_data.xlsx", sheet_name="european_inflation_rates", index_col=0)
     
     # Function which pads the data with a new data point 20 years later which is the same as the last data point
     # and a data point 20 years before which is the same as the first data point
@@ -34,11 +38,17 @@ class data_loading_class:
         # Loads forecasted carbon taxes
         if "seamaps" in args:
             self.carbon_tax = pd.read_excel(self.cwd + "\\data\\marine_fuel_costs_and_emissions.xlsx", sheet_name="CO2-Price")
-            self.carbon_taxes = pd.Series(index=self.carbon_tax["Year"].values, data=self.carbon_tax["CO2-tax /tonne"].values, dtype=float)
+            self.carbon_taxes = pd.Series(
+                                index=self.carbon_tax["Year"].values,
+                                data=self.carbon_tax["CO2-tax /tonne"].values,
+                                dtype=float)
         else:
             self.carbon_tax = pd.read_excel(self.cwd + "\\data\\co2_tax.xlsx")
-            self.carbon_taxes = pd.Series(index=self.carbon_tax["Year"].values, data=self.carbon_tax["EUR2015/tCO2"].values, dtype=float)
-
+            self.carbon_taxes = pd.Series(
+                                index=self.carbon_tax["Year"].values,
+                                data=self.carbon_tax["EUR2015/tCO2"].values * self.inflation.loc[2015]['Inflation Multiplier'],
+                                dtype=float)
+        
         if "sensitivity" in kwargs:
             self.carbon_taxes = self.carbon_taxes * kwargs["sensitivity"]
         
@@ -50,7 +60,10 @@ class data_loading_class:
         kwargs = dict(kwargs)
 
         # Loads forecasted gas prices
-        self.gas_prices = pd.Series(index=self.fuel_prices.columns[1:].astype(int), data=self.fuel_prices.loc[self.fuel_prices["[EUR/GJ]"] == "Gas"].values[0][1:], dtype=float)
+        self.gas_prices = pd.Series(
+                                index=self.fuel_prices.columns[1:].astype(int),
+                                data=self.fuel_prices.loc[self.fuel_prices["[EUR/GJ]"] == "Gas"].values[0][1:] * self.inflation.loc[2015]['Inflation Multiplier'], # €/GJ
+                                dtype=float)
 
         if "sensitivity" in kwargs:
             self.gas_prices = self.gas_prices * kwargs["sensitivity"]
@@ -63,19 +76,40 @@ class data_loading_class:
         kwargs = dict(kwargs)
 
         # Loads forecasted oil prices
-        self.oil_prices = pd.Series(index=self.fuel_prices.columns[1:].astype(int), data=self.fuel_prices.loc[self.fuel_prices["[EUR/GJ]"] == "Oil"].values[0][1:], dtype=float)
+        self.oil_prices = pd.Series(
+                                index=self.fuel_prices.columns[1:].astype(int),
+                                data=self.fuel_prices.loc[self.fuel_prices["[EUR/GJ]"] == "Oil"].values[0][1:] * self.inflation.loc[2015]['Inflation Multiplier'], # €/GJ
+                                dtype=float)
         
         if "sensitivity" in kwargs:
             self.oil_prices = self.oil_prices * kwargs["sensitivity"]
         
         return self._pad_data(self.oil_prices)
     
+    # Function which loads the coal prices from self
+    def load_coal_prices(self, *args, **kwargs):
+        args = list(args)
+        kwargs = dict(kwargs)
+
+        self.coal_prices = pd.Series(
+                                index=self.fuel_prices.columns[1:].astype(int),
+                                data=self.fuel_prices.loc[self.fuel_prices["[EUR/GJ]"] == "Coal"].values[0][1:] * self.inflation.loc[2015]['Inflation Multiplier'], # €/GJ
+                                dtype=float)
+
+        if "sensitivity" in kwargs:
+            self.coal_prices = self.coal_prices * kwargs["sensitivity"]
+
+        return self._pad_data(self.coal_prices)
+    
     # Function which loads the woodchip prices from self
     def load_woodchip_prices(self, *args, **kwargs):
         args = list(args)
         kwargs = dict(kwargs)
         
-        self.woodchip_prices = pd.Series(index=self.biomass_prices["Euro/GJ"].values[1:].astype(int), data=self.biomass_prices["Wood Chips"].values[1:], dtype=float)
+        self.woodchip_prices = pd.Series(
+                                index=self.biomass_prices["Euro/GJ"].values[1:].astype(int),
+                                data=self.biomass_prices["Wood Chips"].values[1:].astype(float) * self.inflation.loc[2015]['Inflation Multiplier'], # €/GJ
+                                dtype=float)
 
         if "sensitivity" in kwargs:
             self.woodchip_prices = self.woodchip_prices * kwargs["sensitivity"]
@@ -87,7 +121,10 @@ class data_loading_class:
         args = list(args)
         kwargs = dict(kwargs)
 
-        self.straw_prices = pd.Series(index=self.biomass_prices["Euro/GJ"].values[1:].astype(int), data=self.biomass_prices["Straw"].values[1:], dtype=float)
+        self.straw_prices = pd.Series(
+                                index=self.biomass_prices["Euro/GJ"].values[1:].astype(int),
+                                data=self.biomass_prices["Straw"].values[1:].astype(float) * self.inflation.loc[2015]['Inflation Multiplier'], # €/GJ
+                                dtype=float)
 
         if "sensitivity" in kwargs:
             self.straw_prices = self.straw_prices * kwargs["sensitivity"]
@@ -99,33 +136,38 @@ class data_loading_class:
         args = list(args)
         kwargs = dict(kwargs)
 
-        self.woodpellet_prices = pd.Series(index=self.biomass_prices["Euro/GJ"].values[1:].astype(int), data=self.biomass_prices["Wood Pellets"].values[1:], dtype=float)
+        self.woodpellet_prices = pd.Series(
+                                index=self.biomass_prices["Euro/GJ"].values[1:].astype(int),
+                                data=self.biomass_prices["Wood Pellets"].values[1:].astype(float) * self.inflation.loc[2015]['Inflation Multiplier'], # €/GJ
+                                dtype=float)
 
         if "sensitivity" in kwargs:
             self.woodpellet_prices = self.woodpellet_prices * kwargs["sensitivity"]
         
         return self._pad_data(self.woodpellet_prices)
     
-    # Function which loads the coal prices from self
-    def load_coal_prices(self, *args, **kwargs):
-        args = list(args)
-        kwargs = dict(kwargs)
-
-        self.coal_prices = pd.Series(index=self.fuel_prices.columns[1:].astype(int), data=self.fuel_prices.loc[self.fuel_prices["[EUR/GJ]"] == "Coal"].values[0][1:], dtype=float)
-
-        if "sensitivity" in kwargs:
-            self.coal_prices = self.coal_prices * kwargs["sensitivity"]
-
-        return self._pad_data(self.coal_prices)
-    
     # Function which loads the electricity prices from self
     def load_electricity_prices(self, *args, **kwargs):
         args = list(args)
         kwargs = dict(kwargs)
 
-        self.electricity_prices = pd.Series(index=[2020, 2030, 2040, 2050], data=[0.04, 0.035, 0.03, 0.025], dtype=float)
+        self.electricity_prices = pd.Series(
+                                index=[2020, 2030, 2040, 2050],
+                                data=[40, 35, 30, 25], # €_2020/MWh (example data)
+                                dtype=float)
 
         if "sensitivity" in kwargs:
             self.electricity_prices = self.electricity_prices * kwargs["sensitivity"]
 
         return self._pad_data(self.electricity_prices)
+
+if __name__ == "__main__":
+    data = data_loading_class()
+    print(data.load_carbon_taxes())
+    print(data.load_gas_prices())
+    print(data.load_oil_prices())
+    print(data.load_woodchip_prices())
+    print(data.load_straw_prices())
+    print(data.load_woodpellet_prices())
+    print(data.load_coal_prices())
+    print(data.load_electricity_prices())

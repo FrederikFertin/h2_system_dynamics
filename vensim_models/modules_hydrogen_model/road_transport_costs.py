@@ -104,8 +104,8 @@ def hd_battery_weight():
         "hd_be_powertrain_capex": 1,
         "hd_be_storage_capex": 1,
         "hd_rest_of_vehicle_capex": 1,
-        "vehicle_insurance": 1,
         "hd_af": 1,
+        "vehicle_insurance": 1,
         "hd_annual_km": 1,
     },
 )
@@ -160,15 +160,17 @@ def hd_be_om():
     comp_subtype="Normal",
     depends_on={
         "hd_be_om": 1,
-        "hd_be_energy_usage": 1,
         "grid_electricity_price": 1,
+        "hd_be_energy_usage": 1,
         "charging_efficiency": 1,
     },
 )
 def hd_be_opex():
     return (
         hd_be_om()
-        + (hd_be_energy_usage() / charging_efficiency()) * grid_electricity_price()
+        + (hd_be_energy_usage() / charging_efficiency())
+        * grid_electricity_price()
+        / 1000
     )
 
 
@@ -202,10 +204,10 @@ def hd_be_storage_capacity():
     units="€",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"battery_cost": 1, "hd_be_storage_capacity": 1},
+    depends_on={"rt_battery_cost": 1, "hd_be_storage_capacity": 1},
 )
 def hd_be_storage_capex():
-    return battery_cost() * hd_be_storage_capacity()
+    return rt_battery_cost() * hd_be_storage_capacity()
 
 
 @component.add(
@@ -216,6 +218,37 @@ def hd_be_weight_penalty_switch():
     1 if activated, 0 if not
     """
     return 0
+
+
+@component.add(
+    name="HD CO2 WTP",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "hd_fc_lco": 1,
+        "hd_be_lco": 1,
+        "carbon_tax": 1,
+        "diesel_emission_factor": 2,
+        "diesel_lhv": 2,
+        "hd_ice_lco": 1,
+        "hd_ice_energy_usage": 2,
+    },
+)
+def hd_co2_wtp():
+    """
+    €/km / (tCO2/km)
+    """
+    return (
+        np.minimum(hd_fc_lco(), hd_be_lco())
+        - (
+            hd_ice_lco()
+            - diesel_emission_factor()
+            * diesel_lhv()
+            * carbon_tax()
+            * hd_ice_energy_usage()
+        )
+    ) / (diesel_emission_factor() * diesel_lhv() * hd_ice_energy_usage())
 
 
 @component.add(
@@ -257,8 +290,8 @@ def hd_ev_efficiency():
         "hd_fc_powertrain_capex": 1,
         "hd_fc_storage_capex": 1,
         "hd_rest_of_vehicle_capex": 1,
-        "vehicle_insurance": 1,
         "hd_af": 1,
+        "vehicle_insurance": 1,
         "hd_annual_km": 1,
     },
 )
@@ -348,13 +381,13 @@ def hd_fc_storage_capacity():
     units="€",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"battery_cost": 1, "h2_lhv": 1, "hd_fc_storage_capacity": 1},
+    depends_on={"rt_battery_cost": 1, "h2_lhv": 1, "hd_fc_storage_capacity": 1},
 )
 def hd_fc_storage_capex():
     """
     A constant cost of the 700 bar hydrogen tank is assumed of 42000 € in line with the used source for all cost numbers. Furthermore an additional (small) battery storage is included 1/17th the capacity of the hydrogen fuel tank
     """
-    return 42000 + battery_cost() * (hd_fc_storage_capacity() * h2_lhv()) / 17
+    return 42000 + rt_battery_cost() * (hd_fc_storage_capacity() * h2_lhv()) / 17
 
 
 @component.add(
@@ -379,8 +412,8 @@ def hd_fcev_efficiency():
         "hd_ice_powertrain_capex": 1,
         "hd_ice_storage_capex": 1,
         "hd_rest_of_vehicle_capex": 1,
-        "vehicle_insurance": 1,
         "hd_af": 1,
+        "vehicle_insurance": 1,
         "hd_annual_km": 1,
     },
 )
@@ -440,7 +473,7 @@ def hd_ice_om():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hd_ice_om": 1, "diesel_price": 1, "hd_ice_energy_usage": 1},
+    depends_on={"hd_ice_om": 1, "hd_ice_energy_usage": 1, "diesel_price": 1},
 )
 def hd_ice_opex():
     return hd_ice_om() + hd_ice_energy_usage() * diesel_price()
@@ -553,8 +586,8 @@ def ld_annual_km():
         "ld_be_engine_capex": 1,
         "ld_be_storage_capex": 1,
         "ld_rest_of_vehicle_capex": 1,
-        "vehicle_insurance": 1,
         "ld_af": 1,
+        "vehicle_insurance": 1,
         "ld_annual_km": 1,
     },
 )
@@ -616,14 +649,17 @@ def ld_be_om():
     depends_on={
         "ld_be_om": 1,
         "ld_be_energy_usage": 1,
-        "electricity_taxes": 1,
         "grid_electricity_price": 1,
         "charging_efficiency": 1,
+        "electricity_taxes": 1,
     },
 )
 def ld_be_opex():
-    return ld_be_om() + (ld_be_energy_usage() / charging_efficiency()) * (
-        grid_electricity_price() * electricity_taxes()
+    return (
+        ld_be_om()
+        + (ld_be_energy_usage() / charging_efficiency())
+        * (grid_electricity_price() * electricity_taxes())
+        / 1000
     )
 
 
@@ -646,10 +682,38 @@ def ld_be_storage_capacity():
     units="€",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"battery_cost": 1, "ld_be_storage_capacity": 1},
+    depends_on={"rt_battery_cost": 1, "ld_be_storage_capacity": 1},
 )
 def ld_be_storage_capex():
-    return battery_cost() * ld_be_storage_capacity()
+    return rt_battery_cost() * ld_be_storage_capacity()
+
+
+@component.add(
+    name="LD CO2 WTP",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "ld_fc_lco": 1,
+        "ld_be_lco": 1,
+        "carbon_tax": 1,
+        "ld_ice_energy_usage": 2,
+        "diesel_emission_factor": 2,
+        "diesel_lhv": 2,
+        "ld_ice_lco": 1,
+    },
+)
+def ld_co2_wtp():
+    return (
+        np.minimum(ld_fc_lco(), ld_be_lco())
+        - (
+            ld_ice_lco()
+            - diesel_emission_factor()
+            * diesel_lhv()
+            * carbon_tax()
+            * ld_ice_energy_usage()
+        )
+    ) / (diesel_emission_factor() * diesel_lhv() * ld_ice_energy_usage())
 
 
 @component.add(
@@ -699,8 +763,8 @@ def ld_ev_efficiency():
         "ld_fc_engine_capex": 1,
         "ld_fc_storage_capex": 1,
         "ld_rest_of_vehicle_capex": 1,
-        "vehicle_insurance": 1,
         "ld_af": 1,
+        "vehicle_insurance": 1,
         "ld_annual_km": 1,
     },
 )
@@ -747,7 +811,7 @@ def ld_fc_engine_capex():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"ld_fc_lco_without_h2": 1, "ld_h2_cost": 1, "ld_fc_energy_usage": 1},
+    depends_on={"ld_fc_lco_without_h2": 1, "ld_fc_energy_usage": 1, "ld_h2_cost": 1},
 )
 def ld_fc_lco():
     return ld_fc_lco_without_h2() + ld_fc_energy_usage() * ld_h2_cost()
@@ -797,7 +861,7 @@ def ld_fc_storage_capacity():
         "ld_fc_storage_capacity": 2,
         "h2_tank_cost": 1,
         "h2_lhv": 1,
-        "battery_cost": 1,
+        "rt_battery_cost": 1,
     },
 )
 def ld_fc_storage_capex():
@@ -806,7 +870,7 @@ def ld_fc_storage_capex():
     """
     return (
         ld_fc_storage_capacity() * h2_tank_cost()
-        + battery_cost() * (ld_fc_storage_capacity() * h2_lhv()) / 11.5
+        + rt_battery_cost() * (ld_fc_storage_capacity() * h2_lhv()) / 11.5
     )
 
 
@@ -832,8 +896,8 @@ def ld_fcev_efficiency():
         "ld_ice_engine_capex": 1,
         "ld_ice_storage_capex": 1,
         "ld_rest_of_vehicle_capex": 1,
-        "vehicle_insurance": 1,
         "ld_af": 1,
+        "vehicle_insurance": 1,
         "ld_annual_km": 1,
     },
 )
@@ -899,7 +963,7 @@ def ld_ice_om():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"ld_ice_om": 1, "diesel_price": 1, "ld_ice_energy_usage": 1},
+    depends_on={"ld_ice_om": 1, "ld_ice_energy_usage": 1, "diesel_price": 1},
 )
 def ld_ice_opex():
     return ld_ice_om() + ld_ice_energy_usage() * diesel_price()
@@ -966,6 +1030,13 @@ def ld_rest_of_vehicle_capex():
     Own assumption - small truck rest of vehicle cost is 17k in the referenced study, which regards commercial light duty vehicles.
     """
     return 5000
+
+
+@component.add(
+    name="RT battery cost", units="€/kWh", comp_type="Constant", comp_subtype="Normal"
+)
+def rt_battery_cost():
+    return 139.34
 
 
 @component.add(

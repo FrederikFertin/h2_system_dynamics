@@ -4,6 +4,31 @@ Translated using PySD version 3.14.0
 """
 
 @component.add(
+    name="blue fertilizer emissions",
+    units="tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "blue_nh3": 2,
+        "cc_capture_rate": 1,
+        "nh3_h2_usage": 1,
+        "smr_emission_factor": 1,
+        "electricity_emission_factor": 1,
+        "nh3_el_usage": 1,
+    },
+)
+def blue_fertilizer_emissions():
+    return (
+        blue_nh3()
+        * (1 - cc_capture_rate())
+        / nh3_h2_usage()
+        * smr_emission_factor()
+        * 10**6
+        + blue_nh3() * electricity_emission_factor() * 10**6 * nh3_el_usage()
+    )
+
+
+@component.add(
     name="Blue NH3",
     units="MT NH3",
     comp_type="Stateful",
@@ -230,8 +255,8 @@ _integ_errorint_fertilizer = Integ(
         "blue_nh3_cost": 1,
         "green_nh3": 1,
         "fertilizer_nh3_cost": 1,
-        "grey_nh3_cost": 1,
         "grey_nh3": 1,
+        "grey_nh3_cost": 1,
         "sum_fertilizer": 1,
     },
 )
@@ -248,22 +273,10 @@ def fertilizer_average_cost():
     units="tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "grey_nh3": 2,
-        "blue_nh3": 2,
-        "cc_capture_rate": 1,
-        "nh3_h2_usage": 1,
-        "smr_emission_factor": 1,
-        "electricity_emission_factor": 1,
-        "nh3_el_usage": 1,
-    },
+    depends_on={"blue_fertilizer_emissions": 1, "grey_fertilizer_emissions": 1},
 )
 def fertilizer_emissions():
-    return (
-        grey_nh3() + blue_nh3() * (1 - cc_capture_rate())
-    ) / nh3_h2_usage() * smr_emission_factor() * 10**6 + (
-        grey_nh3() + blue_nh3()
-    ) * electricity_emission_factor() * 10**9 * nh3_el_usage()
+    return blue_fertilizer_emissions() + grey_fertilizer_emissions()
 
 
 @component.add(
@@ -398,8 +411,8 @@ _smooth_green_nh3_inno_switch = Smooth(
         "nh3_reinvestment": 1,
         "innovators": 1,
         "green_nh3_inno_switch": 1,
-        "green_nh3": 1,
         "sum_fertilizer": 2,
+        "green_nh3": 1,
     },
 )
 def green_nh3_innovators():
@@ -451,6 +464,25 @@ def green_nh3_level():
         / (1 + np.exp(slope() * (cross() - green_nh3_competitiveness())))
         * green_nh3()
         / sum_fertilizer()
+    )
+
+
+@component.add(
+    name="grey fertilizer emissions",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "grey_nh3": 2,
+        "nh3_h2_usage": 1,
+        "smr_emission_factor": 1,
+        "electricity_emission_factor": 1,
+        "nh3_el_usage": 1,
+    },
+)
+def grey_fertilizer_emissions():
+    return (
+        grey_nh3() / nh3_h2_usage() * smr_emission_factor() * 10**6
+        + grey_nh3() * electricity_emission_factor() * 10**6 * nh3_el_usage()
     )
 
 

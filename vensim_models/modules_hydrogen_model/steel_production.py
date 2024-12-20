@@ -10,10 +10,10 @@ Translated using PySD version 3.14.0
     comp_subtype="Normal",
     depends_on={
         "bf_coal_cost": 1,
-        "bf_coal_emission_factor": 1,
-        "carbon_tax": 1,
         "ccs_cost": 1,
         "cc_capture_rate": 1,
+        "carbon_tax": 1,
+        "bf_coal_emission_factor": 1,
     },
 )
 def bf_ccs_cost():
@@ -29,7 +29,7 @@ def bf_coal_capex():
     """
     https://doi.org/10.1016/j.jclepro.2023.136391 Table 2 average
     """
-    return (600 + 311) / 2
+    return 456
 
 
 @component.add(
@@ -45,9 +45,10 @@ def bf_coal_capex():
         "coal_lhv": 1,
         "grid_electricity_price": 1,
         "el_to_steel_bf_coal": 1,
-        "foundry_af": 1,
-        "bf_coal_capex": 1,
         "foundry_operating_hours": 1,
+        "bf_coal_capex": 1,
+        "foundry_af": 1,
+        "inflation_lookup": 1,
     },
 )
 def bf_coal_cost():
@@ -58,7 +59,30 @@ def bf_coal_cost():
         carbon_tax() * bf_coal_emission_factor()
         + coal_price() * (coal_to_steel() * coal_lhv())
         + grid_electricity_price() * el_to_steel_bf_coal()
-        + bf_coal_capex() / (foundry_operating_hours() / 8760) * foundry_af()
+        + bf_coal_capex()
+        / (foundry_operating_hours() / 8760)
+        * foundry_af()
+        * inflation_lookup(2022)
+    )
+
+
+@component.add(
+    name="BF Coal cost without CO2",
+    units="€/tsteel",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "bf_coal_cost": 1,
+        "carbon_tax": 1,
+        "electricity_emission_factor": 1,
+        "el_to_steel_bf_coal": 1,
+        "bf_coal_emission_factor": 1,
+    },
+)
+def bf_coal_cost_without_co2():
+    return bf_coal_cost() - carbon_tax() * (
+        bf_coal_emission_factor()
+        + electricity_emission_factor() * el_to_steel_bf_coal()
     )
 
 
@@ -100,7 +124,7 @@ def coal_to_steel():
 
 @component.add(
     name="EL to Steel BF Coal",
-    units="kWh/tsteel",
+    units="MWh/tsteel",
     comp_type="Constant",
     comp_subtype="Normal",
 )
@@ -108,7 +132,7 @@ def el_to_steel_bf_coal():
     """
     https://www.globalccsinstitute.com/archive/hub/publications/15671/global-te chnology-roadmap-ccs-industry-steel-sectoral-report.pdf
     """
-    return 250
+    return 0.25
 
 
 @component.add(
@@ -182,10 +206,20 @@ def gas_to_steel():
     units="€/tsteel",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"h2dri_learning_curve": 1, "h2dri_capex_base": 1, "foundry_af": 1},
+    depends_on={
+        "h2dri_learning_curve": 1,
+        "h2dri_capex_base": 1,
+        "foundry_af": 1,
+        "inflation_lookup": 1,
+    },
 )
 def h2dri_capex():
-    return h2dri_learning_curve() * h2dri_capex_base() * foundry_af()
+    return (
+        h2dri_learning_curve()
+        * h2dri_capex_base()
+        * foundry_af()
+        * inflation_lookup(2022)
+    )
 
 
 @component.add(
@@ -198,7 +232,7 @@ def h2dri_capex_base():
     """
     https://doi.org/10.1016/j.jclepro.2023.136391 Table 2 average
     """
-    return (945 + 635 + 670) / 3
+    return 750
 
 
 @component.add(
@@ -260,13 +294,13 @@ def h2dri_cost():
     depends_on={
         "grid_electricity_price": 1,
         "el_to_steel_h2dri": 1,
+        "h2dri_capex": 1,
         "foundry_operating_hours": 1,
         "h2dri_capex_subsidy": 1,
-        "h2dri_capex": 1,
     },
 )
 def h2dri_cost_without_h2():
-    return (grid_electricity_price() * 1000) * (el_to_steel_h2dri() / 3.6) + (
+    return grid_electricity_price() * el_to_steel_h2dri() / 3.6 + (
         h2dri_capex() - h2dri_capex_subsidy()
     ) / (foundry_operating_hours() / 8760)
 
@@ -325,7 +359,7 @@ def ngdri_capex():
     """
     https://doi.org/10.1016/j.jclepro.2023.136391 Table 2 average
     """
-    return (265 + 590) / 2
+    return 428
 
 
 @component.add(
@@ -340,9 +374,10 @@ def ngdri_capex():
         "gas_to_steel": 1,
         "el_to_steel_ngdri": 1,
         "grid_electricity_price": 1,
+        "foundry_operating_hours": 1,
         "ngdri_capex": 1,
         "foundry_af": 1,
-        "foundry_operating_hours": 1,
+        "inflation_lookup": 1,
     },
 )
 def ngdri_cost():
@@ -352,8 +387,11 @@ def ngdri_cost():
     return (
         carbon_tax() * ngdri_emission_factor()
         + gas_price() * (gas_to_steel() * 3.6)
-        + grid_electricity_price() * 1000 * el_to_steel_ngdri()
-        + ngdri_capex() / (foundry_operating_hours() / 8760) * foundry_af()
+        + grid_electricity_price() * el_to_steel_ngdri()
+        + ngdri_capex()
+        / (foundry_operating_hours() / 8760)
+        * foundry_af()
+        * inflation_lookup(2022)
     )
 
 
@@ -368,6 +406,29 @@ def ngdri_emission_factor():
     https://doi.org/10.1016/j.jclepro.2023.136391
     """
     return 1.105
+
+
+@component.add(
+    name="steel CO2 WTP",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "h2dri_cost": 1,
+        "bf_coal_cost_without_co2": 1,
+        "electricity_emission_factor": 1,
+        "el_to_steel_bf_coal": 1,
+        "bf_coal_emission_factor": 1,
+    },
+)
+def steel_co2_wtp():
+    """
+    €/tSteel / (tCO2/tSteel)
+    """
+    return (h2dri_cost() - bf_coal_cost_without_co2()) / (
+        bf_coal_emission_factor()
+        + electricity_emission_factor() * el_to_steel_bf_coal()
+    )
 
 
 @component.add(
@@ -388,7 +449,7 @@ def steel_h2_marginal_wtp():
     return (
         (
             np.minimum(np.minimum(bf_ccs_cost(), bf_coal_cost()), ngdri_cost())
-            - (renewable_electricity_price() * 1000) * (el_to_steel_h2dri() / 3.6)
+            - renewable_electricity_price() * (el_to_steel_h2dri() / 3.6)
         )
         / 1000
         / h2_to_steel()

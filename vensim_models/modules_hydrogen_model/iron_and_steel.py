@@ -7,7 +7,7 @@ Translated using PySD version 3.14.0
     name="BF CCS competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"ngdri_cost": 1, "bf_ccs_cost": 3, "bf_coal_cost": 1, "h2dri_cost": 1},
+    depends_on={"ngdri_cost": 1, "bf_ccs_cost": 3, "h2dri_cost": 1, "bf_coal_cost": 1},
 )
 def bf_ccs_competitiveness():
     return np.minimum(
@@ -130,8 +130,8 @@ def bf_ccs_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "bf_ccs_competitiveness": 1,
         "cross": 1,
+        "bf_ccs_competitiveness": 1,
         "coal_bf_bof_ccs": 1,
         "sum_steel": 1,
     },
@@ -149,7 +149,7 @@ def bf_ccs_level():
     name="BF Coal competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"ngdri_cost": 1, "bf_coal_cost": 3, "bf_ccs_cost": 1, "h2dri_cost": 1},
+    depends_on={"ngdri_cost": 1, "bf_coal_cost": 3, "h2dri_cost": 1, "bf_ccs_cost": 1},
 )
 def bf_coal_competitiveness():
     return np.minimum(
@@ -164,8 +164,8 @@ def bf_coal_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "coal_bf_bof": 1,
-        "bf_coal_early_decommission_rate": 1,
         "foundry_lifetime": 1,
+        "bf_coal_early_decommission_rate": 1,
     },
 )
 def bf_coal_decay():
@@ -209,8 +209,8 @@ def bf_coal_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "bf_coal_competitiveness": 1,
+        "cross": 1,
         "coal_bf_bof": 1,
         "sum_steel": 1,
     },
@@ -277,13 +277,20 @@ _integ_coal_bf_bof_ccs = Integ(
     comp_subtype="Normal",
     depends_on={
         "coal_bf_bof_ccs": 1,
+        "electricity_emission_factor": 1,
         "cc_capture_rate": 1,
+        "el_to_steel_bf_coal": 1,
         "bf_coal_emission_factor": 1,
     },
 )
 def coal_bf_bof_ccs_emissions():
     return (
-        coal_bf_bof_ccs() * (1 - cc_capture_rate()) * bf_coal_emission_factor() * 10**6
+        coal_bf_bof_ccs()
+        * 10**6
+        * (
+            (1 - cc_capture_rate()) * bf_coal_emission_factor()
+            + el_to_steel_bf_coal() * electricity_emission_factor()
+        )
     )
 
 
@@ -292,10 +299,22 @@ def coal_bf_bof_ccs_emissions():
     units="tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"coal_bf_bof": 1, "bf_coal_emission_factor": 1},
+    depends_on={
+        "coal_bf_bof": 1,
+        "electricity_emission_factor": 1,
+        "el_to_steel_bf_coal": 1,
+        "bf_coal_emission_factor": 1,
+    },
 )
 def coal_bf_bof_emissions():
-    return coal_bf_bof() * bf_coal_emission_factor() * 10**6
+    return (
+        coal_bf_bof()
+        * 10**6
+        * (
+            bf_coal_emission_factor()
+            + el_to_steel_bf_coal() * electricity_emission_factor()
+        )
+    )
 
 
 @component.add(
@@ -430,7 +449,7 @@ _integ_h2dri_eaf = Integ(
     name="H2DRI EAF competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"ngdri_cost": 1, "h2dri_cost": 3, "bf_ccs_cost": 1, "bf_coal_cost": 1},
+    depends_on={"ngdri_cost": 1, "h2dri_cost": 3, "bf_coal_cost": 1, "bf_ccs_cost": 1},
 )
 def h2dri_eaf_competitiveness():
     return np.minimum(
@@ -463,8 +482,8 @@ def h2dri_eaf_decay():
 def h2dri_eaf_emissions():
     return (
         h2dri_eaf()
-        * (el_to_steel_h2dri() / 3.6 * electricity_emission_factor() * 1000)
         * 10**6
+        * (el_to_steel_h2dri() / 3.6 * electricity_emission_factor())
     )
 
 
@@ -506,8 +525,8 @@ def h2dri_eaf_inno_switch():
         "foundry_reinvestment": 1,
         "innovators": 1,
         "h2dri_eaf_inno_switch": 1,
-        "h2dri_eaf": 1,
         "sum_steel": 2,
+        "h2dri_eaf": 1,
     },
 )
 def h2dri_eaf_innovators():
@@ -588,7 +607,7 @@ _integ_ngdri_eaf = Integ(
     name="NGDRI EAF competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"h2dri_cost": 1, "ngdri_cost": 3, "bf_ccs_cost": 1, "bf_coal_cost": 1},
+    depends_on={"h2dri_cost": 1, "ngdri_cost": 3, "bf_coal_cost": 1, "bf_ccs_cost": 1},
 )
 def ngdri_eaf_competitiveness():
     return np.minimum(
@@ -612,10 +631,22 @@ def ngdri_eaf_decay():
     units="tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"ngdri_eaf": 1, "ngdri_emission_factor": 1},
+    depends_on={
+        "ngdri_eaf": 1,
+        "electricity_emission_factor": 1,
+        "ngdri_emission_factor": 1,
+        "el_to_steel_ngdri": 1,
+    },
 )
 def ngdri_eaf_emissions():
-    return ngdri_eaf() * ngdri_emission_factor() * 10**6
+    return (
+        ngdri_eaf()
+        * 10**6
+        * (
+            ngdri_emission_factor()
+            + el_to_steel_ngdri() * electricity_emission_factor()
+        )
+    )
 
 
 @component.add(
@@ -656,8 +687,8 @@ def ngdri_eaf_inno_switch():
         "foundry_reinvestment": 1,
         "innovators": 1,
         "ngdri_eaf_inno_switch": 1,
-        "ngdri_eaf": 1,
         "sum_steel": 2,
+        "ngdri_eaf": 1,
     },
 )
 def ngdri_eaf_innovators():
@@ -757,12 +788,12 @@ def secondary_sector_growth():
     depends_on={
         "coal_bf_bof": 1,
         "bf_coal_cost": 1,
-        "bf_ccs_cost": 1,
         "coal_bf_bof_ccs": 1,
-        "h2dri_eaf": 1,
+        "bf_ccs_cost": 1,
         "h2dri_cost": 1,
-        "ngdri_eaf": 1,
+        "h2dri_eaf": 1,
         "ngdri_cost": 1,
+        "ngdri_eaf": 1,
         "sum_steel": 1,
     },
 )

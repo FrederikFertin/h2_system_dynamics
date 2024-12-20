@@ -64,7 +64,7 @@ def blue_refinery_decay():
 
 
 @component.add(
-    name="Blue refinery emissions",
+    name="blue refinery emissions",
     units="tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -313,8 +313,8 @@ def green_refinery_inno_switch():
         "refinery_reinvestment": 1,
         "innovators": 1,
         "green_refinery_inno_switch": 1,
-        "green_refinery": 1,
         "sum_refining": 2,
+        "green_refinery": 1,
     },
 )
 def green_refinery_innovators():
@@ -356,8 +356,8 @@ def green_refinery_investment_level():
         "slope": 1,
         "cross": 1,
         "green_refinery_competitiveness": 1,
-        "green_refinery": 1,
         "sum_refining": 1,
+        "green_refinery": 1,
     },
 )
 def green_refinery_level():
@@ -442,7 +442,7 @@ def grey_refinery_early_decommission_rate():
 
 
 @component.add(
-    name="Grey refinery emissions",
+    name="grey refinery emissions",
     units="tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -479,8 +479,8 @@ def grey_refinery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "grey_refinery_competitiveness": 1,
+        "cross": 1,
         "sum_refining": 1,
         "grey_refinery": 1,
     },
@@ -501,8 +501,8 @@ def grey_refinery_level():
     depends_on={
         "blue_refinery": 1,
         "blue_h2_cost": 1,
-        "green_refinery": 1,
         "refinery_h2_cost": 1,
+        "green_refinery": 1,
         "grey_h2_cost": 1,
         "grey_refinery": 1,
         "sum_refining": 1,

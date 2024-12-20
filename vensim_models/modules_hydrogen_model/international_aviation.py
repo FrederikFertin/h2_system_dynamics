@@ -154,8 +154,8 @@ def bio_kerosene_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "bio_kerosene_competitiveness": 1,
         "cross": 1,
+        "bio_kerosene_competitiveness": 1,
         "bio_kerosene_consumption": 1,
         "sum_international_aviation": 1,
     },
@@ -240,10 +240,10 @@ _integ_errorint_international_aviation = Integ(
     depends_on={
         "bio_kerosene_consumption": 1,
         "biokero_cost": 1,
-        "jetfuel_consumption": 1,
         "jetfuel_cost": 1,
-        "synkero_cost": 1,
+        "jetfuel_consumption": 1,
         "syn_kerosene_consumption": 1,
+        "synkero_cost": 1,
         "sum_international_aviation": 1,
     },
 )
@@ -534,6 +534,26 @@ def international_aviation_synkero_hydrogen_demand():
 
 
 @component.add(
+    name="Jetfuel CO2 WTP",
+    units="€/tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "biokero_cost": 1,
+        "synkero_cost": 1,
+        "jetfuel_cost": 1,
+        "carbon_tax": 1,
+        "jetfuel_emission_factor": 2,
+    },
+)
+def jetfuel_co2_wtp():
+    return (
+        np.minimum(biokero_cost(), synkero_cost())
+        - (jetfuel_cost() - carbon_tax() * jetfuel_emission_factor())
+    ) / jetfuel_emission_factor()
+
+
+@component.add(
     name="Jetfuel competitiveness",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -573,8 +593,8 @@ _integ_jetfuel_consumption = Integ(
     comp_subtype="Normal",
     depends_on={
         "jetfuel_consumption": 1,
-        "jetfuel_early_decommission_rate": 1,
         "jetfuel_lockin_period": 1,
+        "jetfuel_early_decommission_rate": 1,
     },
 )
 def jetfuel_decay():
@@ -623,8 +643,8 @@ def jetfuel_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "jetfuel_competitiveness": 1,
+        "cross": 1,
         "jetfuel_consumption": 1,
         "sum_international_aviation": 1,
     },
@@ -775,8 +795,8 @@ _smooth_syn_kerosene_inno_switch = Smooth(
         "international_aviation_reinvestment": 1,
         "innovators": 1,
         "syn_kerosene_inno_switch": 1,
-        "sum_international_aviation": 2,
         "syn_kerosene_consumption": 1,
+        "sum_international_aviation": 2,
     },
 )
 def syn_kerosene_innovators():
