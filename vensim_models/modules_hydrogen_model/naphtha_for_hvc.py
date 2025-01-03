@@ -138,8 +138,8 @@ def bio_naphtha_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "bio_naphtha_competitiveness": 1,
+        "cross": 1,
         "biogenic_naphtha": 1,
         "sum_naphtha": 1,
     },
@@ -289,8 +289,8 @@ def f_naphtha_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "fossil_naphtha": 1,
-        "f_naphtha_early_decommission_rate": 1,
         "feedstock_lockin": 1,
+        "f_naphtha_early_decommission_rate": 1,
     },
 )
 def f_naphtha_decay():
@@ -338,8 +338,8 @@ def f_naphtha_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "f_naphtha_competitiveness": 1,
+        "cross": 1,
         "fossil_naphtha": 1,
         "sum_naphtha": 1,
     },
@@ -439,8 +439,8 @@ def naphtha_biomass_demand():
     depends_on={
         "bionaphtha_cost": 1,
         "synnaphtha_cost": 1,
-        "naphtha_cost": 1,
         "naphtha_emission_factor": 2,
+        "naphtha_cost": 1,
         "carbon_tax": 1,
     },
 )
@@ -554,8 +554,8 @@ def naphtha_lhv():
         "olefin_production": 1,
         "mto": 1,
         "naphta_olefin_rate": 1,
-        "pulse_size": 1,
         "pulse_naphtha": 1,
+        "pulse_size": 1,
     },
 )
 def naphtha_production():
@@ -602,8 +602,8 @@ def pyrolysisnaphtha_cost():
     depends_on={
         "naphtha_cost": 1,
         "pyrolysisnaphtha_cost": 3,
-        "synnaphtha_cost": 1,
         "bionaphtha_cost": 1,
+        "synnaphtha_cost": 1,
     },
 )
 def recycled_competitiveness():
@@ -730,8 +730,8 @@ def recycled_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "recycled_competitiveness": 1,
+        "cross": 1,
         "recycled_naphtha": 1,
         "sum_naphtha": 1,
     },
@@ -922,8 +922,8 @@ def syn_naphtha_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "syn_naphtha_competitiveness": 1,
+        "cross": 1,
         "synthetic_naphtha": 1,
         "sum_naphtha": 1,
     },

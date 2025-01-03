@@ -12,8 +12,8 @@ Translated using PySD version 3.14.0
         "bf_coal_cost": 1,
         "ccs_cost": 1,
         "cc_capture_rate": 1,
-        "carbon_tax": 1,
         "bf_coal_emission_factor": 1,
+        "carbon_tax": 1,
     },
 )
 def bf_ccs_cost():
@@ -46,9 +46,9 @@ def bf_coal_capex():
         "grid_electricity_price": 1,
         "el_to_steel_bf_coal": 1,
         "foundry_operating_hours": 1,
+        "inflation_lookup": 1,
         "bf_coal_capex": 1,
         "foundry_af": 1,
-        "inflation_lookup": 1,
     },
 )
 def bf_coal_cost():
@@ -73,10 +73,10 @@ def bf_coal_cost():
     comp_subtype="Normal",
     depends_on={
         "bf_coal_cost": 1,
-        "carbon_tax": 1,
-        "electricity_emission_factor": 1,
         "el_to_steel_bf_coal": 1,
         "bf_coal_emission_factor": 1,
+        "carbon_tax": 1,
+        "electricity_emission_factor": 1,
     },
 )
 def bf_coal_cost_without_co2():
@@ -294,9 +294,9 @@ def h2dri_cost():
     depends_on={
         "grid_electricity_price": 1,
         "el_to_steel_h2dri": 1,
+        "h2dri_capex_subsidy": 1,
         "h2dri_capex": 1,
         "foundry_operating_hours": 1,
-        "h2dri_capex_subsidy": 1,
     },
 )
 def h2dri_cost_without_h2():
@@ -372,12 +372,12 @@ def ngdri_capex():
         "ngdri_emission_factor": 1,
         "gas_price": 1,
         "gas_to_steel": 1,
-        "el_to_steel_ngdri": 1,
         "grid_electricity_price": 1,
-        "foundry_operating_hours": 1,
+        "el_to_steel_ngdri": 1,
         "ngdri_capex": 1,
-        "foundry_af": 1,
         "inflation_lookup": 1,
+        "foundry_operating_hours": 1,
+        "foundry_af": 1,
     },
 )
 def ngdri_cost():
@@ -416,8 +416,8 @@ def ngdri_emission_factor():
     depends_on={
         "h2dri_cost": 1,
         "bf_coal_cost_without_co2": 1,
-        "electricity_emission_factor": 1,
         "el_to_steel_bf_coal": 1,
+        "electricity_emission_factor": 1,
         "bf_coal_emission_factor": 1,
     },
 )

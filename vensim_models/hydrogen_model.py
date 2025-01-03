@@ -6,10 +6,10 @@ Translated using PySD
 from pathlib import Path
 import numpy as np
 
-from pysd.py_backend.functions import pulse, if_then_else, step, modulo
+from pysd.py_backend.functions import modulo, step, if_then_else, pulse
 from pysd.py_backend.statefuls import Integ, Smooth, Initial
 from pysd.py_backend.lookups import HardcodedLookups
-from pysd.py_backend.utils import load_modules, load_model_data
+from pysd.py_backend.utils import load_model_data, load_modules
 from pysd import Component
 
 __pysd_version__ = "3.14.0"

@@ -53,9 +53,9 @@ def carbon_storage_opex():
     comp_subtype="Normal",
     depends_on={
         "ct_distance": 1,
+        "ct_opex": 1,
         "ct_af": 1,
         "ct_capex": 1,
-        "ct_opex": 1,
         "ct_capacity_factor": 1,
     },
 )
@@ -397,8 +397,8 @@ def ps_cc_cost():
     depends_on={
         "cc_electricity_usage": 1,
         "grid_electricity_price": 1,
-        "cc_heat_usage": 1,
         "heat_cost": 1,
+        "cc_heat_usage": 1,
         "cc_variable_cost": 1,
     },
 )

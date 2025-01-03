@@ -38,8 +38,8 @@ def biokero_hydrogen_demand():
     comp_subtype="Normal",
     depends_on={
         "h2_lhv": 1,
-        "refinery_grey_and_blue_hydrogen_demand": 1,
         "fertilizer_grey_and_blue_hydrogen_demand": 1,
+        "refinery_grey_and_blue_hydrogen_demand": 1,
     },
 )
 def carbon_hydrogen_twh():
