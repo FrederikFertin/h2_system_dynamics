@@ -6,8 +6,8 @@ Translated using PySD
 from pathlib import Path
 import numpy as np
 
-from pysd.py_backend.functions import modulo, step, if_then_else, pulse
-from pysd.py_backend.statefuls import Integ, Smooth, Initial
+from pysd.py_backend.functions import if_then_else, modulo, pulse, step
+from pysd.py_backend.statefuls import Smooth, Integ, Initial
 from pysd.py_backend.lookups import HardcodedLookups
 from pysd.py_backend.utils import load_model_data, load_modules
 from pysd import Component

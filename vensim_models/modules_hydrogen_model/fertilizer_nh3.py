@@ -528,8 +528,8 @@ def grey_nh3_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "grey_nh3": 1,
-        "smr_lifetime": 1,
         "grey_nh3_early_decommission_rate": 1,
+        "smr_lifetime": 1,
     },
 )
 def grey_nh3_decay():

@@ -122,8 +122,8 @@ _smooth_domestic_battery_inno_switch = Smooth(
         "domestic_shipping_reinvestment": 1,
         "innovators": 1,
         "domestic_battery_inno_switch": 1,
-        "domestic_battery_shipping_consumption": 1,
         "sum_dom_shipping": 2,
+        "domestic_battery_shipping_consumption": 1,
     },
 )
 def domestic_battery_innovators():
@@ -163,8 +163,8 @@ def domestic_battery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "domestic_battery_competitiveness": 1,
         "cross": 1,
+        "domestic_battery_competitiveness": 1,
         "domestic_battery_shipping_consumption": 1,
         "sum_dom_shipping": 1,
     },
@@ -334,8 +334,8 @@ def domestic_h2_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "domestic_h2_competitiveness": 1,
         "cross": 1,
+        "domestic_h2_competitiveness": 1,
         "domestic_h2_shipping_consumption": 1,
         "sum_dom_shipping": 1,
     },
@@ -380,8 +380,8 @@ _integ_domestic_h2_shipping_consumption = Integ(
     depends_on={
         "fc_ship_cost": 1,
         "hfo_ship_cost": 3,
-        "be_ship_cost": 1,
         "meoh_ship_cost": 1,
+        "be_ship_cost": 1,
     },
 )
 def domestic_hfo_competitiveness():
@@ -584,8 +584,8 @@ _smooth_domestic_meoh_inno_switch = Smooth(
         "domestic_shipping_reinvestment": 1,
         "innovators": 1,
         "domestic_meoh_inno_switch": 1,
-        "sum_dom_shipping": 2,
         "domestic_meoh_shipping_consumption": 1,
+        "sum_dom_shipping": 2,
     },
 )
 def domestic_meoh_innovators():
@@ -672,8 +672,8 @@ _integ_domestic_meoh_shipping_consumption = Integ(
     depends_on={
         "domestic_hfo_shipping_consumption": 1,
         "hfo_ship_cost": 1,
-        "meoh_ship_cost": 1,
         "domestic_meoh_shipping_consumption": 1,
+        "meoh_ship_cost": 1,
         "domestic_battery_shipping_consumption": 1,
         "be_ship_cost": 1,
         "fc_ship_cost": 1,

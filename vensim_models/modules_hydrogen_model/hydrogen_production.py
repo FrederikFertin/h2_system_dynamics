@@ -131,8 +131,8 @@ def blue_h2_capex():
         "green_h2_cost": 1,
         "grey_h2_cost": 1,
         "grey_h2_cost_wo_co2": 1,
-        "ccs_cost": 1,
         "smr_emission_factor": 2,
+        "ccs_cost": 1,
         "cc_capture_rate": 1,
     },
 )
@@ -165,9 +165,9 @@ def blue_h2_cost():
     comp_subtype="Normal",
     depends_on={
         "grey_h2_variable_cost": 1,
-        "cc_capture_rate": 1,
-        "smr_emission_factor": 1,
         "carbon_tax": 1,
+        "smr_emission_factor": 1,
+        "cc_capture_rate": 1,
         "ccs_opex": 1,
     },
 )
@@ -396,8 +396,8 @@ def grey_h2_cost():
         "smr_fixed_opex": 1,
         "gas_price": 1,
         "smr_ng_usage": 1,
-        "grid_electricity_price": 1,
         "smr_el_usage": 1,
+        "grid_electricity_price": 1,
     },
 )
 def grey_h2_cost_wo_co2():
@@ -422,8 +422,8 @@ def grey_h2_cost_wo_co2():
         "smr_emission_factor": 1,
         "gas_price": 1,
         "smr_ng_usage": 1,
-        "grid_electricity_price": 1,
         "smr_el_usage": 1,
+        "grid_electricity_price": 1,
     },
 )
 def grey_h2_variable_cost():

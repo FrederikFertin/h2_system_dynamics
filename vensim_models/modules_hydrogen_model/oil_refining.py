@@ -112,8 +112,8 @@ def blue_refinery_inno_switch():
         "refinery_reinvestment": 1,
         "innovators": 1,
         "blue_refinery_inno_switch": 1,
-        "blue_refinery": 1,
         "sum_refining": 2,
+        "blue_refinery": 1,
     },
 )
 def blue_refinery_innovators():
@@ -153,10 +153,10 @@ def blue_refinery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "blue_refinery_competitiveness": 1,
         "cross": 1,
-        "blue_refinery": 1,
+        "blue_refinery_competitiveness": 1,
         "sum_refining": 1,
+        "blue_refinery": 1,
     },
 )
 def blue_refinery_level():
@@ -313,8 +313,8 @@ def green_refinery_inno_switch():
         "refinery_reinvestment": 1,
         "innovators": 1,
         "green_refinery_inno_switch": 1,
-        "sum_refining": 2,
         "green_refinery": 1,
+        "sum_refining": 2,
     },
 )
 def green_refinery_innovators():
@@ -354,10 +354,10 @@ def green_refinery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "green_refinery_competitiveness": 1,
         "cross": 1,
-        "sum_refining": 1,
+        "green_refinery_competitiveness": 1,
         "green_refinery": 1,
+        "sum_refining": 1,
     },
 )
 def green_refinery_level():
@@ -501,8 +501,8 @@ def grey_refinery_level():
     depends_on={
         "blue_refinery": 1,
         "blue_h2_cost": 1,
-        "green_refinery": 1,
         "refinery_h2_cost": 1,
+        "green_refinery": 1,
         "grey_refinery": 1,
         "grey_h2_cost": 1,
         "sum_refining": 1,
