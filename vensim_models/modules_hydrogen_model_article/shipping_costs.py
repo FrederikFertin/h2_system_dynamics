@@ -64,14 +64,14 @@ def battery_pack_lifetime():
         "battery_capacity": 1,
         "auxilliary_battery_capacity": 1,
         "battery_cost": 1,
-        "rest_of_ship_cost": 1,
         "ship_motor_capacity": 1,
         "electric_motor_cost": 1,
+        "rest_of_ship_cost": 1,
         "ship_engine_af": 1,
-        "usd_to_eur": 1,
-        "grid_electricity_price": 1,
-        "charging_infrastructure_cost": 1,
         "yearly_electricity_bought": 1,
+        "charging_infrastructure_cost": 1,
+        "grid_electricity_price": 1,
+        "usd_to_eur": 1,
     },
 )
 def be_ship_cost():
@@ -206,9 +206,9 @@ def fc_lifetime():
     comp_subtype="Normal",
     depends_on={
         "fc_ship_cost_without_h2": 1,
-        "green_h2_cost": 1,
         "h2_lhv": 1,
         "yearly_h2_consumption": 1,
+        "green_h2_cost": 1,
     },
 )
 def fc_ship_cost():
@@ -229,12 +229,12 @@ def fc_ship_cost():
         "ship_battery_af": 1,
         "opex_electric_ship": 4,
         "fc_cost": 1,
-        "electric_motor_cost": 1,
         "ship_engine_af": 2,
-        "fc_af": 1,
         "ship_motor_capacity": 1,
-        "h2_capacity": 1,
+        "fc_af": 1,
+        "electric_motor_cost": 1,
         "rest_of_ship_cost": 1,
+        "h2_capacity": 1,
         "h2_storage_cost": 1,
     },
 )
@@ -306,10 +306,10 @@ def hfo_capacity():
     comp_subtype="Normal",
     depends_on={
         "min_green_containership_cost": 1,
-        "hfo_containership_cost": 1,
-        "hfo_emission_factor": 2,
-        "yearly_containership_consumption": 2,
         "carbon_tax": 1,
+        "hfo_containership_cost": 1,
+        "yearly_containership_consumption": 2,
+        "hfo_emission_factor": 2,
     },
 )
 def hfo_containership_co2_wtp():
@@ -366,10 +366,10 @@ def hfo_ship_capex():
     comp_subtype="Normal",
     depends_on={
         "min_green_ship_cost": 1,
-        "hfo_emission_factor": 2,
         "hfo_ship_cost": 1,
         "carbon_tax": 1,
         "yearly_hfo_consumption": 2,
+        "hfo_emission_factor": 2,
     },
 )
 def hfo_ship_co2_wtp():
@@ -390,13 +390,13 @@ def hfo_ship_co2_wtp():
     depends_on={
         "opex_ice_ship": 2,
         "ship_engine_af": 1,
-        "hfo_capacity": 1,
-        "oil_tank_cost": 1,
         "ship_ice_cost": 1,
-        "rest_of_ship_cost": 1,
+        "oil_tank_cost": 1,
         "ship_motor_capacity": 1,
-        "battery_cost": 1,
+        "hfo_capacity": 1,
+        "rest_of_ship_cost": 1,
         "ship_battery_af": 1,
+        "battery_cost": 1,
         "auxilliary_battery_capacity": 1,
         "hfo_cost": 1,
         "scrubber_cost": 1,
@@ -450,8 +450,8 @@ def ice_efficiency():
         "containership_opex": 1,
         "meoh_ship_capex": 1,
         "ship_engine_af": 1,
-        "yearly_containership_consumption": 1,
         "shipping_biomeoh_cost": 1,
+        "yearly_containership_consumption": 1,
     },
 )
 def meoh_containership_cost():
@@ -476,8 +476,8 @@ def meoh_ship_capex():
     comp_subtype="Normal",
     depends_on={
         "meoh_ship_cost_without_meoh": 1,
-        "yearly_hfo_consumption": 1,
         "shipping_biomeoh_cost": 1,
+        "yearly_hfo_consumption": 1,
     },
 )
 def meoh_ship_cost():
@@ -495,13 +495,13 @@ def meoh_ship_cost():
     depends_on={
         "opex_ice_ship": 2,
         "ship_engine_af": 1,
-        "hfo_capacity": 1,
-        "oil_tank_cost": 1,
         "ship_ice_cost": 1,
-        "rest_of_ship_cost": 1,
+        "oil_tank_cost": 1,
         "ship_motor_capacity": 1,
-        "battery_cost": 1,
+        "hfo_capacity": 1,
+        "rest_of_ship_cost": 1,
         "ship_battery_af": 1,
+        "battery_cost": 1,
         "auxilliary_battery_capacity": 1,
         "hfo_vs_meoh_capex": 1,
     },

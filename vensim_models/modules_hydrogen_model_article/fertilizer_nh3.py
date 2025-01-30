@@ -135,8 +135,8 @@ _smooth_blue_nh3_inno_switch = Smooth(
         "nh3_reinvestment": 1,
         "innovators": 1,
         "blue_nh3_inno_switch": 1,
-        "sum_fertilizer": 2,
         "blue_nh3": 1,
+        "sum_fertilizer": 2,
     },
 )
 def blue_nh3_innovators():
@@ -253,8 +253,8 @@ _integ_errorint_fertilizer = Integ(
     depends_on={
         "blue_nh3": 1,
         "blue_nh3_cost": 1,
-        "fertilizer_nh3_cost": 1,
         "green_nh3": 1,
+        "fertilizer_nh3_cost": 1,
         "grey_nh3": 1,
         "grey_nh3_cost": 1,
         "sum_fertilizer": 1,
@@ -539,8 +539,8 @@ def grey_nh3_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "grey_nh3": 1,
-        "grey_nh3_early_decommission_rate": 1,
         "smr_lifetime": 1,
+        "grey_nh3_early_decommission_rate": 1,
     },
 )
 def grey_nh3_decay():

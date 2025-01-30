@@ -71,8 +71,8 @@ _integ_error_int_hd_rt = Integ(
         "hd_fc_lco": 1,
         "hd_ice_lco": 1,
         "hd_fossil_consumption": 1,
-        "hd_ice_energy_usage": 1,
         "diesel_lhv": 1,
+        "hd_ice_energy_usage": 1,
         "sum_hd_rt": 1,
     },
 )
@@ -264,8 +264,8 @@ def hd_bev_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "hd_bev_competitiveness": 1,
         "cross": 1,
+        "hd_bev_competitiveness": 1,
         "hd_bev_consumption": 1,
         "sum_hd_rt": 1,
     },
@@ -427,8 +427,8 @@ def hd_fcev_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "hd_fcev_competitiveness": 1,
         "cross": 1,
+        "hd_fcev_competitiveness": 1,
         "hd_fcev_consumption": 1,
         "sum_hd_rt": 1,
     },

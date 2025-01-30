@@ -75,13 +75,13 @@ class result_loading_class:
                     "MeOH": "Methanol",
                     "fertilizer": "Fertilizer",
                     "high temperature": "High Temperature Heat",
-                    "refining": "Refining",
-                    "int_aviation": "International Aviation",
-                    "dom_aviation": "Domestic Aviation",
-                    "int_shipping": "International Shipping",
-                    "dom_shipping": "Domestic Shipping",
-                    "ld_road_transport": "Light Duty Road Transport",
-                    "hd_road_transport": "Heavy Duty Road Transport",
+                    "refinery": "Refining",
+                    "international aviation": "International Aviation",
+                    "domestic aviation": "Domestic Aviation",
+                    "international shipping": "International Shipping",
+                    "domestic shipping": "Domestic Shipping",
+                    "light duty": "Light Duty Road Transport",
+                    "heavy duty": "Heavy Duty Road Transport",
                     "power": "Power",
                     "TOTAL TWh": "Total",
                     }
@@ -171,7 +171,7 @@ class result_loading_class:
 
     # Define the dictionary of sectors, include a key for each sector which defines the unit used in the sector
     industry_sector_dict = {
-                            "refining": {"unit": "MT H2", "stocks" : refining_sector, "h2 demand" : "refinery hydrogen demand", "emissions" : "refinery emissions", "subsidy": "refinery subsidy", "WTP": "refinery H2 WTP", "CT revenue": "refinery CT revenue", "costs": refining_costs, "CO2 WTP": "Grey refinery CO2 WTP", "cost index": "refinery cost index"},
+                            "refinery": {"unit": "MT H2", "stocks" : refining_sector, "h2 demand" : "refinery hydrogen demand", "emissions" : "refinery emissions", "subsidy": "refinery subsidy", "WTP": "refinery H2 WTP", "CT revenue": "refinery CT revenue", "costs": refining_costs, "CO2 WTP": "Grey refinery CO2 WTP", "cost index": "refinery cost index"},
                             "high temperature": {"unit": "GWh", "stocks" : temp_sector, "h2 demand" : "high temperature hydrogen demand", "emissions" : "high temperature emissions", "biomass": "high temperature biomass demand", "subsidy": "high temperature subsidy", "WTP": "high temperature H2 WTP", "CT revenue": "high temperature CT revenue", "costs": temp_costs, "CO2 WTP": "Grey NG NM CO2 WTP", "cost index": "high temperature cost index"},
                             "fertilizer": {"unit": "MT NH3", "stocks" : fertilizer_sector, "h2 demand" : "fertilizer hydrogen demand", "emissions" : "fertilizer emissions", "subsidy": "fertilizer subsidy", "WTP": "fertilizer H2 WTP", "CT revenue": "fertilizer CT revenue", "costs": fertilizer_costs, "CO2 WTP": "fertilizer CO2 WTP", "cost index": "fertilizer cost index"},
                             "steel": {"unit": "MT Steel", "stocks" : steel_sector, "h2 demand" : "steel hydrogen demand", "emissions" : "steel emissions", "subsidy": "steel subsidy", "WTP": "steel H2 WTP", "CT revenue": "steel CT revenue", "costs": steel_costs, "CO2 WTP": "steel CO2 WTP", "cost index": "steel cost index"},
@@ -179,12 +179,12 @@ class result_loading_class:
                             "MeOH": {"unit": "MT MeOH", "stocks" : meoh_sector, "h2 demand" : "MeOH hydrogen demand", "emissions" : "MeOH emissions", "biomass": "MeOH biomass demand", "subsidy": "MeOH subsidy", "WTP": "eMeOH H2 WTP", "WTP 2": "bioMeOH H2 WTP", "CT revenue": "MeOH CT revenue", "costs": meoh_costs, "CO2 WTP": "convMeOH CO2 WTP", "cost index": "MeOH cost index"},
                             }
 
-    transport_sector_dict = {"int_aviation": {"unit": "GWh", "stocks" : int_aviation_sector, "h2 demand" : "international aviation hydrogen demand", "emissions" : "international aviation emissions", "biomass": "international aviation biomass demand", "subsidy": "international aviation subsidy", "WTP": "SynKero H2 WTP", "WTP 2": "BioKero H2 WTP", "CT revenue": "international aviation CT revenue", "costs": int_aviation_costs, "CO2 WTP": "Jetfuel CO2 WTP", "cost index": "international aviation cost index"},
-                            "dom_aviation": {"unit": "GWh", "stocks" : dom_aviation_sector, "h2 demand" : "domestic aviation hydrogen demand", "emissions" : "domestic aviation emissions", "biomass": "domestic aviation biomass demand", "subsidy": "domestic aviation subsidy", "WTP": "SynKero H2 WTP", "WTP 2": "BioKero H2 WTP", "CT revenue": "domestic aviation CT revenue", "costs": dom_aviation_costs, "CO2 WTP": "Jetfuel CO2 WTP", "cost index": "domestic aviation cost index"},
-                            "ld_road_transport": {"unit": "GWh", "stocks" : ld_road_transport_sector, "h2 demand" : "light duty hydrogen demand", "emissions" : "light duty emissions", "subsidy": "light duty subsidy", "WTP": "LD H2 WTP", "CT revenue": "light duty CT revenue", "costs": ld_road_transport_costs, "CO2 WTP": "LD CO2 WTP", "cost index": "LD cost index"},
-                            "hd_road_transport": {"unit": "GWh", "stocks" : hd_road_transport_sector, "h2 demand" : "heavy duty hydrogen demand", "emissions" : "heavy duty emissions", "subsidy": "heavy duty subsidy", "WTP": "HD H2 WTP", "CT revenue": "heavy duty CT revenue", "costs": hd_road_transport_costs, "CO2 WTP": "HD CO2 WTP", "cost index": "HD cost index"},
-                            "int_shipping": {"unit": "GWh", "stocks" : int_shipping_sector, "h2 demand" : "international shipping hydrogen demand", "emissions" : "international shipping emissions", "biomass": "international shipping biomass demand", "subsidy": "international shipping subsidy", "WTP": "NH3 containership H2 WTP", "WTP 2": "MeOH containership H2 WTP", "CT revenue": "international shipping CT revenue", "costs": int_shipping_costs, "CO2 WTP": "HFO containership CO2 WTP", "cost index": "international shipping cost index"},
-                            "dom_shipping": {"unit": "GWh", "stocks" : dom_shipping_sector, "h2 demand" : "domestic shipping hydrogen demand", "emissions" : "domestic shipping emissions", "biomass": "domestic shipping biomass demand", "subsidy": "domestic shipping subsidy", "WTP": "MeOH ship H2 WTP", "WTP 2": "FC ship H2 WTP", "CT revenue": "domestic shipping CT revenue",  "costs": dom_shipping_costs, "CO2 WTP": "HFO ship CO2 WTP", "cost index": "domestic shipping cost index"},
+    transport_sector_dict = {"international aviation": {"unit": "GWh", "stocks" : int_aviation_sector, "h2 demand" : "international aviation hydrogen demand", "emissions" : "international aviation emissions", "biomass": "international aviation biomass demand", "subsidy": "international aviation subsidy", "WTP": "SynKero H2 WTP", "WTP 2": "BioKero H2 WTP", "CT revenue": "international aviation CT revenue", "costs": int_aviation_costs, "CO2 WTP": "Jetfuel CO2 WTP", "cost index": "international aviation cost index"},
+                            "domestic aviation": {"unit": "GWh", "stocks" : dom_aviation_sector, "h2 demand" : "domestic aviation hydrogen demand", "emissions" : "domestic aviation emissions", "biomass": "domestic aviation biomass demand", "subsidy": "domestic aviation subsidy", "WTP": "SynKero H2 WTP", "WTP 2": "BioKero H2 WTP", "CT revenue": "domestic aviation CT revenue", "costs": dom_aviation_costs, "CO2 WTP": "Jetfuel CO2 WTP", "cost index": "domestic aviation cost index"},
+                            "light duty": {"unit": "GWh", "stocks" : ld_road_transport_sector, "h2 demand" : "light duty hydrogen demand", "emissions" : "light duty emissions", "subsidy": "light duty subsidy", "WTP": "LD H2 WTP", "CT revenue": "light duty CT revenue", "costs": ld_road_transport_costs, "CO2 WTP": "LD CO2 WTP", "cost index": "LD cost index"},
+                            "heavy duty": {"unit": "GWh", "stocks" : hd_road_transport_sector, "h2 demand" : "heavy duty hydrogen demand", "emissions" : "heavy duty emissions", "subsidy": "heavy duty subsidy", "WTP": "HD H2 WTP", "CT revenue": "heavy duty CT revenue", "costs": hd_road_transport_costs, "CO2 WTP": "HD CO2 WTP", "cost index": "HD cost index"},
+                            "international shipping": {"unit": "GWh", "stocks" : int_shipping_sector, "h2 demand" : "international shipping hydrogen demand", "emissions" : "international shipping emissions", "biomass": "international shipping biomass demand", "subsidy": "international shipping subsidy", "WTP": "NH3 containership H2 WTP", "WTP 2": "MeOH containership H2 WTP", "CT revenue": "international shipping CT revenue", "costs": int_shipping_costs, "CO2 WTP": "HFO containership CO2 WTP", "cost index": "international shipping cost index"},
+                            "domestic shipping": {"unit": "GWh", "stocks" : dom_shipping_sector, "h2 demand" : "domestic shipping hydrogen demand", "emissions" : "domestic shipping emissions", "biomass": "domestic shipping biomass demand", "subsidy": "domestic shipping subsidy", "WTP": "MeOH ship H2 WTP", "WTP 2": "FC ship H2 WTP", "CT revenue": "domestic shipping CT revenue",  "costs": dom_shipping_costs, "CO2 WTP": "HFO ship CO2 WTP", "cost index": "domestic shipping cost index"},
                             }
 
     sector_dict = {"industry": industry_sector_dict, "transport": transport_sector_dict}

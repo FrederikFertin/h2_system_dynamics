@@ -522,8 +522,8 @@ def emeoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "emeoh_competitiveness": 1,
         "cross": 1,
+        "emeoh_competitiveness": 1,
         "emeoh": 1,
         "sum_meoh": 1,
     },
@@ -721,8 +721,8 @@ def grey_meoh_level():
         "blue_meoh_cost": 1,
         "convmeoh_cost": 1,
         "grey_meoh": 1,
-        "emeoh": 1,
         "green_emeoh_cost": 1,
+        "emeoh": 1,
         "sum_meoh": 1,
     },
 )

@@ -116,8 +116,8 @@ _smooth_biogas_nm_inno_switch = Smooth(
         "nm_reinvestment": 1,
         "innovators": 1,
         "biogas_nm_inno_switch": 1,
-        "sum_nm": 2,
         "biogas_nm": 1,
+        "sum_nm": 2,
     },
 )
 def biogas_nm_innovators():
@@ -503,8 +503,8 @@ def grey_ng_nm_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "grey_ng_nm": 1,
-        "gas_lockin_period": 1,
         "ng_nm_early_decommission_rate": 1,
+        "gas_lockin_period": 1,
     },
 )
 def grey_ng_nm_decay():
@@ -718,8 +718,8 @@ def h2_nm_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "h2_nm_competitiveness": 1,
         "cross": 1,
+        "h2_nm_competitiveness": 1,
         "h2_nm": 1,
         "sum_nm": 1,
     },
