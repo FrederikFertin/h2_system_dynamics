@@ -166,9 +166,9 @@ def blue_h2_cost():
     depends_on={
         "grey_h2_variable_cost": 1,
         "smr_emission_factor": 1,
-        "ccs_opex": 1,
-        "cc_capture_rate": 1,
         "carbon_tax": 1,
+        "cc_capture_rate": 1,
+        "ccs_opex": 1,
     },
 )
 def blue_h2_opex():
@@ -318,8 +318,8 @@ def green_h2_opex():
     depends_on={
         "yearly_total_subsidies_limit": 1,
         "total_subsidies_ytd": 1,
-        "green_h2_subsidy_size": 1,
         "pulse_h2_subsidy": 1,
+        "green_h2_subsidy_size": 1,
     },
 )
 def green_h2_subsidy():
@@ -396,8 +396,8 @@ def grey_h2_cost():
         "smr_fixed_opex": 1,
         "gas_price": 1,
         "smr_ng_usage": 1,
-        "grid_electricity_price": 1,
         "smr_el_usage": 1,
+        "grid_electricity_price": 1,
     },
 )
 def grey_h2_cost_wo_co2():
@@ -422,8 +422,8 @@ def grey_h2_cost_wo_co2():
         "smr_emission_factor": 1,
         "gas_price": 1,
         "smr_ng_usage": 1,
-        "grid_electricity_price": 1,
         "smr_el_usage": 1,
+        "grid_electricity_price": 1,
     },
 )
 def grey_h2_variable_cost():

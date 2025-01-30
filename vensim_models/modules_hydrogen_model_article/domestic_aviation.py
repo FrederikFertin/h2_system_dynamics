@@ -239,8 +239,8 @@ def dom_aviation_equalizer_dom():
         "h2_propulsion_cost_aviation": 1,
         "bio_kerosene_consumption_dom": 1,
         "biokero_propulsion_cost": 1,
-        "jetfuel_propulsion_cost": 1,
         "jetfuel_consumption_dom": 1,
+        "jetfuel_propulsion_cost": 1,
         "syn_kerosene_consumption_dom": 1,
         "synkero_propulsion_cost": 1,
         "jet_engine_efficiency": 1,
@@ -749,8 +749,8 @@ def hydrogen_investment_level_dom():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "hydrogen_competitiveness_dom": 1,
+        "cross": 1,
         "hydrogen_consumption_dom": 1,
         "sum_domestic_aviation": 1,
     },
@@ -815,8 +815,8 @@ _integ_jetfuel_consumption_dom = Integ(
     comp_subtype="Normal",
     depends_on={
         "jetfuel_consumption_dom": 1,
-        "jetfuel_early_decommission_rate_dom": 1,
         "jetfuel_lockin_period": 1,
+        "jetfuel_early_decommission_rate_dom": 1,
     },
 )
 def jetfuel_decay_dom():
@@ -1064,8 +1064,8 @@ def syn_kerosene_investment_level_dom():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "syn_kerosene_competitiveness_dom": 1,
+        "cross": 1,
         "syn_kerosene_consumption_dom": 1,
         "sum_domestic_aviation": 1,
     },
