@@ -247,8 +247,8 @@ _hardcodedlookup_gas_price_lookup = HardcodedLookups(
         "time": 1,
         "electricity_price_lookup": 1,
         "electricity_sensitivity": 1,
-        "carbon_tax": 1,
         "electricity_emission_factor": 1,
+        "carbon_tax": 1,
     },
 )
 def grid_electricity_price():
@@ -431,12 +431,12 @@ _hardcodedlookup_inflation_lookup = HardcodedLookups(
 
 @component.add(name="k i", comp_type="Constant", comp_subtype="Normal")
 def k_i():
-    return 0.2 / 4
+    return 0.2 / 3
 
 
 @component.add(name="k p", comp_type="Constant", comp_subtype="Normal")
 def k_p():
-    return 1
+    return 2
 
 
 @component.add(

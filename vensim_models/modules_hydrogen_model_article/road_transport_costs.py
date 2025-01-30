@@ -13,9 +13,7 @@ def battery_weight_penalty():
     """
     The levelized cost of trasnporting cargo with BE trucks is higher since the battery weight of 8 tons removes potential cargo from the assumed 14 tons of storage space. Following previously sourced material 75% of the 14 tons space is utilized on average. Motivates the discussion on whether trucks and buses should be evaluated on the same metrics.
     """
-    return if_then_else(
-        hd_be_weight_penalty_switch() > 0.5, lambda: (0.75 * 14) / (14 - 8), lambda: 1
-    )
+    return hd_be_weight_penalty_switch() * ((0.75 * 14) / (14 - 8) - 1) + 1
 
 
 @component.add(
@@ -160,9 +158,9 @@ def hd_be_om():
     comp_subtype="Normal",
     depends_on={
         "hd_be_om": 1,
-        "charging_efficiency": 1,
         "hd_be_energy_usage": 1,
         "grid_electricity_price": 1,
+        "charging_efficiency": 1,
     },
 )
 def hd_be_opex():
@@ -215,7 +213,7 @@ def hd_be_storage_capex():
 )
 def hd_be_weight_penalty_switch():
     """
-    1 if activated, 0 if not
+    1 if fully activated, 0 if not
     """
     return 0
 
@@ -229,8 +227,8 @@ def hd_be_weight_penalty_switch():
         "hd_fc_lco": 1,
         "hd_be_lco": 1,
         "diesel_emission_factor": 2,
-        "hd_ice_lco": 1,
         "hd_ice_energy_usage": 2,
+        "hd_ice_lco": 1,
         "carbon_tax": 1,
         "diesel_lhv": 2,
     },
@@ -473,7 +471,7 @@ def hd_ice_om():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hd_ice_om": 1, "diesel_price": 1, "hd_ice_energy_usage": 1},
+    depends_on={"hd_ice_om": 1, "hd_ice_energy_usage": 1, "diesel_price": 1},
 )
 def hd_ice_opex():
     return hd_ice_om() + hd_ice_energy_usage() * diesel_price()
@@ -586,8 +584,8 @@ def ld_annual_km():
         "ld_be_engine_capex": 1,
         "ld_be_storage_capex": 1,
         "ld_rest_of_vehicle_capex": 1,
-        "ld_af": 1,
         "vehicle_insurance": 1,
+        "ld_af": 1,
         "ld_annual_km": 1,
     },
 )
@@ -648,10 +646,10 @@ def ld_be_om():
     comp_subtype="Normal",
     depends_on={
         "ld_be_om": 1,
-        "charging_efficiency": 1,
         "ld_be_energy_usage": 1,
-        "electricity_taxes": 1,
         "grid_electricity_price": 1,
+        "electricity_taxes": 1,
+        "charging_efficiency": 1,
     },
 )
 def ld_be_opex():
@@ -696,8 +694,8 @@ def ld_be_storage_capex():
     depends_on={
         "ld_fc_lco": 1,
         "ld_be_lco": 1,
-        "diesel_emission_factor": 2,
         "ld_ice_lco": 1,
+        "diesel_emission_factor": 2,
         "carbon_tax": 1,
         "ld_ice_energy_usage": 2,
         "diesel_lhv": 2,
@@ -763,8 +761,8 @@ def ld_ev_efficiency():
         "ld_fc_engine_capex": 1,
         "ld_fc_storage_capex": 1,
         "ld_rest_of_vehicle_capex": 1,
-        "ld_af": 1,
         "vehicle_insurance": 1,
+        "ld_af": 1,
         "ld_annual_km": 1,
     },
 )
@@ -860,8 +858,8 @@ def ld_fc_storage_capacity():
     depends_on={
         "ld_fc_storage_capacity": 2,
         "h2_tank_cost": 1,
-        "rt_battery_cost": 1,
         "h2_lhv": 1,
+        "rt_battery_cost": 1,
     },
 )
 def ld_fc_storage_capex():
@@ -896,8 +894,8 @@ def ld_fcev_efficiency():
         "ld_ice_engine_capex": 1,
         "ld_ice_storage_capex": 1,
         "ld_rest_of_vehicle_capex": 1,
-        "ld_af": 1,
         "vehicle_insurance": 1,
+        "ld_af": 1,
         "ld_annual_km": 1,
     },
 )
@@ -963,7 +961,7 @@ def ld_ice_om():
     units="€/km",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"ld_ice_om": 1, "diesel_price": 1, "ld_ice_energy_usage": 1},
+    depends_on={"ld_ice_om": 1, "ld_ice_energy_usage": 1, "diesel_price": 1},
 )
 def ld_ice_opex():
     return ld_ice_om() + ld_ice_energy_usage() * diesel_price()

@@ -97,8 +97,8 @@ _smooth_bio_naphtha_inno_switch = Smooth(
         "bio_naphtha_inno_switch": 1,
         "naphtha_feedstock_reinvestment": 1,
         "innovators": 1,
-        "biogenic_naphtha": 1,
         "sum_naphtha": 2,
+        "biogenic_naphtha": 1,
     },
 )
 def bio_naphtha_innovators():
@@ -289,8 +289,8 @@ def f_naphtha_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "fossil_naphtha": 1,
-        "feedstock_lockin": 1,
         "f_naphtha_early_decommission_rate": 1,
+        "feedstock_lockin": 1,
     },
 )
 def f_naphtha_decay():
@@ -404,8 +404,8 @@ def naphta_olefin_rate():
         "bionaphtha_cost": 1,
         "naphtha_cost": 1,
         "fossil_naphtha": 1,
-        "recycled_naphtha": 1,
         "pyrolysisnaphtha_cost": 1,
+        "recycled_naphtha": 1,
         "synnaphtha_cost": 1,
         "synthetic_naphtha": 1,
         "sum_naphtha": 1,
@@ -522,7 +522,7 @@ _integ_naphtha_feedstock_reinvestment = Integ(
     - syn_naphtha_investment()
     - f_naphtha_investment()
     - recycled_investment(),
-    lambda: naphtha_production() / feedstock_lockin() * 0.8,
+    lambda: naphtha_production() / feedstock_lockin() * 0.9,
     "_integ_naphtha_feedstock_reinvestment",
 )
 
@@ -689,8 +689,8 @@ _smooth_recycled_inno_switch = Smooth(
         "naphtha_feedstock_reinvestment": 1,
         "innovators": 1,
         "recycled_inno_switch": 1,
-        "recycled_naphtha": 1,
         "sum_naphtha": 2,
+        "recycled_naphtha": 1,
     },
 )
 def recycled_innovators():
@@ -730,8 +730,8 @@ def recycled_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "recycled_competitiveness": 1,
         "cross": 1,
+        "recycled_competitiveness": 1,
         "recycled_naphtha": 1,
         "sum_naphtha": 1,
     },
@@ -794,8 +794,8 @@ def sum_naphtha():
     depends_on={
         "naphtha_cost": 1,
         "synnaphtha_cost": 3,
-        "pyrolysisnaphtha_cost": 1,
         "bionaphtha_cost": 1,
+        "pyrolysisnaphtha_cost": 1,
     },
 )
 def syn_naphtha_competitiveness():
@@ -881,8 +881,8 @@ _smooth_syn_naphtha_inno_switch = Smooth(
         "naphtha_feedstock_reinvestment": 1,
         "innovators": 1,
         "syn_naphtha_inno_switch": 1,
-        "synthetic_naphtha": 1,
         "sum_naphtha": 2,
+        "synthetic_naphtha": 1,
     },
 )
 def syn_naphtha_innovators():
@@ -922,8 +922,8 @@ def syn_naphtha_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "syn_naphtha_competitiveness": 1,
+        "cross": 1,
         "synthetic_naphtha": 1,
         "sum_naphtha": 1,
     },

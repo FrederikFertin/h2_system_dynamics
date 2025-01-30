@@ -318,8 +318,8 @@ _smooth_blue_ng_nm_inno_switch = Smooth(
         "nm_reinvestment": 1,
         "innovators": 1,
         "blue_ng_nm_inno_switch": 1,
-        "sum_nm": 2,
         "blue_ng_nm": 1,
+        "sum_nm": 2,
     },
 )
 def blue_ng_nm_innovators():
@@ -420,7 +420,9 @@ def errorint_nm():
     return _integ_errorint_nm()
 
 
-_integ_errorint_nm = Integ(lambda: k_i() * error_nm(), lambda: 0, "_integ_errorint_nm")
+_integ_errorint_nm = Integ(
+    lambda: k_i() * error_nm(), lambda: 400, "_integ_errorint_nm"
+)
 
 
 @component.add(
@@ -547,8 +549,8 @@ def grey_ng_nm_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "grey_ng_nm_competitiveness": 1,
         "cross": 1,
+        "grey_ng_nm_competitiveness": 1,
         "grey_ng_nm": 1,
         "sum_nm": 1,
     },
@@ -890,7 +892,7 @@ _integ_nm_reinvestment = Integ(
     - blue_ng_nm_investment()
     - h2_nm_investment()
     - grey_ng_nm_investment(),
-    lambda: nm_gas_consumption() / gas_lockin_period() * 0.8,
+    lambda: nm_gas_consumption() / gas_lockin_period() * 0.95,
     "_integ_nm_reinvestment",
 )
 

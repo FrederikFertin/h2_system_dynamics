@@ -119,8 +119,8 @@ _smooth_biomeoh_inno_switch = Smooth(
         "meoh_reinvestment": 1,
         "innovators": 1,
         "biomeoh_inno_switch": 1,
-        "sum_meoh": 2,
         "biomeoh": 1,
+        "sum_meoh": 2,
     },
 )
 def biomeoh_innovators():
@@ -290,8 +290,8 @@ _smooth_blue_meoh_inno_switch = Smooth(
         "meoh_reinvestment": 1,
         "innovators": 1,
         "blue_meoh_inno_switch": 1,
-        "sum_meoh": 2,
         "blue_meoh": 1,
+        "sum_meoh": 2,
     },
 )
 def blue_meoh_innovators():
@@ -331,8 +331,8 @@ def blue_meoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "blue_meoh_competitiveness": 1,
+        "cross": 1,
         "blue_meoh": 1,
         "sum_meoh": 1,
     },
@@ -482,8 +482,8 @@ _smooth_emeoh_inno_switch = Smooth(
         "meoh_reinvestment": 1,
         "innovators": 1,
         "emeoh_inno_switch": 1,
-        "sum_meoh": 2,
         "emeoh": 1,
+        "sum_meoh": 2,
     },
 )
 def emeoh_innovators():
@@ -522,8 +522,8 @@ def emeoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "emeoh_competitiveness": 1,
+        "cross": 1,
         "emeoh": 1,
         "sum_meoh": 1,
     },
@@ -694,8 +694,8 @@ def grey_meoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "grey_meoh_competitiveness": 1,
         "cross": 1,
+        "grey_meoh_competitiveness": 1,
         "grey_meoh": 1,
         "sum_meoh": 1,
     },
@@ -719,8 +719,8 @@ def grey_meoh_level():
         "green_biomeoh_cost": 1,
         "blue_meoh": 1,
         "blue_meoh_cost": 1,
-        "grey_meoh": 1,
         "convmeoh_cost": 1,
+        "grey_meoh": 1,
         "emeoh": 1,
         "green_emeoh_cost": 1,
         "sum_meoh": 1,
@@ -806,7 +806,11 @@ def meoh_plant_lifetime():
     depends_on={"_integ_meoh_reinvestment": 1},
     other_deps={
         "_integ_meoh_reinvestment": {
-            "initial": {"methanol_demand": 1, "meoh_plant_lifetime": 1},
+            "initial": {
+                "methanol_demand": 1,
+                "meoh_plant_lifetime": 1,
+                "innovators": 1,
+            },
             "step": {
                 "biomeoh_decay": 1,
                 "blue_meoh_decay": 1,
@@ -835,7 +839,7 @@ _integ_meoh_reinvestment = Integ(
     - blue_meoh_investment()
     - emeoh_investment()
     - grey_meoh_investment(),
-    lambda: methanol_demand() / meoh_plant_lifetime(),
+    lambda: methanol_demand() / meoh_plant_lifetime() * (1 - innovators()),
     "_integ_meoh_reinvestment",
 )
 

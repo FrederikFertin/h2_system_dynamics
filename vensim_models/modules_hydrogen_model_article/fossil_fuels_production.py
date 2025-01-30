@@ -11,8 +11,8 @@ Translated using PySD version 3.14.0
     depends_on={
         "gas_price": 1,
         "gas_emission_factor": 1,
-        "carbon_tax": 1,
         "ccs_cost": 1,
+        "carbon_tax": 1,
         "cc_capture_rate": 1,
     },
 )
@@ -43,9 +43,9 @@ def diesel_emission_factor():
     depends_on={
         "oil_price": 1,
         "oil_price_init": 1,
+        "diesel_lhv": 1,
         "diesel_emission_factor": 1,
         "carbon_tax": 1,
-        "diesel_lhv": 1,
     },
 )
 def diesel_price():
@@ -86,7 +86,7 @@ def grey_ng_cost():
     units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"oil_price": 1, "carbon_tax": 1, "hfo_emission_factor": 1},
+    depends_on={"oil_price": 1, "hfo_emission_factor": 1, "carbon_tax": 1},
 )
 def hfo_cost():
     """
@@ -124,8 +124,8 @@ def hfo_lhv():
     depends_on={
         "carbon_tax": 1,
         "jetfuel_emission_factor": 1,
-        "jetfuel_crack_spread": 1,
         "oil_price": 1,
+        "jetfuel_crack_spread": 1,
     },
 )
 def jetfuel_cost():

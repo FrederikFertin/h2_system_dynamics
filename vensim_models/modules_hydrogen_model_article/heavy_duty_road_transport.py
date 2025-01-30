@@ -67,12 +67,12 @@ _integ_error_int_hd_rt = Integ(
     depends_on={
         "hd_bev_consumption": 1,
         "hd_be_lco": 1,
-        "hd_fc_lco": 1,
         "hd_fcev_consumption": 1,
-        "hd_fossil_consumption": 1,
+        "hd_fc_lco": 1,
         "hd_ice_lco": 1,
-        "diesel_lhv": 1,
+        "hd_fossil_consumption": 1,
         "hd_ice_energy_usage": 1,
+        "diesel_lhv": 1,
         "sum_hd_rt": 1,
     },
 )
@@ -145,8 +145,8 @@ def hd_bev_decay():
     depends_on={
         "hd_bev_consumption": 1,
         "hd_ice_efficiency": 1,
-        "charging_efficiency": 1,
         "hd_ev_efficiency": 1,
+        "charging_efficiency": 1,
         "electricity_emission_factor": 1,
     },
 )
@@ -532,8 +532,8 @@ def hd_fossil_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "hd_fossil_competitiveness": 1,
         "cross": 1,
+        "hd_fossil_competitiveness": 1,
         "hd_fossil_consumption": 1,
         "sum_hd_rt": 1,
     },

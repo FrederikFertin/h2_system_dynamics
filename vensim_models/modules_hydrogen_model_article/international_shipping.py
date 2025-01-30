@@ -82,8 +82,8 @@ def hfo_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "hfo_shipping_consumption": 1,
-        "ship_lifetime": 1,
         "hfo_early_decommission_rate": 1,
+        "ship_lifetime": 1,
     },
 )
 def hfo_decay():
@@ -324,10 +324,10 @@ _hardcodedlookup_int_shipping_consumption_forecast = HardcodedLookups(
     depends_on={
         "hfo_shipping_consumption": 1,
         "hfo_containership_cost": 1,
-        "meoh_shipping_consumption": 1,
         "meoh_containership_cost": 1,
-        "nh3_containership_cost": 1,
+        "meoh_shipping_consumption": 1,
         "nh3_shipping_consumption": 1,
+        "nh3_containership_cost": 1,
         "yearly_containership_consumption": 1,
         "sum_int_shipping": 1,
     },
@@ -367,7 +367,7 @@ def international_shipping_biomass_demand():
     units="GWh",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"fuel_use_index": 1, "time": 1, "int_shipping_consumption_forecast": 1},
+    depends_on={"fuel_use_index": 1, "int_shipping_consumption_forecast": 1, "time": 1},
 )
 def international_shipping_consumption():
     """
@@ -460,8 +460,8 @@ def meoh_competitiveness():
     depends_on={
         "hfo_containership_cost": 1,
         "meoh_ship_capex": 1,
-        "ship_engine_af": 1,
         "containership_opex": 1,
+        "ship_engine_af": 1,
         "yearly_containership_consumption": 1,
         "biomeoh_cost_without_h2": 1,
         "biomeoh_h2_usage": 1,
@@ -559,8 +559,8 @@ _smooth_meoh_inno_switch = Smooth(
         "shipping_reinvestment": 1,
         "meoh_inno_switch": 1,
         "innovators": 1,
-        "sum_int_shipping": 2,
         "meoh_shipping_consumption": 1,
+        "sum_int_shipping": 2,
     },
 )
 def meoh_innovators():
@@ -675,8 +675,8 @@ def nh3_competitiveness():
     depends_on={
         "hfo_containership_cost": 1,
         "nh3_ship_capex": 1,
-        "ship_engine_af": 1,
         "containership_opex": 1,
+        "ship_engine_af": 1,
         "yearly_containership_consumption": 1,
         "green_nh3_cost_without_h2": 1,
         "nh3_h2_usage": 1,
@@ -774,8 +774,8 @@ _smooth_nh3_inno_switch = Smooth(
         "shipping_reinvestment": 1,
         "innovators": 1,
         "nh3_inno_switch": 1,
-        "sum_int_shipping": 2,
         "nh3_shipping_consumption": 1,
+        "sum_int_shipping": 2,
     },
 )
 def nh3_innovators():
@@ -815,8 +815,8 @@ def nh3_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "nh3_competitiveness": 1,
         "cross": 1,
+        "nh3_competitiveness": 1,
         "nh3_shipping_consumption": 1,
         "sum_int_shipping": 1,
     },
