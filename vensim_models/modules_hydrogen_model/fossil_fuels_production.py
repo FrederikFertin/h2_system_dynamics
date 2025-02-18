@@ -10,10 +10,10 @@ Translated using PySD version 3.14.0
     comp_subtype="Normal",
     depends_on={
         "gas_price": 1,
-        "carbon_tax": 1,
+        "gas_emission_factor": 1,
         "cc_capture_rate": 1,
         "ccs_cost": 1,
-        "gas_emission_factor": 1,
+        "carbon_tax": 1,
     },
 )
 def blue_ng_cost():
@@ -43,9 +43,9 @@ def diesel_emission_factor():
     depends_on={
         "oil_price": 1,
         "oil_price_init": 1,
-        "carbon_tax": 1,
-        "diesel_lhv": 1,
         "diesel_emission_factor": 1,
+        "diesel_lhv": 1,
+        "carbon_tax": 1,
     },
 )
 def diesel_price():
@@ -75,7 +75,7 @@ def gas_emission_factor():
     units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"gas_price": 1, "carbon_tax": 1, "gas_emission_factor": 1},
+    depends_on={"gas_price": 1, "gas_emission_factor": 1, "carbon_tax": 1},
 )
 def grey_ng_cost():
     return gas_price() + carbon_tax() * gas_emission_factor()
@@ -86,7 +86,7 @@ def grey_ng_cost():
     units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"oil_price": 1, "carbon_tax": 1, "hfo_emission_factor": 1},
+    depends_on={"oil_price": 1, "hfo_emission_factor": 1, "carbon_tax": 1},
 )
 def hfo_cost():
     """
@@ -169,8 +169,8 @@ def jetfuel_emission_factor():
     depends_on={
         "naphtha_crack_spread": 1,
         "oil_price": 1,
-        "carbon_tax": 1,
         "naphtha_emission_factor": 1,
+        "carbon_tax": 1,
     },
 )
 def naphtha_cost():

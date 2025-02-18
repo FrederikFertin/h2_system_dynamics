@@ -34,7 +34,7 @@ def early_switch_level():
     comp_subtype="Normal",
 )
 def inno_switch_level():
-    return 0.45
+    return 0.5
 
 
 @component.add(

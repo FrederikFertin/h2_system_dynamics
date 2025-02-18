@@ -77,6 +77,10 @@
         "biomass_price_scaler",
         "biomass_used"
     ],
+    "buildings__nondynamic": [
+        "buildings_h2_lookup",
+        "buildings_hydrogen_demand"
+    ],
     "carbon_capture_and_storage": [
         "carbon_storage_capex",
         "carbon_storage_cost",
@@ -111,14 +115,6 @@
         "ps_cc_capex",
         "ps_cc_cost",
         "ps_cc_opex"
-    ],
-    "discount_rates": [
-        "aviation_wacc",
-        "chemical_wacc",
-        "shipping_wacc",
-        "steel_wacc",
-        "transportation_wacc",
-        "trucking_wacc"
     ],
     "domestic_aviation": [
         "bio_kerosene_competitiveness_dom",
@@ -171,7 +167,7 @@
         "syn_kerosene_investment_level_dom",
         "syn_kerosene_level_dom"
     ],
-    "domestic_aviation_propulsion_costs": [
+    "domestic_aviation_propulsion_costs__not_develope": [
         "biokero_propulsion_cost",
         "h2_propulsion_cost_aviation",
         "hydrogen_fuel_cell_efficiency",
@@ -233,6 +229,10 @@
         "min_green_ship_cost",
         "sum_dom_shipping"
     ],
+    "ets_approximation__not_developed": [
+        "carbon_cost",
+        "emissions_cap_lookup"
+    ],
     "fertilizer_nh3": [
         "blue_fertilizer_emissions",
         "blue_nh3",
@@ -249,8 +249,9 @@
         "error_fertilizer",
         "errorint_fertilizer",
         "fertilizer_average_cost",
+        "fertilizer_blue_hydrogen_demand",
         "fertilizer_emissions",
-        "fertilizer_grey_and_blue_hydrogen_demand",
+        "fertilizer_grey_hydrogen_demand",
         "fertilizer_hydrogen_demand",
         "green_nh3",
         "green_nh3_competitiveness",
@@ -344,10 +345,13 @@
     "green_hydrogen_demand_summary": [
         "all_hydrogen",
         "biokero_hydrogen_demand",
-        "carbon_hydrogen_twh",
+        "blue_hydrogen_twh",
+        "buildings_twh",
+        "grey_hydrogen_twh",
         "industry_hydrogen_demand",
         "industry_twh",
         "power_twh",
+        "scope_twh",
         "shipping_meoh_hydrogen_demand",
         "synkero_hydrogen_demand",
         "total_green_hydrogen_demand",
@@ -399,7 +403,7 @@
         "sum_hd_rt",
         "truck_lifetime"
     ],
-    "hvo_production__obsolete": [
+    "hvo_production__to_be_compared_to_uco_price": [
         "biodiesel_cost",
         "bionaphtha_cost_as_hvo_byproduct",
         "hvo_af",
@@ -454,12 +458,8 @@
         "pulse_h2_subsidy",
         "raw_green_h2_cost",
         "smr_af",
+        "smr_capacity_factor",
         "smr_capex",
-        "smr_ccs_capex",
-        "smr_ccs_efficiency",
-        "smr_ccs_emission_factor",
-        "smr_ccs_opex",
-        "smr_costs",
         "smr_el_usage",
         "smr_emission_factor",
         "smr_fixed_opex",
@@ -525,6 +525,8 @@
         "steel_h2_subsidy_size"
     ],
     "hydrogen_subsidy_summary": [
+        "buildings_subsidy",
+        "buildings_subsidy_ytd",
         "domestic_aviation_subsidy",
         "domestic_aviation_subsidy_ytd",
         "domestic_shipping_subsidy",
@@ -924,9 +926,12 @@
         "emeoh_excess_heat",
         "emeoh_h2_usage",
         "emeoh_h2_wtp",
+        "emeoh_learning",
+        "emeoh_learning_rate",
         "emeoh_lifetime",
         "emeoh_operating_hours",
         "emeoh_opex",
+        "emeoh_plant_size",
         "green_biomeoh_cost",
         "green_emeoh_cost",
         "grey_biomeoh_cost",
@@ -936,15 +941,18 @@
         "shipping_biomeoh_cost"
     ],
     "model_components": [
+        "activity_change",
         "biomass_demand",
-        "fuel_1_cost",
-        "fuel_2_cost",
-        "hydrogen_demand",
-        "input_parameters",
-        "investment_flow",
-        "other_assumptions",
+        "decom_missions",
+        "learning_curves",
+        "reinvestments",
         "sector_emissions",
-        "technology_activity"
+        "sectoral_hydrogen_demand",
+        "technoeconomics",
+        "technology_1_cost",
+        "technology_2_cost",
+        "technology_activity_distribution",
+        "yearly_investments"
     ],
     "naphtha_for_hvc": [
         "bio_naphtha_competitiveness",
@@ -982,16 +990,7 @@
         "naphtha_production",
         "pulse_naphtha",
         "pulse_size",
-        "pyrolysisnaphtha_cost",
-        "recycled_competitiveness",
-        "recycled_decay",
-        "recycled_imitators",
-        "recycled_inno_switch",
-        "recycled_innovators",
-        "recycled_investment",
-        "recycled_investment_level",
-        "recycled_level",
-        "recycled_naphtha",
+        "sum_innovator_investment",
         "sum_naphtha",
         "syn_naphtha_competitiveness",
         "syn_naphtha_decay",
@@ -1040,16 +1039,17 @@
         "grey_refinery_investment_level",
         "grey_refinery_level",
         "refinery_average_cost",
+        "refinery_blue_hydrogen_demand",
         "refinery_consumption",
         "refinery_emissions",
         "refinery_equalizer",
-        "refinery_grey_and_blue_hydrogen_demand",
+        "refinery_grey_hydrogen_demand",
         "refinery_h2_wtp",
         "refinery_hydrogen_demand",
         "refinery_reinvestment",
         "sum_refining"
     ],
-    "olefins__mto_vs_naphthao": [
+    "olefins_mto_vs_naphthao__unused": [
         "bf_cracking_competitiveness",
         "bf_cracking_cost",
         "bf_cracking_decay",
@@ -1233,6 +1233,14 @@
         "rt_battery_cost",
         "vehicle_insurance"
     ],
+    "sectoral_wacc__unused": [
+        "aviation_wacc",
+        "chemical_wacc",
+        "shipping_wacc",
+        "steel_wacc",
+        "transportation_wacc",
+        "trucking_wacc"
+    ],
     "shipping_costs": [
         "auxilliary_battery_capacity",
         "battery_capacity",
@@ -1317,8 +1325,5 @@
         "steel_h2_marginal_wtp",
         "steel_h2_wtp",
         "total_h2dri_capex_subsidy"
-    ],
-    "view_46": [
-        "emissions_cap_lookup"
     ]
 }

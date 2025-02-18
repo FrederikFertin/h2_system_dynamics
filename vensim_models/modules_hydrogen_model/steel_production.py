@@ -10,15 +10,15 @@ Translated using PySD version 3.14.0
     comp_subtype="Normal",
     depends_on={
         "bf_coal_cost": 1,
+        "bf_coal_emission_factor": 1,
+        "ccs_cost": 1,
         "carbon_tax": 1,
         "cc_capture_rate": 1,
-        "ccs_cost": 1,
-        "bf_coal_emission_factor": 1,
     },
 )
 def bf_ccs_cost():
-    return bf_coal_cost() + bf_coal_emission_factor() * (
-        ccs_cost() - carbon_tax() * cc_capture_rate()
+    return bf_coal_cost() + bf_coal_emission_factor() * cc_capture_rate() * (
+        ccs_cost() - carbon_tax()
     )
 
 
@@ -40,8 +40,8 @@ def bf_coal_capex():
     depends_on={
         "carbon_tax": 1,
         "bf_coal_emission_factor": 1,
-        "coal_lhv": 1,
         "coal_price": 1,
+        "coal_lhv": 1,
         "coal_to_steel": 1,
         "grid_electricity_price": 1,
         "el_to_steel_bf_coal": 1,
@@ -73,10 +73,10 @@ def bf_coal_cost():
     comp_subtype="Normal",
     depends_on={
         "bf_coal_cost": 1,
-        "carbon_tax": 1,
-        "electricity_emission_factor": 1,
-        "el_to_steel_bf_coal": 1,
         "bf_coal_emission_factor": 1,
+        "el_to_steel_bf_coal": 1,
+        "electricity_emission_factor": 1,
+        "carbon_tax": 1,
     },
 )
 def bf_coal_cost_without_co2():
@@ -100,7 +100,7 @@ def bf_coal_emission_factor():
 
 
 @component.add(
-    name="Coal LHV", units="MJ/kg", comp_type="Constant", comp_subtype="Unchangeable"
+    name="Coal LHV", units="GJ/t", comp_type="Constant", comp_subtype="Unchangeable"
 )
 def coal_lhv():
     """
@@ -185,7 +185,7 @@ def foundry_operating_hours():
     """
     Own assumption
     """
-    return 8500
+    return 8000
 
 
 @component.add(
@@ -294,9 +294,9 @@ def h2dri_cost():
     depends_on={
         "grid_electricity_price": 1,
         "el_to_steel_h2dri": 1,
+        "h2dri_capex": 1,
         "h2dri_capex_subsidy": 1,
         "foundry_operating_hours": 1,
-        "h2dri_capex": 1,
     },
 )
 def h2dri_cost_without_h2():
@@ -328,7 +328,7 @@ def h2dri_learning_curve():
     comp_subtype="Normal",
 )
 def h2dri_learning_rate():
-    return 0.12
+    return 0.1
 
 
 @component.add(
@@ -370,13 +370,13 @@ def ngdri_capex():
     depends_on={
         "carbon_tax": 1,
         "ngdri_emission_factor": 1,
-        "gas_price": 1,
         "gas_to_steel": 1,
-        "grid_electricity_price": 1,
+        "gas_price": 1,
         "el_to_steel_ngdri": 1,
+        "grid_electricity_price": 1,
         "foundry_operating_hours": 1,
-        "foundry_af": 1,
         "ngdri_capex": 1,
+        "foundry_af": 1,
         "inflation_lookup": 1,
     },
 )
@@ -416,9 +416,9 @@ def ngdri_emission_factor():
     depends_on={
         "h2dri_cost": 1,
         "bf_coal_cost_without_co2": 1,
-        "electricity_emission_factor": 1,
-        "el_to_steel_bf_coal": 1,
         "bf_coal_emission_factor": 1,
+        "el_to_steel_bf_coal": 1,
+        "electricity_emission_factor": 1,
     },
 )
 def steel_co2_wtp():
@@ -440,8 +440,8 @@ def steel_co2_wtp():
         "bf_ccs_cost": 1,
         "bf_coal_cost": 1,
         "ngdri_cost": 1,
-        "el_to_steel_h2dri": 1,
         "renewable_electricity_price": 1,
+        "el_to_steel_h2dri": 1,
         "h2_to_steel": 1,
     },
 )

@@ -541,9 +541,9 @@ def international_aviation_synkero_hydrogen_demand():
     depends_on={
         "biokero_cost": 1,
         "synkero_cost": 1,
-        "carbon_tax": 1,
-        "jetfuel_cost": 1,
         "jetfuel_emission_factor": 2,
+        "jetfuel_cost": 1,
+        "carbon_tax": 1,
     },
 )
 def jetfuel_co2_wtp():
@@ -795,8 +795,8 @@ _smooth_syn_kerosene_inno_switch = Smooth(
         "international_aviation_reinvestment": 1,
         "innovators": 1,
         "syn_kerosene_inno_switch": 1,
-        "sum_international_aviation": 2,
         "syn_kerosene_consumption": 1,
+        "sum_international_aviation": 2,
     },
 )
 def syn_kerosene_innovators():
@@ -836,8 +836,8 @@ def syn_kerosene_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "syn_kerosene_competitiveness": 1,
         "cross": 1,
+        "syn_kerosene_competitiveness": 1,
         "syn_kerosene_consumption": 1,
         "sum_international_aviation": 1,
     },

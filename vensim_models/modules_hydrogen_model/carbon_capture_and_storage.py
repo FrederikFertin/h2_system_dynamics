@@ -53,9 +53,9 @@ def carbon_storage_opex():
     comp_subtype="Normal",
     depends_on={
         "ct_distance": 1,
-        "ct_capex": 1,
         "ct_af": 1,
         "ct_opex": 1,
+        "ct_capex": 1,
         "ct_capacity_factor": 1,
     },
 )
@@ -114,7 +114,7 @@ def cc_capture_rate():
     """
     Assumes a capture rate of 90% for retrofitted CC units.
     """
-    return 0.8
+    return 0.9
 
 
 @component.add(

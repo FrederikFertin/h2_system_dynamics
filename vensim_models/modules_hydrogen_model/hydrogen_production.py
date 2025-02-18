@@ -20,8 +20,8 @@ def aec_af():
     comp_subtype="Normal",
     depends_on={
         "electrolyser_capacity": 3,
-        "one_gw_aec_capex": 2,
         "learning_rate": 1,
+        "one_gw_aec_capex": 2,
         "initial_gw_aec_capex": 2,
     },
 )
@@ -116,10 +116,17 @@ def aec_opex():
     units="€/kgH2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"grey_h2_capex": 1, "smr_emission_factor": 1, "ccs_capex": 1},
+    depends_on={
+        "grey_h2_capex": 1,
+        "cc_capture_rate": 1,
+        "ccs_capex": 1,
+        "smr_emission_factor": 1,
+    },
 )
 def blue_h2_capex():
-    return grey_h2_capex() + smr_emission_factor() / 1000 * ccs_capex()
+    return (
+        grey_h2_capex() + smr_emission_factor() / 1000 * cc_capture_rate() * ccs_capex()
+    )
 
 
 @component.add(
@@ -131,9 +138,9 @@ def blue_h2_capex():
         "green_h2_cost": 1,
         "grey_h2_cost": 1,
         "grey_h2_cost_wo_co2": 1,
-        "smr_emission_factor": 2,
+        "cc_capture_rate": 2,
         "ccs_cost": 1,
-        "cc_capture_rate": 1,
+        "smr_emission_factor": 2,
     },
 )
 def blue_h2_co2_wtp():
@@ -143,7 +150,7 @@ def blue_h2_co2_wtp():
     return (
         np.minimum(green_h2_cost(), grey_h2_cost())
         - grey_h2_cost_wo_co2()
-        - smr_emission_factor() / 1000 * ccs_cost()
+        - smr_emission_factor() / 1000 * ccs_cost() * cc_capture_rate()
     ) / (smr_emission_factor() / 1000 * (1 - cc_capture_rate()))
 
 
@@ -165,15 +172,16 @@ def blue_h2_cost():
     comp_subtype="Normal",
     depends_on={
         "grey_h2_variable_cost": 1,
+        "ccs_opex": 1,
+        "cc_capture_rate": 1,
         "carbon_tax": 1,
         "smr_emission_factor": 1,
-        "cc_capture_rate": 1,
-        "ccs_opex": 1,
     },
 )
 def blue_h2_opex():
-    return grey_h2_variable_cost() + smr_emission_factor() / 1000 * (
-        ccs_opex() - cc_capture_rate() * carbon_tax()
+    return (
+        grey_h2_variable_cost()
+        + smr_emission_factor() / 1000 * cc_capture_rate() * (ccs_opex() - carbon_tax())
     )
 
 
@@ -345,10 +353,15 @@ def green_h2_subsidy_size():
     units="€/kgH2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"smr_capex": 1, "smr_af": 1, "smr_fixed_opex": 1},
+    depends_on={
+        "smr_capex": 1,
+        "smr_af": 1,
+        "smr_capacity_factor": 1,
+        "smr_fixed_opex": 1,
+    },
 )
 def grey_h2_capex():
-    return (smr_capex() * smr_af() + smr_fixed_opex()) / 1000
+    return (smr_capex() * smr_af() / smr_capacity_factor() + smr_fixed_opex()) / 1000
 
 
 @component.add(
@@ -394,10 +407,10 @@ def grey_h2_cost():
         "smr_capex": 1,
         "smr_af": 1,
         "smr_fixed_opex": 1,
-        "gas_price": 1,
         "smr_ng_usage": 1,
-        "smr_el_usage": 1,
+        "gas_price": 1,
         "grid_electricity_price": 1,
+        "smr_el_usage": 1,
     },
 )
 def grey_h2_cost_wo_co2():
@@ -420,10 +433,10 @@ def grey_h2_cost_wo_co2():
     depends_on={
         "carbon_tax": 1,
         "smr_emission_factor": 1,
-        "gas_price": 1,
         "smr_ng_usage": 1,
-        "smr_el_usage": 1,
+        "gas_price": 1,
         "grid_electricity_price": 1,
+        "smr_el_usage": 1,
     },
 )
 def grey_h2_variable_cost():
@@ -466,7 +479,7 @@ def initial_gw_aec_capex():
     name="learning rate", units="percent", comp_type="Constant", comp_subtype="Normal"
 )
 def learning_rate():
-    return 0.18
+    return 0.15
 
 
 @component.add(
@@ -523,6 +536,16 @@ def smr_af():
 
 
 @component.add(
+    name="SMR Capacity Factor",
+    units="percent",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def smr_capacity_factor():
+    return 0.95
+
+
+@component.add(
     name="SMR CAPEX", units="€/(tH2/yr)", comp_type="Constant", comp_subtype="Normal"
 )
 def smr_capex():
@@ -530,58 +553,6 @@ def smr_capex():
     €/(tH2/yr)
     """
     return 5306
-
-
-@component.add(
-    name="SMR CCS CAPEX",
-    units="€/kWH2",
-    comp_type="Auxiliary",
-    comp_subtype="with Lookup",
-    depends_on={"time": 1},
-)
-def smr_ccs_capex():
-    """
-    €/kWH2
-    """
-    return np.interp(time(), [2019, 2030, 2050], [1680, 1360, 1280])
-
-
-@component.add(
-    name="SMR CCS efficiency",
-    units="percent",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def smr_ccs_efficiency():
-    return 0.69
-
-
-@component.add(
-    name="SMR CCS emission factor",
-    units="kgCO2/kgH2",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def smr_ccs_emission_factor():
-    """
-    1 kgCO2 / kgH2
-    """
-    return 1
-
-
-@component.add(
-    name="SMR CCS OPEX", units="percent", comp_type="Constant", comp_subtype="Normal"
-)
-def smr_ccs_opex():
-    """
-    %/yr of CAPEX
-    """
-    return 0.047
-
-
-@component.add(name="SMR costs", comp_type="Constant", comp_subtype="Normal")
-def smr_costs():
-    return 2
 
 
 @component.add(

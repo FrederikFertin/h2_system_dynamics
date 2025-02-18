@@ -155,8 +155,8 @@ def blue_refinery_investment_level():
         "slope": 1,
         "cross": 1,
         "blue_refinery_competitiveness": 1,
-        "sum_refining": 1,
         "blue_refinery": 1,
+        "sum_refining": 1,
     },
 )
 def blue_refinery_level():
@@ -421,8 +421,8 @@ def grey_refinery_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "grey_refinery": 1,
-        "grey_refinery_early_decommission_rate": 1,
         "smr_lifetime": 1,
+        "grey_refinery_early_decommission_rate": 1,
     },
 )
 def grey_refinery_decay():
@@ -479,8 +479,8 @@ def grey_refinery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "grey_refinery_competitiveness": 1,
         "cross": 1,
+        "grey_refinery_competitiveness": 1,
         "grey_refinery": 1,
         "sum_refining": 1,
     },
@@ -501,10 +501,10 @@ def grey_refinery_level():
     depends_on={
         "blue_refinery": 1,
         "blue_h2_cost": 1,
-        "refinery_h2_cost": 1,
         "green_refinery": 1,
-        "grey_refinery": 1,
+        "refinery_h2_cost": 1,
         "grey_h2_cost": 1,
+        "grey_refinery": 1,
         "sum_refining": 1,
     },
 )
@@ -517,6 +517,17 @@ def refinery_average_cost():
 
 
 @component.add(
+    name="refinery blue hydrogen demand",
+    units="t H2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"blue_refinery": 1},
+)
+def refinery_blue_hydrogen_demand():
+    return blue_refinery() * 10**6
+
+
+@component.add(
     name="Refinery consumption",
     units="MT H2",
     comp_type="Auxiliary",
@@ -525,7 +536,7 @@ def refinery_average_cost():
 )
 def refinery_consumption():
     """
-    2.4 MT/year - assumed constant moving forward. https://www.petrochemistry.eu/wp-content/uploads/2021/03/Petrochemicals_Pap er_hydrogen-1.pdf
+    2.4 MT/year in 2022. Linearly decreasing. https://www.petrochemistry.eu/wp-content/uploads/2021/03/Petrochemicals_Pap er_hydrogen-1.pdf
     """
     return np.interp(
         time(),
@@ -620,14 +631,14 @@ def refinery_equalizer():
 
 
 @component.add(
-    name="refinery grey and blue hydrogen demand",
+    name="refinery grey hydrogen demand",
     units="t H2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"blue_refinery": 1, "grey_refinery": 1},
+    depends_on={"grey_refinery": 1},
 )
-def refinery_grey_and_blue_hydrogen_demand():
-    return (blue_refinery() + grey_refinery()) * 10**6
+def refinery_grey_hydrogen_demand():
+    return grey_refinery() * 10**6
 
 
 @component.add(

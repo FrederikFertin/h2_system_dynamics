@@ -130,8 +130,8 @@ def bf_ccs_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "bf_ccs_competitiveness": 1,
         "cross": 1,
+        "bf_ccs_competitiveness": 1,
         "coal_bf_bof_ccs": 1,
         "sum_steel": 1,
     },
@@ -277,10 +277,10 @@ _integ_coal_bf_bof_ccs = Integ(
     comp_subtype="Normal",
     depends_on={
         "coal_bf_bof_ccs": 1,
-        "bf_coal_emission_factor": 1,
-        "cc_capture_rate": 1,
         "electricity_emission_factor": 1,
         "el_to_steel_bf_coal": 1,
+        "bf_coal_emission_factor": 1,
+        "cc_capture_rate": 1,
     },
 )
 def coal_bf_bof_ccs_emissions():
@@ -301,9 +301,9 @@ def coal_bf_bof_ccs_emissions():
     comp_subtype="Normal",
     depends_on={
         "coal_bf_bof": 1,
+        "bf_coal_emission_factor": 1,
         "el_to_steel_bf_coal": 1,
         "electricity_emission_factor": 1,
-        "bf_coal_emission_factor": 1,
     },
 )
 def coal_bf_bof_emissions():
@@ -363,7 +363,7 @@ def errorint_steel():
 
 
 _integ_errorint_steel = Integ(
-    lambda: k_i() * error_steel(), lambda: 0, "_integ_errorint_steel"
+    lambda: k_i() * error_steel(), lambda: 0.03, "_integ_errorint_steel"
 )
 
 
@@ -411,7 +411,7 @@ _integ_foundry_reinvestment = Integ(
     - bf_coal_investment()
     - h2dri_eaf_investment()
     - ngdri_eaf_investment(),
-    lambda: primary_sector() / foundry_lifetime(),
+    lambda: primary_sector() / foundry_lifetime() * 0.9,
     "_integ_foundry_reinvestment",
 )
 
@@ -525,8 +525,8 @@ def h2dri_eaf_inno_switch():
         "foundry_reinvestment": 1,
         "innovators": 1,
         "h2dri_eaf_inno_switch": 1,
-        "h2dri_eaf": 1,
         "sum_steel": 2,
+        "h2dri_eaf": 1,
     },
 )
 def h2dri_eaf_innovators():
@@ -566,8 +566,8 @@ def h2dri_eaf_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "h2dri_eaf_competitiveness": 1,
         "cross": 1,
+        "h2dri_eaf_competitiveness": 1,
         "h2dri_eaf": 1,
         "sum_steel": 1,
     },
@@ -633,9 +633,9 @@ def ngdri_eaf_decay():
     comp_subtype="Normal",
     depends_on={
         "ngdri_eaf": 1,
-        "ngdri_emission_factor": 1,
-        "electricity_emission_factor": 1,
         "el_to_steel_ngdri": 1,
+        "electricity_emission_factor": 1,
+        "ngdri_emission_factor": 1,
     },
 )
 def ngdri_eaf_emissions():
@@ -788,12 +788,12 @@ def secondary_sector_growth():
     depends_on={
         "coal_bf_bof": 1,
         "bf_coal_cost": 1,
-        "bf_ccs_cost": 1,
         "coal_bf_bof_ccs": 1,
-        "h2dri_eaf": 1,
+        "bf_ccs_cost": 1,
         "h2dri_cost": 1,
-        "ngdri_cost": 1,
+        "h2dri_eaf": 1,
         "ngdri_eaf": 1,
+        "ngdri_cost": 1,
         "sum_steel": 1,
     },
 )

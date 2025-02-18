@@ -11,7 +11,7 @@ Translated using PySD version 3.14.0
     depends_on={"time": 1},
 )
 def power_h2_lookup():
-    return np.interp(time(), [2022, 2030, 2040, 2050], [0, 7, 66, 164])
+    return np.interp(time(), [2022.0, 2030.0, 2040.0, 2050.0], [0.0, 6.6, 66.1, 163.6])
 
 
 @component.add(

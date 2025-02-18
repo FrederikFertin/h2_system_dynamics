@@ -4,6 +4,64 @@ Translated using PySD version 3.14.0
 """
 
 @component.add(
+    name="buildings subsidy",
+    units="M€",
+    comp_type="Stateful",
+    comp_subtype="Integ",
+    depends_on={"_integ_buildings_subsidy": 1},
+    other_deps={
+        "_integ_buildings_subsidy": {
+            "initial": {},
+            "step": {"green_h2_actual_subsidy": 1, "buildings_hydrogen_demand": 1},
+        }
+    },
+)
+def buildings_subsidy():
+    return _integ_buildings_subsidy()
+
+
+_integ_buildings_subsidy = Integ(
+    lambda: green_h2_actual_subsidy() * buildings_hydrogen_demand() / 1000,
+    lambda: 0,
+    "_integ_buildings_subsidy",
+)
+
+
+@component.add(
+    name="buildings subsidy YTD",
+    units="M€",
+    comp_type="Stateful",
+    comp_subtype="Integ",
+    depends_on={"_integ_buildings_subsidy_ytd": 1},
+    other_deps={
+        "_integ_buildings_subsidy_ytd": {
+            "initial": {},
+            "step": {
+                "time": 1,
+                "time_step": 2,
+                "green_h2_actual_subsidy": 1,
+                "buildings_hydrogen_demand": 1,
+                "buildings_subsidy_ytd": 1,
+            },
+        }
+    },
+)
+def buildings_subsidy_ytd():
+    return _integ_buildings_subsidy_ytd()
+
+
+_integ_buildings_subsidy_ytd = Integ(
+    lambda: if_then_else(
+        modulo(time(), 1) >= time_step(),
+        lambda: green_h2_actual_subsidy() * buildings_hydrogen_demand() / 1000,
+        lambda: -buildings_subsidy_ytd() / time_step(),
+    ),
+    lambda: 0,
+    "_integ_buildings_subsidy_ytd",
+)
+
+
+@component.add(
     name="domestic aviation subsidy",
     units="M€",
     comp_type="Stateful",
@@ -46,8 +104,8 @@ _integ_domestic_aviation_subsidy = Integ(
                 "time": 1,
                 "time_step": 2,
                 "green_h2_actual_subsidy": 1,
-                "domestic_aviation_hydrogen_demand": 1,
                 "ft_h2_actual_subsidy": 1,
+                "domestic_aviation_hydrogen_demand": 1,
                 "domestic_aviation_subsidy_ytd": 1,
             },
         }
@@ -174,8 +232,8 @@ _integ_fertilizer_subsidy = Integ(
                 "time": 1,
                 "time_step": 2,
                 "green_h2_actual_subsidy": 1,
-                "fertilizer_hydrogen_demand": 1,
                 "fertilizer_h2_actual_subsidy": 1,
+                "fertilizer_hydrogen_demand": 1,
                 "fertilizer_subsidy_ytd": 1,
             },
         }
@@ -308,8 +366,8 @@ _integ_high_temperature_subsidy = Integ(
                 "time": 1,
                 "time_step": 2,
                 "green_h2_actual_subsidy": 1,
-                "high_temperature_hydrogen_demand": 1,
                 "nm_h2_actual_subsidy": 1,
+                "high_temperature_hydrogen_demand": 1,
                 "high_temperature_subsidy_ytd": 1,
             },
         }
@@ -822,8 +880,8 @@ _integ_shipping_meoh_subsidy = Integ(
                 "time": 1,
                 "time_step": 2,
                 "green_h2_actual_subsidy": 1,
-                "shipping_meoh_h2_actual_subsidy": 1,
                 "shipping_meoh_hydrogen_demand": 1,
+                "shipping_meoh_h2_actual_subsidy": 1,
                 "shipping_meoh_subsidy_ytd": 1,
             },
         }
@@ -956,8 +1014,8 @@ _integ_steel_subsidy = Integ(
                 "time": 1,
                 "time_step": 2,
                 "green_h2_actual_subsidy": 1,
-                "steel_hydrogen_demand": 1,
                 "steel_h2_actual_subsidy": 1,
+                "steel_hydrogen_demand": 1,
                 "steel_subsidy_ytd": 1,
             },
         }
@@ -999,6 +1057,7 @@ _integ_steel_subsidy_ytd = Integ(
         "shipping_meoh_subsidy": 1,
         "shipping_nh3_subsidy": 1,
         "meoh_subsidy": 1,
+        "buildings_subsidy": 1,
     },
 )
 def total_subsidies():
@@ -1016,6 +1075,7 @@ def total_subsidies():
         + shipping_meoh_subsidy()
         + shipping_nh3_subsidy()
         + meoh_subsidy()
+        + buildings_subsidy()
     )
 
 
@@ -1038,6 +1098,7 @@ def total_subsidies():
         "shipping_meoh_subsidy_ytd": 1,
         "shipping_nh3_subsidy_ytd": 1,
         "meoh_subsidy_ytd": 1,
+        "buildings_subsidy_ytd": 1,
     },
 )
 def total_subsidies_ytd():
@@ -1055,4 +1116,5 @@ def total_subsidies_ytd():
         + shipping_meoh_subsidy_ytd()
         + shipping_nh3_subsidy_ytd()
         + meoh_subsidy_ytd()
+        + buildings_subsidy_ytd()
     )

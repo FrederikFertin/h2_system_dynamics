@@ -22,13 +22,17 @@ class data_loading_class:
     # Function which pads the data with a new data point 20 years later which is the same as the last data point
     # and a data point 20 years before which is the same as the first data point
     def _pad_data(self, series):
+        # Pre data padding:
         first_year = series.index[0]
-        last_year = series.index[-1]
         new_first_year = first_year - 20
-        new_last_year = last_year + 20
         new_first_value = series.iloc[0]
+        # Post data padding:
+        last_year = series.index[-1]
+        new_last_year = last_year + 20
+        new_last_years = list(range(last_year+1,new_last_year+1))
         new_last_value = series.iloc[-1]
-        return pd.Series(data=[new_first_value], index=[new_first_year])._append(series)._append(pd.Series(data=[new_last_value], index=[new_last_year]))
+        new_last_values = [new_last_value] * len(new_last_years)
+        return pd.Series(data=[new_first_value], index=[new_first_year])._append(series)._append(pd.Series(data=new_last_values, index=new_last_years))
     
     # Function which loads the carbon taxes from self
     def load_carbon_taxes(self, *args, **kwargs):
@@ -51,6 +55,18 @@ class data_loading_class:
         
         if "sensitivity" in kwargs:
             self.carbon_taxes = self.carbon_taxes * kwargs["sensitivity"]
+        if "discount_rate" in kwargs:
+            first_year = self.carbon_taxes.index[0]
+            last_year = self.carbon_taxes.index[-1]
+            c = self._pad_data(self.carbon_taxes)
+            discount_index = [1/(1 + kwargs["discount_rate"])**i for i in range(20)]
+            c_npv = []
+            for i in range(first_year, last_year + 1):
+                c_d = sum(c[year]*discount_index[j] for j, year in enumerate(range(i, i + 20))) / sum(discount_index)
+                c_npv.append(c_d)
+            c.loc[first_year:last_year] = c_npv
+            self.carbon_taxes = c
+            return self.carbon_taxes
         
         return self._pad_data(self.carbon_taxes)
     
@@ -163,7 +179,7 @@ class data_loading_class:
 
 if __name__ == "__main__":
     data = data_loading_class()
-    print(data.load_carbon_taxes())
+    print(data.load_carbon_taxes(**{"discount_rate": 0.08}))
     print(data.load_gas_prices())
     print(data.load_oil_prices())
     print(data.load_woodchip_prices())
