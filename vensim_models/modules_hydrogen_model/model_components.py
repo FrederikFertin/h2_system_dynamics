@@ -3,8 +3,18 @@ Module model_components
 Translated using PySD version 3.14.0
 """
 
-@component.add(name="Activity Change", comp_type="Constant", comp_subtype="Normal")
+@component.add(
+    name="Activity Change",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"activity_projection": 1},
+)
 def activity_change():
+    return 0 * activity_projection()
+
+
+@component.add(name="Activity Projection", comp_type="Constant", comp_subtype="Normal")
+def activity_projection():
     return 0
 
 
@@ -13,18 +23,52 @@ def activity_change():
     units="GWh Biomass",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"technology_activity_distribution": 1},
+    depends_on={"technology_activity_levels": 1},
 )
 def biomass_demand():
     """
     Convert from GWh MeOH to GWh biomass
     """
-    return technology_activity_distribution()
+    return technology_activity_levels()
 
 
-@component.add(name="Decom missions", comp_type="Constant", comp_subtype="Normal")
+@component.add(name='"Decom- missions"', comp_type="Constant", comp_subtype="Normal")
 def decom_missions():
     return 0
+
+
+@component.add(
+    name="Green Hydrogen Cost",
+    comp_type="Stateful",
+    comp_subtype="Integ",
+    depends_on={"_integ_green_hydrogen_cost": 1},
+    other_deps={
+        "_delay_green_hydrogen_cost": {
+            "initial": {"total_green_h2_demand": 1},
+            "step": {"total_green_h2_demand": 1},
+        },
+        "_integ_green_hydrogen_cost": {
+            "initial": {},
+            "step": {"_delay_green_hydrogen_cost": 1},
+        },
+    },
+)
+def green_hydrogen_cost():
+    return _integ_green_hydrogen_cost()
+
+
+_delay_green_hydrogen_cost = Delay(
+    lambda: total_green_h2_demand(),
+    lambda: 1,
+    lambda: total_green_h2_demand(),
+    lambda: 1,
+    time_step,
+    "_delay_green_hydrogen_cost",
+)
+
+_integ_green_hydrogen_cost = Integ(
+    lambda: _delay_green_hydrogen_cost(), lambda: 0, "_integ_green_hydrogen_cost"
+)
 
 
 @component.add(
@@ -38,13 +82,24 @@ def learning_curves():
 
 
 @component.add(
-    name="Reinvestments",
+    name='"Reinvest- ments"',
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"technology_1_cost": 1, "technology_2_cost": 1},
+    depends_on={
+        "technology_cost": 1,
+        "technology_1_cost": 1,
+        "technology_n_cost": 1,
+        "technology_activity_levels": 1,
+    },
 )
-def reinvestments():
-    return technology_1_cost() * technology_2_cost() * 0
+def reinvest_ments():
+    return (
+        technology_cost()
+        * technology_1_cost()
+        * 0
+        * technology_n_cost()
+        * technology_activity_levels()
+    )
 
 
 @component.add(
@@ -52,10 +107,40 @@ def reinvestments():
     units="tCO2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"technology_activity_distribution": 1},
+    depends_on={"technology_activity_levels": 1},
 )
 def sector_emissions():
-    return technology_activity_distribution()
+    return technology_activity_levels()
+
+
+@component.add(
+    name="Sectoral Green H2 Demands",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"sectoral_h2_investments": 1},
+)
+def sectoral_green_h2_demands():
+    return sectoral_h2_investments()
+
+
+@component.add(
+    name="Sectoral H2 Competitiveness",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"green_hydrogen_cost": 1},
+)
+def sectoral_h2_competitiveness():
+    return green_hydrogen_cost()
+
+
+@component.add(
+    name="Sectoral H2 Investments",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"sectoral_h2_competitiveness": 1},
+)
+def sectoral_h2_investments():
+    return sectoral_h2_competitiveness()
 
 
 @component.add(
@@ -63,23 +148,18 @@ def sector_emissions():
     units="t H2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"technology_activity_distribution": 1},
+    depends_on={"technology_activity_levels": 1},
 )
 def sectoral_hydrogen_demand():
     """
     Get this from Balmorel or have a range of possible scenarios?
     """
-    return technology_activity_distribution()
+    return technology_activity_levels()
 
 
-@component.add(
-    name='"Techno-economics"',
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"learning_curves": 1},
-)
+@component.add(name='"Techno-economics"', comp_type="Constant", comp_subtype="Normal")
 def technoeconomics():
-    return 1 * learning_curves()
+    return 1
 
 
 @component.add(
@@ -94,38 +174,59 @@ def technology_1_cost():
 
 
 @component.add(
-    name="Technology 2 cost",
+    name="Technology Activity Levels",
+    units="GWh",
+    comp_type="Stateful",
+    comp_subtype="Integ",
+    depends_on={"_integ_technology_activity_levels": 1},
+    other_deps={
+        "_integ_technology_activity_levels": {
+            "initial": {},
+            "step": {"reinvest_ments": 1, "decom_missions": 1},
+        }
+    },
+)
+def technology_activity_levels():
+    return _integ_technology_activity_levels()
+
+
+_integ_technology_activity_levels = Integ(
+    lambda: reinvest_ments() + decom_missions(),
+    lambda: 0,
+    "_integ_technology_activity_levels",
+)
+
+
+@component.add(
+    name='"Technology .. cost"',
     units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={"technoeconomics": 1},
 )
-def technology_2_cost():
+def technology_cost():
     return technoeconomics()
 
 
 @component.add(
-    name="Technology Activity Distribution",
-    units="GWh",
-    comp_type="Stateful",
-    comp_subtype="Integ",
-    depends_on={"_integ_technology_activity_distribution": 1},
-    other_deps={
-        "_integ_technology_activity_distribution": {
-            "initial": {},
-            "step": {"reinvestments": 1, "decom_missions": 1},
-        }
-    },
+    name="Technology N cost",
+    units="€/GJ",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"technoeconomics": 1},
 )
-def technology_activity_distribution():
-    return _integ_technology_activity_distribution()
+def technology_n_cost():
+    return technoeconomics()
 
 
-_integ_technology_activity_distribution = Integ(
-    lambda: reinvestments() + decom_missions(),
-    lambda: 0,
-    "_integ_technology_activity_distribution",
+@component.add(
+    name="Total Green H2 Demand",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"sectoral_green_h2_demands": 1},
 )
+def total_green_h2_demand():
+    return sectoral_green_h2_demands()
 
 
 @component.add(
@@ -136,7 +237,7 @@ _integ_technology_activity_distribution = Integ(
     other_deps={
         "_integ_yearly_investments": {
             "initial": {},
-            "step": {"activity_change": 1, "decom_missions": 1, "reinvestments": 1},
+            "step": {"activity_change": 1, "decom_missions": 1, "reinvest_ments": 1},
         }
     },
 )
@@ -145,7 +246,7 @@ def yearly_investments():
 
 
 _integ_yearly_investments = Integ(
-    lambda: activity_change() + decom_missions() - reinvestments(),
+    lambda: activity_change() + decom_missions() - reinvest_ments(),
     lambda: 0,
     "_integ_yearly_investments",
 )

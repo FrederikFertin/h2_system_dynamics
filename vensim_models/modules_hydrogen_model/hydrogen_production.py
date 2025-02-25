@@ -20,8 +20,8 @@ def aec_af():
     comp_subtype="Normal",
     depends_on={
         "electrolyser_capacity": 3,
-        "learning_rate": 1,
         "one_gw_aec_capex": 2,
+        "learning_rate": 1,
         "initial_gw_aec_capex": 2,
     },
 )
@@ -172,8 +172,8 @@ def blue_h2_cost():
     comp_subtype="Normal",
     depends_on={
         "grey_h2_variable_cost": 1,
-        "ccs_opex": 1,
         "cc_capture_rate": 1,
+        "ccs_opex": 1,
         "carbon_tax": 1,
         "smr_emission_factor": 1,
     },
@@ -407,8 +407,8 @@ def grey_h2_cost():
         "smr_capex": 1,
         "smr_af": 1,
         "smr_fixed_opex": 1,
-        "smr_ng_usage": 1,
         "gas_price": 1,
+        "smr_ng_usage": 1,
         "grid_electricity_price": 1,
         "smr_el_usage": 1,
     },
@@ -433,8 +433,8 @@ def grey_h2_cost_wo_co2():
     depends_on={
         "carbon_tax": 1,
         "smr_emission_factor": 1,
-        "smr_ng_usage": 1,
         "gas_price": 1,
+        "smr_ng_usage": 1,
         "grid_electricity_price": 1,
         "smr_el_usage": 1,
     },

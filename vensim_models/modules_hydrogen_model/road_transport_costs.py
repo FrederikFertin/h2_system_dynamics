@@ -226,11 +226,11 @@ def hd_be_weight_penalty_switch():
     depends_on={
         "hd_fc_lco": 1,
         "hd_be_lco": 1,
-        "diesel_emission_factor": 2,
         "hd_ice_energy_usage": 2,
+        "diesel_lhv": 2,
         "hd_ice_lco": 1,
         "carbon_tax": 1,
-        "diesel_lhv": 2,
+        "diesel_emission_factor": 2,
     },
 )
 def hd_co2_wtp():
@@ -646,10 +646,10 @@ def ld_be_om():
     comp_subtype="Normal",
     depends_on={
         "ld_be_om": 1,
-        "electricity_taxes": 1,
-        "ld_be_energy_usage": 1,
-        "charging_efficiency": 1,
         "grid_electricity_price": 1,
+        "electricity_taxes": 1,
+        "charging_efficiency": 1,
+        "ld_be_energy_usage": 1,
     },
 )
 def ld_be_opex():
@@ -694,11 +694,11 @@ def ld_be_storage_capex():
     depends_on={
         "ld_fc_lco": 1,
         "ld_be_lco": 1,
-        "diesel_emission_factor": 2,
         "ld_ice_energy_usage": 2,
-        "ld_ice_lco": 1,
-        "carbon_tax": 1,
         "diesel_lhv": 2,
+        "carbon_tax": 1,
+        "ld_ice_lco": 1,
+        "diesel_emission_factor": 2,
     },
 )
 def ld_co2_wtp():

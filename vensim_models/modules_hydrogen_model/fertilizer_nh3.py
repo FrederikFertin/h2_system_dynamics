@@ -13,8 +13,8 @@ Translated using PySD version 3.14.0
         "cc_capture_rate": 1,
         "nh3_h2_usage": 1,
         "smr_emission_factor": 1,
-        "electricity_emission_factor": 1,
         "nh3_el_usage": 1,
+        "electricity_emission_factor": 1,
     },
 )
 def blue_fertilizer_emissions():
@@ -255,8 +255,8 @@ _integ_errorint_fertilizer = Integ(
         "blue_nh3_cost": 1,
         "green_nh3": 1,
         "fertilizer_nh3_cost": 1,
-        "grey_nh3": 1,
         "grey_nh3_cost": 1,
+        "grey_nh3": 1,
         "sum_fertilizer": 1,
     },
 )
@@ -486,8 +486,8 @@ def green_nh3_level():
         "grey_nh3": 2,
         "nh3_h2_usage": 1,
         "smr_emission_factor": 1,
-        "electricity_emission_factor": 1,
         "nh3_el_usage": 1,
+        "electricity_emission_factor": 1,
     },
 )
 def grey_fertilizer_emissions():
@@ -539,8 +539,8 @@ def grey_nh3_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "grey_nh3": 1,
-        "grey_nh3_early_decommission_rate": 1,
         "smr_lifetime": 1,
+        "grey_nh3_early_decommission_rate": 1,
     },
 )
 def grey_nh3_decay():
@@ -584,8 +584,8 @@ def grey_nh3_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "grey_nh3_competitiveness": 1,
+        "cross": 1,
         "grey_nh3": 1,
         "sum_fertilizer": 1,
     },

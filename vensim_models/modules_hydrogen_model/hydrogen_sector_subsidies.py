@@ -33,9 +33,9 @@ def fertilizer_h2_cost():
     depends_on={
         "fertilizer_subsidy_ytd": 1,
         "fertilizer_h2_subsidy_limit": 1,
-        "fertilizer_h2_subsidy_size": 1,
         "fertilizer_h2_subsidy_length": 1,
         "time": 1,
+        "fertilizer_h2_subsidy_size": 1,
     },
 )
 def fertilizer_h2_subsidy():
@@ -181,8 +181,8 @@ def hd_h2_cost():
         "heavy_duty_subsidy_ytd": 1,
         "hd_h2_subsidy_limit": 1,
         "hd_h2_subsidy_length": 1,
-        "hd_h2_subsidy_size": 1,
         "time": 1,
+        "hd_h2_subsidy_size": 1,
     },
 )
 def hd_h2_subsidy():
@@ -248,9 +248,9 @@ def ld_h2_cost():
     depends_on={
         "light_duty_subsidy_ytd": 1,
         "ld_h2_subsidy_limit": 1,
-        "ld_h2_subsidy_size": 1,
-        "ld_h2_subsidy_length": 1,
         "time": 1,
+        "ld_h2_subsidy_length": 1,
+        "ld_h2_subsidy_size": 1,
     },
 )
 def ld_h2_subsidy():
@@ -327,8 +327,8 @@ def nm_h2_gj_cost():
     depends_on={
         "high_temperature_subsidy_ytd": 1,
         "nm_h2_subsidy_limit": 1,
-        "nm_h2_subsidy_size": 1,
         "nm_h2_subsidy_length": 1,
+        "nm_h2_subsidy_size": 1,
         "time": 1,
     },
 )
@@ -395,8 +395,8 @@ def refinery_h2_cost():
     depends_on={
         "refinery_subsidy_ytd": 1,
         "refinery_h2_subsidy_limit": 1,
-        "refinery_h2_subsidy_length": 1,
         "refinery_h2_subsidy_size": 1,
+        "refinery_h2_subsidy_length": 1,
         "time": 1,
     },
 )
@@ -470,8 +470,8 @@ def shipping_meoh_h2_cost():
         "shipping_meoh_subsidy_ytd": 1,
         "shipping_meoh_h2_subsidy_limit": 1,
         "shipping_meoh_h2_subsidy_length": 1,
-        "shipping_meoh_h2_subsidy_size": 1,
         "time": 1,
+        "shipping_meoh_h2_subsidy_size": 1,
     },
 )
 def shipping_meoh_h2_subsidy():
@@ -544,8 +544,8 @@ def shipping_nh3_h2_cost():
         "shipping_nh3_subsidy_ytd": 1,
         "shipping_nh3_h2_subsidy_limit": 1,
         "shipping_nh3_h2_subsidy_size": 1,
-        "shipping_nh3_h2_subsidy_length": 1,
         "time": 1,
+        "shipping_nh3_h2_subsidy_length": 1,
     },
 )
 def shipping_nh3_h2_subsidy():
@@ -617,9 +617,9 @@ def steel_h2_cost():
     depends_on={
         "steel_subsidy_ytd": 1,
         "steel_h2_subsidy_limit": 1,
-        "steel_h2_subsidy_length": 1,
-        "steel_h2_subsidy_size": 1,
         "time": 1,
+        "steel_h2_subsidy_size": 1,
+        "steel_h2_subsidy_length": 1,
     },
 )
 def steel_h2_subsidy():

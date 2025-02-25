@@ -31,8 +31,8 @@ def demand_change_dom_shipping():
     depends_on={
         "fc_ship_cost": 1,
         "be_ship_cost": 3,
-        "hfo_ship_cost": 1,
         "meoh_ship_cost": 1,
+        "hfo_ship_cost": 1,
     },
 )
 def domestic_battery_competitiveness():
@@ -163,8 +163,8 @@ def domestic_battery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "domestic_battery_competitiveness": 1,
         "cross": 1,
+        "domestic_battery_competitiveness": 1,
         "domestic_battery_shipping_consumption": 1,
         "sum_dom_shipping": 1,
     },
@@ -209,8 +209,8 @@ _integ_domestic_battery_shipping_consumption = Integ(
     depends_on={
         "meoh_ship_cost": 1,
         "fc_ship_cost": 3,
-        "hfo_ship_cost": 1,
         "be_ship_cost": 1,
+        "hfo_ship_cost": 1,
     },
 )
 def domestic_h2_competitiveness():
@@ -293,8 +293,8 @@ _smooth_domestic_h2_inno_switch = Smooth(
         "innovators": 1,
         "domestic_h2_inno_switch": 1,
         "domestic_shipping_reinvestment": 1,
-        "sum_dom_shipping": 2,
         "domestic_h2_shipping_consumption": 1,
+        "sum_dom_shipping": 2,
     },
 )
 def domestic_h2_innovators():
@@ -495,8 +495,8 @@ _integ_domestic_hfo_shipping_consumption = Integ(
     depends_on={
         "fc_ship_cost": 1,
         "meoh_ship_cost": 3,
-        "hfo_ship_cost": 1,
         "be_ship_cost": 1,
+        "hfo_ship_cost": 1,
     },
 )
 def domestic_meoh_competitiveness():
@@ -625,8 +625,8 @@ def domestic_meoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "domestic_meoh_competitiveness": 1,
         "cross": 1,
+        "domestic_meoh_competitiveness": 1,
         "domestic_meoh_shipping_consumption": 1,
         "sum_dom_shipping": 1,
     },
@@ -672,12 +672,12 @@ _integ_domestic_meoh_shipping_consumption = Integ(
     depends_on={
         "domestic_hfo_shipping_consumption": 1,
         "hfo_ship_cost": 1,
-        "domestic_meoh_shipping_consumption": 1,
         "meoh_ship_cost": 1,
-        "domestic_battery_shipping_consumption": 1,
+        "domestic_meoh_shipping_consumption": 1,
         "be_ship_cost": 1,
-        "fc_ship_cost": 1,
+        "domestic_battery_shipping_consumption": 1,
         "domestic_h2_shipping_consumption": 1,
+        "fc_ship_cost": 1,
         "yearly_hfo_consumption": 1,
         "sum_dom_shipping": 1,
     },
@@ -1092,7 +1092,7 @@ def meoh_ship_h2_wtp():
     units="M€/Year",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"be_ship_cost": 1, "fc_ship_cost": 1, "meoh_ship_cost": 1},
+    depends_on={"be_ship_cost": 1, "meoh_ship_cost": 1, "fc_ship_cost": 1},
 )
 def min_green_ship_cost():
     return np.minimum(be_ship_cost(), np.minimum(fc_ship_cost(), meoh_ship_cost()))

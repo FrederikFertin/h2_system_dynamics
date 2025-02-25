@@ -49,12 +49,12 @@ def biogas_capex():
         "biogas_capex": 1,
         "biogas_opex": 1,
         "biogas_operating_hours": 1,
-        "renewable_electricity_price": 1,
         "biogas_electricity_usage": 1,
-        "biogas_heat_usage": 1,
+        "renewable_electricity_price": 1,
         "heat_cost": 1,
-        "biogas_biomass_usage": 1,
+        "biogas_heat_usage": 1,
         "biomass_price": 1,
+        "biogas_biomass_usage": 1,
     },
 )
 def biogas_cost():
@@ -176,16 +176,16 @@ def biomeoh_capex():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_capex": 1,
-        "biomeoh_af": 1,
         "biomeoh_opex": 1,
-        "biomeoh_operating_hours": 1,
+        "biomeoh_af": 1,
         "meoh_lhv": 2,
+        "biomeoh_operating_hours": 1,
+        "biomeoh_excess_heat": 1,
         "renewable_electricity_price": 1,
         "biomeoh_electricity_usage": 1,
         "heat_cost": 1,
-        "biomeoh_excess_heat": 1,
-        "biomeoh_biomass_usage": 1,
         "biomass_price": 1,
+        "biomeoh_biomass_usage": 1,
     },
 )
 def biomeoh_cost_without_h2():
@@ -269,11 +269,11 @@ def biomeoh_h2_wtp():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_plant_size": 2,
-        "meoh_lhv": 1,
-        "meoh_shipping_consumption": 1,
-        "biomeoh": 1,
-        "green_biomeoh_weight": 1,
         "domestic_meoh_shipping_consumption": 1,
+        "biomeoh": 1,
+        "meoh_shipping_consumption": 1,
+        "green_biomeoh_weight": 1,
+        "meoh_lhv": 1,
         "biomeoh_learning_rate": 1,
     },
 )
@@ -344,8 +344,8 @@ def biomeoh_plant_size():
     depends_on={
         "biomeoh_cost_without_h2": 1,
         "biomeoh_h2_usage": 1,
-        "meoh_lhv": 1,
         "blue_h2_cost": 1,
+        "meoh_lhv": 1,
     },
 )
 def blue_biomeoh_cost():
@@ -362,8 +362,8 @@ def blue_biomeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "emeoh_cost_without_hydrogen": 1,
-        "meoh_lhv": 1,
         "blue_h2_cost": 1,
+        "meoh_lhv": 1,
         "emeoh_h2_usage": 1,
     },
 )
@@ -382,10 +382,10 @@ def blue_emeoh_cost():
     depends_on={
         "convmeoh_cost": 1,
         "meoh_lhv": 1,
-        "ccs_cost": 1,
+        "cc_capture_rate": 1,
         "carbon_tax": 1,
         "convmeoh_emission_factor": 1,
-        "cc_capture_rate": 1,
+        "ccs_cost": 1,
     },
 )
 def blue_meoh_cost():
@@ -425,8 +425,8 @@ def convmeoh_capex():
         "min_green_meoh_cost": 1,
         "convmeoh_cost_without_co2": 1,
         "meoh_lhv": 1,
-        "convmeoh_emission_factor": 1,
         "electricity_emission_factor": 1,
+        "convmeoh_emission_factor": 1,
         "convmeoh_electricity_usage": 1,
     },
 )
@@ -452,13 +452,13 @@ def convmeoh_co2_wtp():
     depends_on={
         "convmeoh_electricity_usage": 1,
         "grid_electricity_price": 1,
-        "convmeoh_emission_factor": 1,
         "carbon_tax": 1,
-        "gas_price": 1,
+        "convmeoh_emission_factor": 1,
         "convmeoh_gas_usage": 1,
+        "gas_price": 1,
         "convmeoh_opex": 1,
-        "convmeoh_capex": 1,
         "convmeoh_af": 1,
+        "convmeoh_capex": 1,
         "meoh_lhv": 1,
     },
 )
@@ -479,11 +479,11 @@ def convmeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "convmeoh_cost": 1,
-        "meoh_lhv": 1,
+        "convmeoh_electricity_usage": 1,
+        "electricity_emission_factor": 1,
         "carbon_tax": 1,
         "convmeoh_emission_factor": 1,
-        "electricity_emission_factor": 1,
-        "convmeoh_electricity_usage": 1,
+        "meoh_lhv": 1,
     },
 )
 def convmeoh_cost_without_co2():
@@ -587,17 +587,17 @@ def emeoh_co2_usage():
     comp_subtype="Normal",
     depends_on={
         "emeoh_capex": 1,
-        "emeoh_opex": 1,
         "emeoh_af": 1,
-        "meoh_lhv": 2,
+        "emeoh_opex": 1,
         "emeoh_operating_hours": 1,
-        "emeoh_electricity_usage": 1,
+        "meoh_lhv": 2,
         "emeoh_co2_usage": 1,
-        "heat_cost": 1,
-        "ps_cc_cost": 1,
         "renewable_electricity_price": 1,
+        "heat_cost": 1,
         "cc_capture_rate": 1,
+        "ps_cc_cost": 1,
         "emeoh_excess_heat": 1,
+        "emeoh_electricity_usage": 1,
     },
 )
 def emeoh_cost_without_hydrogen():
@@ -681,11 +681,11 @@ def emeoh_h2_wtp():
     comp_subtype="Normal",
     depends_on={
         "emeoh_plant_size": 2,
-        "emeoh": 1,
-        "meoh_lhv": 1,
-        "meoh_shipping_consumption": 1,
-        "green_biomeoh_weight": 1,
         "domestic_meoh_shipping_consumption": 1,
+        "meoh_shipping_consumption": 1,
+        "emeoh": 1,
+        "green_biomeoh_weight": 1,
+        "meoh_lhv": 1,
         "emeoh_learning_rate": 1,
     },
 )
@@ -750,9 +750,9 @@ def emeoh_plant_size():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_cost_without_h2": 1,
+        "biomeoh_h2_usage": 1,
         "green_h2_cost": 1,
         "meoh_lhv": 1,
-        "biomeoh_h2_usage": 1,
     },
 )
 def green_biomeoh_cost():
@@ -788,9 +788,9 @@ def green_emeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_cost_without_h2": 1,
-        "grey_h2_cost": 1,
-        "meoh_lhv": 1,
         "biomeoh_h2_usage": 1,
+        "meoh_lhv": 1,
+        "grey_h2_cost": 1,
     },
 )
 def grey_biomeoh_cost():
@@ -807,9 +807,9 @@ def grey_biomeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "emeoh_cost_without_hydrogen": 1,
-        "grey_h2_cost": 1,
         "meoh_lhv": 1,
         "emeoh_h2_usage": 1,
+        "grey_h2_cost": 1,
     },
 )
 def grey_emeoh_cost():
@@ -844,9 +844,9 @@ def min_alternative_meoh_cost():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_cost_without_h2": 1,
+        "biomeoh_h2_usage": 1,
         "shipping_meoh_h2_cost": 1,
         "meoh_lhv": 1,
-        "biomeoh_h2_usage": 1,
     },
 )
 def shipping_biomeoh_cost():

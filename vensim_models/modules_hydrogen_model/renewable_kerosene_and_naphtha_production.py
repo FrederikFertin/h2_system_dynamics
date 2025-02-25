@@ -59,11 +59,11 @@ def biokero_cost():
     comp_subtype="Normal",
     depends_on={
         "biokero_cost": 1,
-        "ft_h2_cost": 1,
+        "biokero_h2_usage": 1,
+        "biokero_fraction": 1,
         "biokero_revenue_fraction": 1,
         "h2_lhv": 1,
-        "biokero_fraction": 1,
-        "biokero_h2_usage": 1,
+        "ft_h2_cost": 1,
     },
 )
 def biokero_cost_without_h2():
@@ -153,9 +153,9 @@ def biokero_h2_usage():
         "jetfuel_cost": 1,
         "biokero_cost_without_h2": 1,
         "biokero_fraction": 1,
-        "biokero_h2_usage": 1,
-        "biokero_revenue_fraction": 1,
         "h2_lhv": 1,
+        "biokero_revenue_fraction": 1,
+        "biokero_h2_usage": 1,
     },
 )
 def biokero_h2_wtp():
@@ -249,11 +249,11 @@ def bionaphtha_cost():
     comp_subtype="Normal",
     depends_on={
         "bionaphtha_cost": 1,
-        "naphtha_fraction_bio": 1,
-        "ft_h2_cost": 1,
-        "h2_lhv": 1,
-        "bionaphtha_revenue_fraction": 1,
         "biokero_h2_usage": 1,
+        "naphtha_fraction_bio": 1,
+        "h2_lhv": 1,
+        "ft_h2_cost": 1,
+        "bionaphtha_revenue_fraction": 1,
     },
 )
 def bionaphtha_cost_without_h2():
@@ -277,8 +277,8 @@ def bionaphtha_cost_without_h2():
     depends_on={
         "naphtha_cost": 1,
         "bionaphtha_cost_without_h2": 1,
-        "naphtha_fraction_bio": 1,
         "h2_lhv": 1,
+        "naphtha_fraction_bio": 1,
         "biokero_h2_usage": 1,
     },
 )
@@ -306,21 +306,21 @@ def bionaphtha_revenue_fraction():
     depends_on={
         "biokero_electricity_usage": 1,
         "renewable_electricity_price": 1,
-        "biogas_cost": 1,
         "biokero_gas_usage": 1,
+        "biogas_cost": 1,
         "uco_price": 1,
         "biokero_biomass_usage": 1,
         "ft_h2_cost": 1,
-        "h2_lhv": 1,
         "biokero_h2_usage": 1,
-        "biokero_excess_heat": 1,
+        "h2_lhv": 1,
         "heat_cost": 1,
-        "biokero_opex": 1,
+        "biokero_excess_heat": 1,
         "biokero_af": 1,
-        "biokero_variable": 1,
         "biokero_fraction": 1,
-        "biokero_capex": 1,
+        "biokero_variable": 1,
         "biokero_operating_hours": 1,
+        "biokero_opex": 1,
+        "biokero_capex": 1,
     },
 )
 def hvo_jet_total_costs():
@@ -426,14 +426,14 @@ def synkero_co2_usage():
         "cc_capture_rate": 1,
         "synkero_co2_usage": 1,
         "jetfuel_lhv": 1,
-        "synkero_excess_heat": 1,
-        "synkero_h2_usage": 1,
-        "ft_h2_cost": 1,
-        "h2_lhv": 1,
-        "heat_cost": 1,
-        "renewable_electricity_price": 1,
         "synkero_output": 1,
+        "renewable_electricity_price": 1,
+        "heat_cost": 1,
         "synkero_electricity_usage": 1,
+        "synkero_h2_usage": 1,
+        "synkero_excess_heat": 1,
+        "h2_lhv": 1,
+        "ft_h2_cost": 1,
         "synkero_af": 1,
         "synkero_capex": 1,
         "synkero_operating_hours": 1,
@@ -472,11 +472,11 @@ def synkero_cost():
     comp_subtype="Normal",
     depends_on={
         "synkero_cost": 1,
-        "synkero_h2_usage": 1,
-        "ft_h2_cost": 1,
-        "h2_lhv": 1,
-        "synkero_fraction": 1,
         "synkero_output": 1,
+        "synkero_fraction": 1,
+        "synkero_h2_usage": 1,
+        "h2_lhv": 1,
+        "ft_h2_cost": 1,
     },
 )
 def synkero_cost_without_h2():
@@ -554,10 +554,10 @@ def synkero_h2_usage():
     depends_on={
         "jetfuel_cost": 1,
         "synkero_cost_without_h2": 1,
-        "synkero_output": 1,
-        "synkero_h2_usage": 1,
         "synkero_fraction": 1,
+        "synkero_output": 1,
         "h2_lhv": 1,
+        "synkero_h2_usage": 1,
     },
 )
 def synkero_h2_wtp():
@@ -689,10 +689,10 @@ def synnaphtha_fraction():
     depends_on={
         "naphtha_cost": 1,
         "synnaphtha_cost_without_h2": 1,
-        "synkero_output": 1,
-        "synkero_h2_usage": 1,
         "synnaphtha_fraction": 1,
+        "synkero_output": 1,
         "h2_lhv": 1,
+        "synkero_h2_usage": 1,
         "synkero_fraction": 1,
     },
 )
