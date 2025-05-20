@@ -3,6 +3,21 @@ class result_loading_class:
     h2_summary = ["H2 DEMAND in TWh", "industry TWh", "trans TWh", "power TWh"]
     subsidy_summary = ["TOTAL GREEN HYDROGEN DEMAND", "Green H2 cost", "TOTAL SUBSIDIES"]
 
+    # Overall activity projections
+    activity_projections = {"steel": "primary sector",
+                            "naphtha": "naphtha production",
+                            "MeOH": "methanol production",
+                            "fertilizer": "NH3 fertilizer consumption",
+                            "high temperature": "NM gas consumption",
+                            "refinery": "Refinery hydrogen consumption",
+                            "international aviation": "international aviation consumption",
+                            "domestic aviation": "domestic aviation consumption",
+                            "international shipping": "international shipping consumption",
+                            "domestic shipping": "domestic shipping consumption",
+                            "light duty": "LD RT consumption",
+                            "heavy duty": "HD RT consumption",
+                            }
+
     # Define the sectors of the model
     steel_sector = ["Coal BF BOF", "Coal BF BOF CCS", "NGDRI EAF", "H2DRI EAF"]
     hvc_sector = ["Fossil naphtha", "Biogenic naphtha", "Synthetic naphtha"]
@@ -54,6 +69,25 @@ class result_loading_class:
                     "MeOH ship H2 WTP", 
                     "FC ship H2 WTP",
                     ]
+    
+    fuel_to_activity_conversions = {
+                            "steel": {"conversion": 0.0563e6, "units": "MT Steel to t H2"},
+                            "SynNaphtha": {"conversion": 5.85/33.33*1e6, "units": "MT Naphtha to t H2"},
+                            "BioNaphtha": {"conversion": 0.78/33.33*1e6, "units": "MT Naphtha to t H2"},
+                            "eMeOH": {"conversion": 1e6/5.26, "units": "MT MeOH to t H2"},
+                            "bioMeOH": {"conversion": 1e6/15.7, "units": "MT MeOH to t H2"},
+                            "BioKero": {"conversion": 0.099e3/33.33, "units": "GWh Kerosene to t H2"},
+                            "SynKero": {"conversion": 0.995e3/33.33, "units": "MT Kerosene to t H2"},
+                            "fertilizer": {"conversion": 1e6/5.56, "units": "MT NH3 to t H2"},
+                            "refinery": {"conversion": 1e6, "units": "MT H2 to t H2"},
+                            "high temperature": {"conversion": 1e3/33.33, "units": "GWh to t H2"},
+                            "LD": {"conversion": 0.32/0.57*1e3/33.33, "units": "GWh to t H2"},
+                            "HD": {"conversion": 0.343/0.57*1e3/33.33, "units": "GWh to t H2"},
+                            "NH3 containership": {"conversion": 3600/18.6/5.56, "units": "GWh to t H2"},
+                            "MeOH containership": {"conversion": 3600/19.9/15.7, "units": "GWh to t H2"},
+                            "MeOH ship": {"conversion": 3600/19.9/15.7, "units": "GWh to t H2"},
+                            "FC ship": {"conversion": 0.4/0.55*3600/33.33, "units": "GWh to t H2"},
+    }
     
     co2_wtp_list = ["steel CO2 WTP",
                     "Naphtha CO2 WTP", 

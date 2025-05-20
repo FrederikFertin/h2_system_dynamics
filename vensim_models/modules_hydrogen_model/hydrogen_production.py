@@ -118,9 +118,9 @@ def aec_opex():
     comp_subtype="Normal",
     depends_on={
         "grey_h2_capex": 1,
-        "cc_capture_rate": 1,
         "ccs_capex": 1,
         "smr_emission_factor": 1,
+        "cc_capture_rate": 1,
     },
 )
 def blue_h2_capex():
@@ -138,9 +138,9 @@ def blue_h2_capex():
         "green_h2_cost": 1,
         "grey_h2_cost": 1,
         "grey_h2_cost_wo_co2": 1,
-        "cc_capture_rate": 2,
-        "ccs_cost": 1,
         "smr_emission_factor": 2,
+        "ccs_cost": 1,
+        "cc_capture_rate": 2,
     },
 )
 def blue_h2_co2_wtp():
@@ -172,10 +172,10 @@ def blue_h2_cost():
     comp_subtype="Normal",
     depends_on={
         "grey_h2_variable_cost": 1,
-        "cc_capture_rate": 1,
-        "ccs_opex": 1,
-        "carbon_tax": 1,
         "smr_emission_factor": 1,
+        "carbon_tax": 1,
+        "ccs_opex": 1,
+        "cc_capture_rate": 1,
     },
 )
 def blue_h2_opex():
@@ -345,7 +345,7 @@ def green_h2_subsidy():
     comp_subtype="Normal",
 )
 def green_h2_subsidy_size():
-    return 0
+    return 2
 
 
 @component.add(
@@ -407,8 +407,8 @@ def grey_h2_cost():
         "smr_capex": 1,
         "smr_af": 1,
         "smr_fixed_opex": 1,
-        "gas_price": 1,
         "smr_ng_usage": 1,
+        "gas_price": 1,
         "grid_electricity_price": 1,
         "smr_el_usage": 1,
     },
@@ -433,8 +433,8 @@ def grey_h2_cost_wo_co2():
     depends_on={
         "carbon_tax": 1,
         "smr_emission_factor": 1,
-        "gas_price": 1,
         "smr_ng_usage": 1,
+        "gas_price": 1,
         "grid_electricity_price": 1,
         "smr_el_usage": 1,
     },

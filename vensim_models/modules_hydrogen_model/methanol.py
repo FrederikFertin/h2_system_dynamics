@@ -68,47 +68,22 @@ def biomeoh_imitators():
 
 @component.add(
     name="BioMeOH inno switch",
-    comp_type="Stateful",
-    comp_subtype="Smooth",
-    depends_on={"_smooth_biomeoh_inno_switch": 1},
-    other_deps={
-        "_smooth_biomeoh_inno_switch": {
-            "initial": {
-                "biomeoh_competitiveness": 2,
-                "inno_switch_level": 1,
-                "early_switch_level": 1,
-            },
-            "step": {
-                "biomeoh_competitiveness": 2,
-                "inno_switch_level": 1,
-                "early_switch_level": 1,
-            },
-        }
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "biomeoh_competitiveness": 2,
+        "inno_switch_level": 1,
+        "early_switch_level": 1,
     },
 )
 def biomeoh_inno_switch():
-    return _smooth_biomeoh_inno_switch()
-
-
-_smooth_biomeoh_inno_switch = Smooth(
-    lambda: if_then_else(
+    return if_then_else(
         biomeoh_competitiveness() > inno_switch_level(),
         lambda: if_then_else(
             biomeoh_competitiveness() > early_switch_level(), lambda: 3, lambda: 1
         ),
         lambda: 0,
-    ),
-    lambda: 2,
-    lambda: if_then_else(
-        biomeoh_competitiveness() > inno_switch_level(),
-        lambda: if_then_else(
-            biomeoh_competitiveness() > early_switch_level(), lambda: 3, lambda: 1
-        ),
-        lambda: 0,
-    ),
-    lambda: 3,
-    "_smooth_biomeoh_inno_switch",
-)
+    )
 
 
 @component.add(
@@ -119,8 +94,8 @@ _smooth_biomeoh_inno_switch = Smooth(
         "meoh_reinvestment": 1,
         "innovators": 1,
         "biomeoh_inno_switch": 1,
-        "sum_meoh": 2,
         "biomeoh": 1,
+        "sum_meoh": 2,
     },
 )
 def biomeoh_innovators():
@@ -239,47 +214,22 @@ def blue_meoh_imitators():
 
 @component.add(
     name="Blue MeOH inno switch",
-    comp_type="Stateful",
-    comp_subtype="Smooth",
-    depends_on={"_smooth_blue_meoh_inno_switch": 1},
-    other_deps={
-        "_smooth_blue_meoh_inno_switch": {
-            "initial": {
-                "blue_meoh_competitiveness": 2,
-                "inno_switch_level": 1,
-                "early_switch_level": 1,
-            },
-            "step": {
-                "blue_meoh_competitiveness": 2,
-                "inno_switch_level": 1,
-                "early_switch_level": 1,
-            },
-        }
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "blue_meoh_competitiveness": 2,
+        "inno_switch_level": 1,
+        "early_switch_level": 1,
     },
 )
 def blue_meoh_inno_switch():
-    return _smooth_blue_meoh_inno_switch()
-
-
-_smooth_blue_meoh_inno_switch = Smooth(
-    lambda: if_then_else(
+    return if_then_else(
         blue_meoh_competitiveness() > inno_switch_level(),
         lambda: if_then_else(
             blue_meoh_competitiveness() > early_switch_level(), lambda: 3, lambda: 1
         ),
         lambda: 0,
-    ),
-    lambda: 2,
-    lambda: if_then_else(
-        blue_meoh_competitiveness() > inno_switch_level(),
-        lambda: if_then_else(
-            blue_meoh_competitiveness() > early_switch_level(), lambda: 3, lambda: 1
-        ),
-        lambda: 0,
-    ),
-    lambda: 3,
-    "_smooth_blue_meoh_inno_switch",
-)
+    )
 
 
 @component.add(
@@ -431,47 +381,22 @@ def emeoh_imitators():
 
 @component.add(
     name="eMeOH inno switch",
-    comp_type="Stateful",
-    comp_subtype="Smooth",
-    depends_on={"_smooth_emeoh_inno_switch": 1},
-    other_deps={
-        "_smooth_emeoh_inno_switch": {
-            "initial": {
-                "emeoh_competitiveness": 2,
-                "inno_switch_level": 1,
-                "early_switch_level": 1,
-            },
-            "step": {
-                "emeoh_competitiveness": 2,
-                "inno_switch_level": 1,
-                "early_switch_level": 1,
-            },
-        }
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "emeoh_competitiveness": 2,
+        "inno_switch_level": 1,
+        "early_switch_level": 1,
     },
 )
 def emeoh_inno_switch():
-    return _smooth_emeoh_inno_switch()
-
-
-_smooth_emeoh_inno_switch = Smooth(
-    lambda: if_then_else(
+    return if_then_else(
         emeoh_competitiveness() > inno_switch_level(),
         lambda: if_then_else(
             emeoh_competitiveness() > early_switch_level(), lambda: 3, lambda: 1
         ),
         lambda: 0,
-    ),
-    lambda: 2,
-    lambda: if_then_else(
-        emeoh_competitiveness() > inno_switch_level(),
-        lambda: if_then_else(
-            emeoh_competitiveness() > early_switch_level(), lambda: 3, lambda: 1
-        ),
-        lambda: 0,
-    ),
-    lambda: 3,
-    "_smooth_emeoh_inno_switch",
-)
+    )
 
 
 @component.add(
@@ -482,8 +407,8 @@ _smooth_emeoh_inno_switch = Smooth(
         "meoh_reinvestment": 1,
         "innovators": 1,
         "emeoh_inno_switch": 1,
-        "sum_meoh": 2,
         "emeoh": 1,
+        "sum_meoh": 2,
     },
 )
 def emeoh_innovators():
@@ -522,8 +447,8 @@ def emeoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "emeoh_competitiveness": 1,
         "cross": 1,
+        "emeoh_competitiveness": 1,
         "emeoh": 1,
         "sum_meoh": 1,
     },
@@ -717,8 +642,8 @@ def grey_meoh_level():
     depends_on={
         "biomeoh": 1,
         "green_biomeoh_cost": 1,
-        "blue_meoh": 1,
         "blue_meoh_cost": 1,
+        "blue_meoh": 1,
         "grey_meoh": 1,
         "convmeoh_cost": 1,
         "green_emeoh_cost": 1,
@@ -759,8 +684,8 @@ def meoh_biomass_demand():
         "blue_meoh": 2,
         "electricity_emission_factor": 1,
         "convmeoh_electricity_usage": 1,
-        "cc_capture_rate": 1,
         "convmeoh_emission_factor": 1,
+        "cc_capture_rate": 1,
     },
 )
 def meoh_emissions():

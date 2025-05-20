@@ -18,6 +18,9 @@ class data_loading_class:
 
     # Loads the inflation rates
     inflation = pd.read_excel(cwd + "\\data\\european_inflation_rates_data.xlsx", sheet_name="european_inflation_rates", index_col=0)
+
+    # Load the electricity prices
+    electricity_prices = pd.read_excel(cwd + "\\data\\elpriser Balmorel.xlsx", sheet_name="European Averages")
     
     # Function which pads the data with a new data point 20 years later which is the same as the last data point
     # and a data point 20 years before which is the same as the first data point
@@ -168,8 +171,8 @@ class data_loading_class:
         kwargs = dict(kwargs)
 
         self.electricity_prices = pd.Series(
-                                index=[2020, 2030, 2040, 2050],
-                                data=[40, 35, 30, 25], # €_2020/MWh (example data)
+                                index=self.electricity_prices["Year"].values,
+                                data=self.electricity_prices["Mean"].values, # €_2020/MWh
                                 dtype=float)
 
         if "sensitivity" in kwargs:

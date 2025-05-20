@@ -92,7 +92,7 @@ plt.show()
 # Run the sigmoid function with some parameters
 x = np.linspace(0.0, 2.2, 100)
 L = 1
-k = 10
+k = 30
 x0 = 0.9
 y = sigmoid(x, L, k, x0)
 y2 = sigmoid(x, L, 10, 1.1)
