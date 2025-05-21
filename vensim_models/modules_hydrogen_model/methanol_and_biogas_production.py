@@ -49,8 +49,8 @@ def biogas_capex():
         "biogas_capex": 1,
         "biogas_opex": 1,
         "biogas_operating_hours": 1,
-        "renewable_electricity_price": 1,
         "biogas_electricity_usage": 1,
+        "renewable_electricity_price": 1,
         "biogas_heat_usage": 1,
         "heat_cost": 1,
         "biomass_price": 1,
@@ -166,7 +166,7 @@ def biomeoh_biomass_usage():
     depends_on={"biomeoh_learning": 1},
 )
 def biomeoh_capex():
-    return 20000 * biomeoh_learning()
+    return 11900 * 1.3 * 1.3 * biomeoh_learning()
 
 
 @component.add(
@@ -180,9 +180,9 @@ def biomeoh_capex():
         "biomeoh_af": 1,
         "biomeoh_operating_hours": 1,
         "meoh_lhv": 2,
-        "renewable_electricity_price": 1,
         "biomeoh_electricity_usage": 1,
         "biomeoh_excess_heat": 1,
+        "renewable_electricity_price": 1,
         "heat_cost": 1,
         "biomass_price": 1,
         "biomeoh_biomass_usage": 1,
@@ -269,10 +269,10 @@ def biomeoh_h2_wtp():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_plant_size": 2,
-        "meoh_lhv": 1,
         "meoh_shipping_consumption": 1,
-        "domestic_meoh_shipping_consumption": 1,
         "biomeoh": 1,
+        "meoh_lhv": 1,
+        "domestic_meoh_shipping_consumption": 1,
         "green_biomeoh_weight": 1,
         "biomeoh_learning_rate": 1,
     },
@@ -343,9 +343,9 @@ def biomeoh_plant_size():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_cost_without_h2": 1,
-        "meoh_lhv": 1,
-        "biomeoh_h2_usage": 1,
         "blue_h2_cost": 1,
+        "biomeoh_h2_usage": 1,
+        "meoh_lhv": 1,
     },
 )
 def blue_biomeoh_cost():
@@ -363,8 +363,8 @@ def blue_biomeoh_cost():
     depends_on={
         "emeoh_cost_without_hydrogen": 1,
         "blue_h2_cost": 1,
-        "meoh_lhv": 1,
         "emeoh_h2_usage": 1,
+        "meoh_lhv": 1,
     },
 )
 def blue_emeoh_cost():
@@ -381,11 +381,11 @@ def blue_emeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "convmeoh_cost": 1,
-        "cc_capture_rate": 1,
-        "meoh_lhv": 1,
+        "convmeoh_emission_factor": 1,
         "ccs_cost": 1,
         "carbon_tax": 1,
-        "convmeoh_emission_factor": 1,
+        "meoh_lhv": 1,
+        "cc_capture_rate": 1,
     },
 )
 def blue_meoh_cost():
@@ -426,8 +426,8 @@ def convmeoh_capex():
         "convmeoh_cost_without_co2": 1,
         "meoh_lhv": 1,
         "convmeoh_electricity_usage": 1,
-        "electricity_emission_factor": 1,
         "convmeoh_emission_factor": 1,
+        "electricity_emission_factor": 1,
     },
 )
 def convmeoh_co2_wtp():
@@ -452,10 +452,10 @@ def convmeoh_co2_wtp():
     depends_on={
         "convmeoh_electricity_usage": 1,
         "grid_electricity_price": 1,
-        "carbon_tax": 1,
         "convmeoh_emission_factor": 1,
-        "gas_price": 1,
+        "carbon_tax": 1,
         "convmeoh_gas_usage": 1,
+        "gas_price": 1,
         "convmeoh_opex": 1,
         "convmeoh_capex": 1,
         "convmeoh_af": 1,
@@ -479,11 +479,11 @@ def convmeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "convmeoh_cost": 1,
-        "convmeoh_electricity_usage": 1,
+        "convmeoh_emission_factor": 1,
+        "carbon_tax": 1,
         "meoh_lhv": 1,
         "electricity_emission_factor": 1,
-        "carbon_tax": 1,
-        "convmeoh_emission_factor": 1,
+        "convmeoh_electricity_usage": 1,
     },
 )
 def convmeoh_cost_without_co2():
@@ -511,14 +511,15 @@ def convmeoh_electricity_usage():
 @component.add(
     name="convMeOH emission factor",
     units="tCO2/tMeOH",
-    comp_type="Constant",
+    comp_type="Auxiliary",
     comp_subtype="Normal",
+    depends_on={"convmeoh_gas_usage": 1, "gas_emission_factor": 1},
 )
 def convmeoh_emission_factor():
     """
     Direct synthesis emissions + combustion emissions
     """
-    return 0.695 + 1 / 32 * 44
+    return convmeoh_gas_usage() * gas_emission_factor()
 
 
 @component.add(
@@ -564,7 +565,7 @@ def emeoh_af():
     depends_on={"emeoh_learning": 1},
 )
 def emeoh_capex():
-    return 10000 * emeoh_learning()
+    return 11900 * emeoh_learning()
 
 
 @component.add(
@@ -587,17 +588,17 @@ def emeoh_co2_usage():
     comp_subtype="Normal",
     depends_on={
         "emeoh_capex": 1,
-        "emeoh_opex": 1,
         "emeoh_af": 1,
+        "emeoh_opex": 1,
         "emeoh_operating_hours": 1,
         "meoh_lhv": 2,
-        "renewable_electricity_price": 1,
-        "emeoh_co2_usage": 1,
-        "heat_cost": 1,
-        "cc_capture_rate": 1,
-        "emeoh_excess_heat": 1,
-        "emeoh_electricity_usage": 1,
         "ps_cc_cost": 1,
+        "emeoh_co2_usage": 1,
+        "emeoh_electricity_usage": 1,
+        "heat_cost": 1,
+        "emeoh_excess_heat": 1,
+        "renewable_electricity_price": 1,
+        "cc_capture_rate": 1,
     },
 )
 def emeoh_cost_without_hydrogen():
@@ -681,10 +682,10 @@ def emeoh_h2_wtp():
     comp_subtype="Normal",
     depends_on={
         "emeoh_plant_size": 2,
-        "meoh_lhv": 1,
         "meoh_shipping_consumption": 1,
-        "domestic_meoh_shipping_consumption": 1,
         "emeoh": 1,
+        "meoh_lhv": 1,
+        "domestic_meoh_shipping_consumption": 1,
         "green_biomeoh_weight": 1,
         "emeoh_learning_rate": 1,
     },
@@ -750,9 +751,9 @@ def emeoh_plant_size():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_cost_without_h2": 1,
-        "meoh_lhv": 1,
-        "green_h2_cost": 1,
         "biomeoh_h2_usage": 1,
+        "green_h2_cost": 1,
+        "meoh_lhv": 1,
     },
 )
 def green_biomeoh_cost():
@@ -788,9 +789,9 @@ def green_emeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "biomeoh_cost_without_h2": 1,
-        "meoh_lhv": 1,
         "grey_h2_cost": 1,
         "biomeoh_h2_usage": 1,
+        "meoh_lhv": 1,
     },
 )
 def grey_biomeoh_cost():
@@ -807,8 +808,8 @@ def grey_biomeoh_cost():
     comp_subtype="Normal",
     depends_on={
         "emeoh_cost_without_hydrogen": 1,
-        "emeoh_h2_usage": 1,
         "grey_h2_cost": 1,
+        "emeoh_h2_usage": 1,
         "meoh_lhv": 1,
     },
 )

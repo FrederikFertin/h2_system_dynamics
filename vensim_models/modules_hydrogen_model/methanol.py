@@ -135,8 +135,8 @@ def biomeoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "biomeoh_competitiveness": 1,
         "cross": 1,
+        "biomeoh_competitiveness": 1,
         "biomeoh": 1,
         "sum_meoh": 1,
     },
@@ -281,8 +281,8 @@ def blue_meoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "blue_meoh_competitiveness": 1,
         "cross": 1,
+        "blue_meoh_competitiveness": 1,
         "blue_meoh": 1,
         "sum_meoh": 1,
     },
@@ -482,10 +482,10 @@ def equalizer_meoh():
     units="e",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"methanol_demand": 1, "sum_meoh": 1},
+    depends_on={"methanol_production": 1, "sum_meoh": 1},
 )
 def error_meoh():
-    return methanol_demand() - sum_meoh()
+    return methanol_production() - sum_meoh()
 
 
 @component.add(
@@ -546,7 +546,7 @@ def green_meoh_av_cost():
     depends_on={"_integ_grey_meoh": 1},
     other_deps={
         "_integ_grey_meoh": {
-            "initial": {"methanol_demand": 1},
+            "initial": {"methanol_production": 1},
             "step": {"grey_meoh_investment": 1, "grey_meoh_decay": 1},
         }
     },
@@ -557,7 +557,7 @@ def grey_meoh():
 
 _integ_grey_meoh = Integ(
     lambda: grey_meoh_investment() - grey_meoh_decay(),
-    lambda: methanol_demand(),
+    lambda: methanol_production(),
     "_integ_grey_meoh",
 )
 
@@ -619,8 +619,8 @@ def grey_meoh_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "grey_meoh_competitiveness": 1,
         "cross": 1,
+        "grey_meoh_competitiveness": 1,
         "grey_meoh": 1,
         "sum_meoh": 1,
     },
@@ -642,12 +642,12 @@ def grey_meoh_level():
     depends_on={
         "biomeoh": 1,
         "green_biomeoh_cost": 1,
-        "blue_meoh_cost": 1,
         "blue_meoh": 1,
+        "blue_meoh_cost": 1,
         "grey_meoh": 1,
         "convmeoh_cost": 1,
-        "green_emeoh_cost": 1,
         "emeoh": 1,
+        "green_emeoh_cost": 1,
         "sum_meoh": 1,
     },
 )
@@ -732,7 +732,7 @@ def meoh_plant_lifetime():
     other_deps={
         "_integ_meoh_reinvestment": {
             "initial": {
-                "methanol_demand": 1,
+                "methanol_production": 1,
                 "meoh_plant_lifetime": 1,
                 "innovators": 1,
             },
@@ -764,19 +764,22 @@ _integ_meoh_reinvestment = Integ(
     - blue_meoh_investment()
     - emeoh_investment()
     - grey_meoh_investment(),
-    lambda: methanol_demand() / meoh_plant_lifetime() * (1 - innovators()),
+    lambda: methanol_production() / meoh_plant_lifetime() * (1 - innovators()),
     "_integ_meoh_reinvestment",
 )
 
 
 @component.add(
-    name="methanol demand", units="MT MeOH", comp_type="Constant", comp_subtype="Normal"
+    name="methanol production",
+    units="MT MeOH",
+    comp_type="Constant",
+    comp_subtype="Normal",
 )
-def methanol_demand():
+def methanol_production():
     """
-    European MeOH demand. Primary assumption: To not double count MeOH demand for chemicals, plastics, and fuels the demand is assumed constant moving forward. Source: Deloitte - Clean Hydrogen Europe. (https://www.clean-hydrogen.europa.eu/document/download/9fef29ac-6f95-465b- bb6e-1365526f43c4_en?filename=Study%20on%20hydrogen%20in%20ports%20and%20in dustrial%20coastal%20areas.pdf) Based on 2023 level of 11.3 MT. Forecasted 3.96% CAGR from 2023 to 2034. Assumed 3% CAGR from 2034 to 2050. Extrapolated back to 2019 with same growth as forecast (3.96%). Source: https://www.chemanalyst.com/industry-report/europe-methanol-market-215
+    Domestic European MeOH production. Primary assumption: To not double count MeOH demand for chemicals, plastics, and fuels the demand is assumed constant moving forward. Source: Deloitte - Clean Hydrogen Europe. (https://www.clean-hydrogen.europa.eu/document/download/9fef29ac-6f95-465b- bb6e-1365526f43c4_en?filename=Study%20on%20hydrogen%20in%20ports%20and%20in dustrial%20coastal%20areas.pdf) Based on 2023 level of 11.3 MT. Forecasted 3.96% CAGR from 2023 to 2034. Assumed 3% CAGR from 2034 to 2050. Extrapolated back to 2019 with same growth as forecast (3.96%). Source: https://www.chemanalyst.com/industry-report/europe-methanol-market-215
     """
-    return 2.9
+    return 2.3
 
 
 @component.add(

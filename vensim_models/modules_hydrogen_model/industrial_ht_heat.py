@@ -91,8 +91,8 @@ def biogas_nm_inno_switch():
         "nm_reinvestment": 1,
         "innovators": 1,
         "biogas_nm_inno_switch": 1,
-        "sum_nm": 2,
         "biogas_nm": 1,
+        "sum_nm": 2,
     },
 )
 def biogas_nm_innovators():
@@ -131,8 +131,8 @@ def biogas_nm_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "biogas_nm_competitiveness": 1,
+        "cross": 1,
         "biogas_nm": 1,
         "sum_nm": 1,
     },
@@ -268,8 +268,8 @@ def blue_ng_nm_inno_switch():
         "nm_reinvestment": 1,
         "innovators": 1,
         "blue_ng_nm_inno_switch": 1,
-        "sum_nm": 2,
         "blue_ng_nm": 1,
+        "sum_nm": 2,
     },
 )
 def blue_ng_nm_innovators():
@@ -453,8 +453,8 @@ def grey_ng_nm_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "grey_ng_nm": 1,
-        "ng_nm_early_decommission_rate": 1,
         "gas_lockin_period": 1,
+        "ng_nm_early_decommission_rate": 1,
     },
 )
 def grey_ng_nm_decay():
@@ -602,8 +602,8 @@ def h2_nm_inno_switch():
         "nm_reinvestment": 1,
         "innovators": 1,
         "h2_nm_inno_switch": 1,
-        "sum_nm": 2,
         "h2_nm": 1,
+        "sum_nm": 2,
     },
 )
 def h2_nm_innovators():
@@ -668,8 +668,8 @@ def h2_nm_level():
         "biogas_cost": 1,
         "blue_ng_nm": 1,
         "blue_ng_cost": 1,
-        "grey_ng_nm": 1,
         "grey_ng_cost": 1,
+        "grey_ng_nm": 1,
         "h2_nm": 1,
         "nm_h2_gj_cost": 1,
         "sum_nm": 1,

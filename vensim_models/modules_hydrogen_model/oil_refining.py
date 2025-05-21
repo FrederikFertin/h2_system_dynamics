@@ -112,8 +112,8 @@ def blue_refinery_inno_switch():
         "refinery_reinvestment": 1,
         "innovators": 1,
         "blue_refinery_inno_switch": 1,
-        "sum_refining": 2,
         "blue_refinery": 1,
+        "sum_refining": 2,
     },
 )
 def blue_refinery_innovators():
@@ -155,8 +155,8 @@ def blue_refinery_investment_level():
         "slope": 1,
         "cross": 1,
         "blue_refinery_competitiveness": 1,
-        "sum_refining": 1,
         "blue_refinery": 1,
+        "sum_refining": 1,
     },
 )
 def blue_refinery_level():
@@ -193,10 +193,10 @@ def demand_change_refinery():
     units="e",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"refinery_consumption": 1, "sum_refining": 1},
+    depends_on={"refinery_hydrogen_consumption": 1, "sum_refining": 1},
 )
 def error_refinery():
-    return refinery_consumption() - sum_refining()
+    return refinery_hydrogen_consumption() - sum_refining()
 
 
 @component.add(
@@ -207,7 +207,7 @@ def error_refinery():
     depends_on={"_integ_errorint_refinery": 1},
     other_deps={
         "_integ_errorint_refinery": {
-            "initial": {"refinery_consumption": 1},
+            "initial": {"refinery_hydrogen_consumption": 1},
             "step": {"k_i": 1, "error_refinery": 1},
         }
     },
@@ -218,7 +218,7 @@ def errorint_refinery():
 
 _integ_errorint_refinery = Integ(
     lambda: k_i() * error_refinery(),
-    lambda: -refinery_consumption() / 50,
+    lambda: -refinery_hydrogen_consumption() / 50,
     "_integ_errorint_refinery",
 )
 
@@ -313,8 +313,8 @@ def green_refinery_inno_switch():
         "refinery_reinvestment": 1,
         "innovators": 1,
         "green_refinery_inno_switch": 1,
-        "sum_refining": 2,
         "green_refinery": 1,
+        "sum_refining": 2,
     },
 )
 def green_refinery_innovators():
@@ -354,10 +354,10 @@ def green_refinery_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "cross": 1,
         "green_refinery_competitiveness": 1,
-        "sum_refining": 1,
+        "cross": 1,
         "green_refinery": 1,
+        "sum_refining": 1,
     },
 )
 def green_refinery_level():
@@ -376,7 +376,7 @@ def green_refinery_level():
     depends_on={"_integ_grey_refinery": 1},
     other_deps={
         "_integ_grey_refinery": {
-            "initial": {"refinery_consumption": 1},
+            "initial": {"refinery_hydrogen_consumption": 1},
             "step": {"grey_refinery_investment": 1, "grey_refinery_decay": 1},
         }
     },
@@ -387,7 +387,7 @@ def grey_refinery():
 
 _integ_grey_refinery = Integ(
     lambda: grey_refinery_investment() - grey_refinery_decay(),
-    lambda: refinery_consumption(),
+    lambda: refinery_hydrogen_consumption(),
     "_integ_grey_refinery",
 )
 
@@ -421,8 +421,8 @@ def grey_refinery_competitiveness():
     comp_subtype="Normal",
     depends_on={
         "grey_refinery": 1,
-        "smr_lifetime": 1,
         "grey_refinery_early_decommission_rate": 1,
+        "smr_lifetime": 1,
     },
 )
 def grey_refinery_decay():
@@ -481,8 +481,8 @@ def grey_refinery_investment_level():
         "slope": 1,
         "cross": 1,
         "grey_refinery_competitiveness": 1,
-        "sum_refining": 1,
         "grey_refinery": 1,
+        "sum_refining": 1,
     },
 )
 def grey_refinery_level():
@@ -503,8 +503,8 @@ def grey_refinery_level():
         "blue_h2_cost": 1,
         "green_refinery": 1,
         "refinery_h2_cost": 1,
-        "grey_refinery": 1,
         "grey_h2_cost": 1,
+        "grey_refinery": 1,
         "sum_refining": 1,
     },
 )
@@ -528,13 +528,60 @@ def refinery_blue_hydrogen_demand():
 
 
 @component.add(
-    name="Refinery consumption",
+    name="refinery emissions",
+    units="tCO2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"blue_refinery_emissions": 1, "grey_refinery_emissions": 1},
+)
+def refinery_emissions():
+    return blue_refinery_emissions() + grey_refinery_emissions()
+
+
+@component.add(
+    name="Refinery equalizer",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "grey_refinery_level": 1,
+        "green_refinery_level": 1,
+        "blue_refinery_level": 1,
+    },
+)
+def refinery_equalizer():
+    return 1 / (grey_refinery_level() + green_refinery_level() + blue_refinery_level())
+
+
+@component.add(
+    name="refinery grey hydrogen demand",
+    units="t H2",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"grey_refinery": 1},
+)
+def refinery_grey_hydrogen_demand():
+    return grey_refinery() * 10**6
+
+
+@component.add(
+    name="refinery H2 WTP",
+    units="€/kg",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"green_h2_h2_wtp": 1},
+)
+def refinery_h2_wtp():
+    return green_h2_h2_wtp()
+
+
+@component.add(
+    name="Refinery hydrogen consumption",
     units="MT H2",
     comp_type="Auxiliary",
     comp_subtype="with Lookup",
     depends_on={"time": 1},
 )
-def refinery_consumption():
+def refinery_hydrogen_consumption():
     """
     2.4 MT/year in 2022. Linearly decreasing. https://www.petrochemistry.eu/wp-content/uploads/2021/03/Petrochemicals_Pap er_hydrogen-1.pdf
     """
@@ -606,53 +653,6 @@ def refinery_consumption():
 
 
 @component.add(
-    name="refinery emissions",
-    units="tCO2",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"blue_refinery_emissions": 1, "grey_refinery_emissions": 1},
-)
-def refinery_emissions():
-    return blue_refinery_emissions() + grey_refinery_emissions()
-
-
-@component.add(
-    name="Refinery equalizer",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "grey_refinery_level": 1,
-        "green_refinery_level": 1,
-        "blue_refinery_level": 1,
-    },
-)
-def refinery_equalizer():
-    return 1 / (grey_refinery_level() + green_refinery_level() + blue_refinery_level())
-
-
-@component.add(
-    name="refinery grey hydrogen demand",
-    units="t H2",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"grey_refinery": 1},
-)
-def refinery_grey_hydrogen_demand():
-    return grey_refinery() * 10**6
-
-
-@component.add(
-    name="refinery H2 WTP",
-    units="€/kg",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"green_h2_h2_wtp": 1},
-)
-def refinery_h2_wtp():
-    return green_h2_h2_wtp()
-
-
-@component.add(
     name="refinery hydrogen demand",
     units="t H2",
     comp_type="Auxiliary",
@@ -674,7 +674,7 @@ def refinery_hydrogen_demand():
     depends_on={"_integ_refinery_reinvestment": 1},
     other_deps={
         "_integ_refinery_reinvestment": {
-            "initial": {"refinery_consumption": 1, "smr_lifetime": 1},
+            "initial": {"refinery_hydrogen_consumption": 1, "smr_lifetime": 1},
             "step": {
                 "blue_refinery_decay": 1,
                 "demand_change_refinery": 1,
@@ -699,7 +699,7 @@ _integ_refinery_reinvestment = Integ(
     - blue_refinery_investment()
     - green_refinery_investment()
     - grey_refinery_investment(),
-    lambda: refinery_consumption() / smr_lifetime() * 0.3,
+    lambda: refinery_hydrogen_consumption() / smr_lifetime() * 0.3,
     "_integ_refinery_reinvestment",
 )
 

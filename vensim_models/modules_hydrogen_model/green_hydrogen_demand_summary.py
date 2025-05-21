@@ -68,8 +68,8 @@ def buildings_twh():
     comp_subtype="Normal",
     depends_on={
         "h2_lhv": 1,
-        "refinery_grey_hydrogen_demand": 1,
         "fertilizer_grey_hydrogen_demand": 1,
+        "refinery_grey_hydrogen_demand": 1,
     },
 )
 def grey_hydrogen_twh():
@@ -174,7 +174,7 @@ def synkero_hydrogen_demand():
 
 @component.add(
     name="TOTAL GREEN HYDROGEN DEMAND",
-    units="t H2",
+    units="t H2/Year",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
@@ -185,11 +185,12 @@ def synkero_hydrogen_demand():
     },
 )
 def total_green_hydrogen_demand():
-    return (
+    return np.maximum(
+        5000,
         industry_hydrogen_demand()
         + power_hydrogen_demand()
         + transportation_hydrogen_demand()
-        + buildings_hydrogen_demand()
+        + buildings_hydrogen_demand(),
     )
 
 

@@ -32,31 +32,8 @@ def biomass_demand():
     return technology_activity_levels()
 
 
-@component.add(
-    name="Capacity Pipeline",
-    comp_type="Stateful",
-    comp_subtype="Integ",
-    depends_on={"_integ_capacity_pipeline": 1},
-    other_deps={
-        "_integ_capacity_pipeline": {
-            "initial": {},
-            "step": {"activity_change": 1, "decom_missions": 1, "investments": 1},
-        }
-    },
-)
-def capacity_pipeline():
-    return _integ_capacity_pipeline()
-
-
-_integ_capacity_pipeline = Integ(
-    lambda: activity_change() + decom_missions() - investments(),
-    lambda: 0,
-    "_integ_capacity_pipeline",
-)
-
-
-@component.add(name='"Decom- missions"', comp_type="Constant", comp_subtype="Normal")
-def decom_missions():
+@component.add(name='"Decom- missioning"', comp_type="Constant", comp_subtype="Normal")
+def decom_missioning():
     return 0
 
 
@@ -67,8 +44,8 @@ def decom_missions():
     depends_on={"_integ_green_hydrogen_cost": 1},
     other_deps={
         "_delay_green_hydrogen_cost": {
-            "initial": {"total_green_h2_demand": 1},
-            "step": {"total_green_h2_demand": 1},
+            "initial": {"installed_electrolysis": 1},
+            "step": {"installed_electrolysis": 1},
         },
         "_integ_green_hydrogen_cost": {
             "initial": {},
@@ -81,9 +58,9 @@ def green_hydrogen_cost():
 
 
 _delay_green_hydrogen_cost = Delay(
-    lambda: total_green_h2_demand(),
+    lambda: installed_electrolysis(),
     lambda: 1,
-    lambda: total_green_h2_demand(),
+    lambda: installed_electrolysis(),
     lambda: 1,
     time_step,
     "_delay_green_hydrogen_cost",
@@ -95,7 +72,17 @@ _integ_green_hydrogen_cost = Integ(
 
 
 @component.add(
-    name="Investments",
+    name="Installed Electrolysis",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"sectoral_green_h2_demands": 1},
+)
+def installed_electrolysis():
+    return sectoral_green_h2_demands()
+
+
+@component.add(
+    name='"Invest- ments"',
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
@@ -105,7 +92,7 @@ _integ_green_hydrogen_cost = Integ(
         "technology_activity_levels": 1,
     },
 )
-def investments():
+def invest_ments():
     return (
         technology_cost()
         * technology_1_cost()
@@ -113,6 +100,29 @@ def investments():
         * technology_n_cost()
         * technology_activity_levels()
     )
+
+
+@component.add(
+    name="Investment Pipeline",
+    comp_type="Stateful",
+    comp_subtype="Integ",
+    depends_on={"_integ_investment_pipeline": 1},
+    other_deps={
+        "_integ_investment_pipeline": {
+            "initial": {},
+            "step": {"activity_change": 1, "decom_missioning": 1, "invest_ments": 1},
+        }
+    },
+)
+def investment_pipeline():
+    return _integ_investment_pipeline()
+
+
+_integ_investment_pipeline = Integ(
+    lambda: activity_change() + decom_missioning() - invest_ments(),
+    lambda: 0,
+    "_integ_investment_pipeline",
+)
 
 
 @component.add(
@@ -205,7 +215,7 @@ def technology_1_cost():
     other_deps={
         "_integ_technology_activity_levels": {
             "initial": {},
-            "step": {"investments": 1, "decom_missions": 1},
+            "step": {"invest_ments": 1, "decom_missioning": 1},
         }
     },
 )
@@ -214,7 +224,7 @@ def technology_activity_levels():
 
 
 _integ_technology_activity_levels = Integ(
-    lambda: investments() + decom_missions(),
+    lambda: invest_ments() + decom_missioning(),
     lambda: 0,
     "_integ_technology_activity_levels",
 )
@@ -240,13 +250,3 @@ def technology_cost():
 )
 def technology_n_cost():
     return technoeconomics()
-
-
-@component.add(
-    name="Total Green H2 Demand",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"sectoral_green_h2_demands": 1},
-)
-def total_green_h2_demand():
-    return sectoral_green_h2_demands()

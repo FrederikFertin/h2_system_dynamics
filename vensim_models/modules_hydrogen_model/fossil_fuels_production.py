@@ -10,10 +10,10 @@ Translated using PySD version 3.14.0
     comp_subtype="Normal",
     depends_on={
         "gas_price": 1,
+        "gas_emission_factor": 1,
         "ccs_cost": 1,
         "carbon_tax": 1,
         "cc_capture_rate": 1,
-        "gas_emission_factor": 1,
     },
 )
 def blue_ng_cost():
@@ -96,7 +96,7 @@ def grey_ng_cost():
     units="€/GJ",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"oil_price": 1, "hfo_emission_factor": 1, "carbon_tax": 1},
+    depends_on={"oil_price": 1, "carbon_tax": 1, "hfo_emission_factor": 1},
 )
 def hfo_cost():
     """

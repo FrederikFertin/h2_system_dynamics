@@ -272,8 +272,8 @@ _hardcodedlookup_gas_price_lookup = HardcodedLookups(
         "time": 1,
         "electricity_price_lookup": 1,
         "electricity_sensitivity": 1,
-        "electricity_emission_factor": 1,
         "carbon_tax": 1,
+        "electricity_emission_factor": 1,
     },
 )
 def grid_electricity_price():

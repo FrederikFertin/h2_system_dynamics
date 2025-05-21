@@ -19,9 +19,9 @@ def aec_af():
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "electrolyser_capacity": 3,
-        "one_gw_aec_capex": 2,
+        "electrolysis_experience": 3,
         "learning_rate": 1,
+        "one_gw_aec_capex": 2,
         "initial_gw_aec_capex": 2,
     },
 )
@@ -30,11 +30,11 @@ def aec_capex():
     If it is desired to use the Irena learning curve from Carmen's work: - Initial GW AEC CAPEX should be set to 650 €/kW. - One GW AEC CAPEX should be set to 600 €/kW. IF statement used to ensure reasonable costs at very low levels of installed electrolysis.
     """
     return if_then_else(
-        electrolyser_capacity() > 1,
+        electrolysis_experience() > 1,
         lambda: one_gw_aec_capex()
-        * electrolyser_capacity() ** (np.log(1 - learning_rate()) / np.log(2)),
+        * electrolysis_experience() ** (np.log(1 - learning_rate()) / np.log(2)),
         lambda: initial_gw_aec_capex()
-        - (initial_gw_aec_capex() - one_gw_aec_capex()) * electrolyser_capacity(),
+        - (initial_gw_aec_capex() - one_gw_aec_capex()) * electrolysis_experience(),
     )
 
 
@@ -116,17 +116,10 @@ def aec_opex():
     units="€/kgH2",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "grey_h2_capex": 1,
-        "ccs_capex": 1,
-        "smr_emission_factor": 1,
-        "cc_capture_rate": 1,
-    },
+    depends_on={"grey_h2_capex": 1, "smr_emission_factor": 1, "ccs_capex": 1},
 )
 def blue_h2_capex():
-    return (
-        grey_h2_capex() + smr_emission_factor() / 1000 * cc_capture_rate() * ccs_capex()
-    )
+    return grey_h2_capex() + smr_emission_factor() / 1000 * ccs_capex()
 
 
 @component.add(
@@ -173,47 +166,73 @@ def blue_h2_cost():
     depends_on={
         "grey_h2_variable_cost": 1,
         "smr_emission_factor": 1,
-        "carbon_tax": 1,
         "ccs_opex": 1,
+        "carbon_tax": 1,
         "cc_capture_rate": 1,
     },
 )
 def blue_h2_opex():
-    return (
-        grey_h2_variable_cost()
-        + smr_emission_factor() / 1000 * cc_capture_rate() * (ccs_opex() - carbon_tax())
+    return grey_h2_variable_cost() + smr_emission_factor() / 1000 * (
+        ccs_opex() - carbon_tax() * cc_capture_rate()
     )
+
+
+@component.add(
+    name="delay green h2 cost",
+    units="€/kg H2",
+    comp_type="Stateful",
+    comp_subtype="DelayFixed",
+    depends_on={"_delayfixed_delay_green_h2_cost": 1},
+    other_deps={
+        "_delayfixed_delay_green_h2_cost": {
+            "initial": {"green_h2_cost": 1},
+            "step": {"green_h2_cost": 1},
+        }
+    },
+)
+def delay_green_h2_cost():
+    return _delayfixed_delay_green_h2_cost()
+
+
+_delayfixed_delay_green_h2_cost = DelayFixed(
+    lambda: green_h2_cost(),
+    lambda: 10,
+    lambda: green_h2_cost(),
+    time_step,
+    "_delayfixed_delay_green_h2_cost",
+)
 
 
 @component.add(
     name="electrolyser capacity",
     units="GW",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "total_green_hydrogen_demand": 1,
-        "aec_efficiency": 1,
-        "electrolyser_operating_hours": 1,
-        "pilot_plant_capacity": 1,
+    comp_type="Stateful",
+    comp_subtype="Integ",
+    depends_on={"_integ_electrolyser_capacity": 1},
+    other_deps={
+        "_integ_electrolyser_capacity": {
+            "initial": {"pilot_plant_capacity": 1},
+            "step": {"electrolyzer_investments": 1, "electrolyzer_decommissioning": 1},
+        }
     },
 )
 def electrolyser_capacity():
     """
     Hydrogen demand (tH2) * 1000 (kgH2/tH2) * 33.33 (kWhH2/kgH2) / efficiency / working hours (h) *10^-6 (GW/kW)= GW of electroliser capacity
     """
-    return (
-        total_green_hydrogen_demand()
-        * 33.33
-        / aec_efficiency()
-        / electrolyser_operating_hours()
-        / 1000
-        + pilot_plant_capacity()
-    )
+    return _integ_electrolyser_capacity()
+
+
+_integ_electrolyser_capacity = Integ(
+    lambda: electrolyzer_investments() - electrolyzer_decommissioning(),
+    lambda: pilot_plant_capacity(),
+    "_integ_electrolyser_capacity",
+)
 
 
 @component.add(
     name="electrolyser operating hours",
-    units="h",
+    units="h/Year",
     comp_type="Constant",
     comp_subtype="Normal",
 )
@@ -222,15 +241,61 @@ def electrolyser_operating_hours():
 
 
 @component.add(
+    name="electrolysis experience",
+    units="GW",
+    comp_type="Stateful",
+    comp_subtype="Integ",
+    depends_on={"_integ_electrolysis_experience": 1},
+    other_deps={
+        "_integ_electrolysis_experience": {
+            "initial": {"pilot_plant_capacity": 1},
+            "step": {"electrolyzer_investments": 1},
+        }
+    },
+)
+def electrolysis_experience():
+    return _integ_electrolysis_experience()
+
+
+_integ_electrolysis_experience = Integ(
+    lambda: electrolyzer_investments(),
+    lambda: pilot_plant_capacity(),
+    "_integ_electrolysis_experience",
+)
+
+
+@component.add(
+    name="electrolyzer decommissioning",
+    units="GW/Year",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"electrolyser_capacity": 1, "aec_lifetime": 1},
+)
+def electrolyzer_decommissioning():
+    return electrolyser_capacity() / aec_lifetime()
+
+
+@component.add(
+    name="electrolyzer investments",
+    units="GW/yr",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"missing_production_capacity": 1},
+)
+def electrolyzer_investments():
+    return np.maximum(0, missing_production_capacity())
+
+
+@component.add(
     name="FC EC induced learning curve",
     units="scalar",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"electrolyser_capacity": 1, "learning_rate": 1},
+    depends_on={"electrolysis_experience": 1, "learning_rate": 1},
 )
 def fc_ec_induced_learning_curve():
     return np.minimum(
-        1, electrolyser_capacity() ** (np.log(1 - learning_rate() / 2) / np.log(2))
+        1, electrolysis_experience() ** (np.log(1 - learning_rate() / 2) / np.log(2))
     )
 
 
@@ -345,7 +410,7 @@ def green_h2_subsidy():
     comp_subtype="Normal",
 )
 def green_h2_subsidy_size():
-    return 2
+    return 3
 
 
 @component.add(
@@ -483,6 +548,17 @@ def learning_rate():
 
 
 @component.add(
+    name="missing production capacity",
+    units="GW",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"required_electrolysis_capacity": 1, "electrolyser_capacity": 1},
+)
+def missing_production_capacity():
+    return required_electrolysis_capacity() - electrolyser_capacity()
+
+
+@component.add(
     name="One GW AEC CAPEX",
     units="€/kW",
     comp_type="Auxiliary",
@@ -522,6 +598,27 @@ def pulse_h2_subsidy():
 )
 def raw_green_h2_cost():
     return green_h2_capex() + green_h2_opex()
+
+
+@component.add(
+    name="required electrolysis capacity",
+    units="GW",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "total_green_hydrogen_demand": 1,
+        "aec_efficiency": 1,
+        "electrolyser_operating_hours": 1,
+    },
+)
+def required_electrolysis_capacity():
+    return (
+        total_green_hydrogen_demand()
+        * 33.33
+        / 1000
+        / aec_efficiency()
+        / electrolyser_operating_hours()
+    )
 
 
 @component.add(
@@ -594,6 +691,151 @@ def smr_ng_usage():
     GJ ng/t H2
     """
     return 170.9
+
+
+@component.add(
+    name="subsidized electrolysis capacity",
+    units="GW",
+    comp_type="Stateful",
+    comp_subtype="Integ",
+    depends_on={"_integ_subsidized_electrolysis_capacity": 1},
+    other_deps={
+        "_integ_subsidized_electrolysis_capacity": {
+            "initial": {},
+            "step": {
+                "electrolyzer_investments": 1,
+                "pulse_h2_subsidy": 1,
+                "support_terminations": 1,
+            },
+        }
+    },
+)
+def subsidized_electrolysis_capacity():
+    return _integ_subsidized_electrolysis_capacity()
+
+
+_integ_subsidized_electrolysis_capacity = Integ(
+    lambda: electrolyzer_investments() * pulse_h2_subsidy() - support_terminations(),
+    lambda: 0,
+    "_integ_subsidized_electrolysis_capacity",
+)
+
+
+@component.add(
+    name="subsidized green H2 production",
+    units="t H2/Year",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "subsidized_electrolysis_capacity": 1,
+        "electrolyser_operating_hours": 1,
+        "aec_efficiency": 1,
+    },
+)
+def subsidized_green_h2_production():
+    return (
+        subsidized_electrolysis_capacity()
+        * electrolyser_operating_hours()
+        * aec_efficiency()
+        * 1000
+        / 33.33
+    )
+
+
+@component.add(
+    name="subsidy payout",
+    units="B€/Year",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"subsidized_green_h2_production": 1, "green_h2_subsidy_size": 1},
+)
+def subsidy_payout():
+    return subsidized_green_h2_production() * green_h2_subsidy_size() / 10**6
+
+
+@component.add(
+    name="support terminations",
+    units="GW",
+    comp_type="Stateful",
+    comp_subtype="DelayFixed",
+    depends_on={"_delayfixed_support_terminations": 1},
+    other_deps={
+        "_delayfixed_support_terminations": {
+            "initial": {},
+            "step": {"electrolyzer_investments": 1, "pulse_h2_subsidy": 1},
+        }
+    },
+)
+def support_terminations():
+    return _delayfixed_support_terminations()
+
+
+_delayfixed_support_terminations = DelayFixed(
+    lambda: electrolyzer_investments() * pulse_h2_subsidy(),
+    lambda: 10,
+    lambda: 0,
+    time_step,
+    "_delayfixed_support_terminations",
+)
+
+
+@component.add(
+    name="total subsidy cost",
+    units="B€",
+    comp_type="Stateful",
+    comp_subtype="Integ",
+    depends_on={"_integ_total_subsidy_cost": 1},
+    other_deps={
+        "_integ_total_subsidy_cost": {"initial": {}, "step": {"subsidy_payout": 1}}
+    },
+)
+def total_subsidy_cost():
+    return _integ_total_subsidy_cost()
+
+
+_integ_total_subsidy_cost = Integ(
+    lambda: subsidy_payout(), lambda: 0, "_integ_total_subsidy_cost"
+)
+
+
+@component.add(
+    name="WAC green H2",
+    units="€/kgH2",
+    comp_type="Stateful",
+    comp_subtype="Integ",
+    depends_on={"_integ_wac_green_h2": 1},
+    other_deps={
+        "_integ_wac_green_h2": {
+            "initial": {
+                "green_h2_cost": 1,
+                "pilot_plant_capacity": 1,
+                "electrolyser_capacity": 1,
+            },
+            "step": {
+                "electrolyzer_investments": 1,
+                "electrolyser_capacity": 2,
+                "green_h2_cost": 1,
+                "wac_green_h2": 2,
+                "support_terminations": 1,
+                "delay_green_h2_cost": 1,
+            },
+        }
+    },
+)
+def wac_green_h2():
+    return _integ_wac_green_h2()
+
+
+_integ_wac_green_h2 = Integ(
+    lambda: electrolyzer_investments()
+    / electrolyser_capacity()
+    * (green_h2_cost() - wac_green_h2())
+    - support_terminations()
+    / electrolyser_capacity()
+    * (delay_green_h2_cost() - wac_green_h2()),
+    lambda: green_h2_cost() * pilot_plant_capacity() / electrolyser_capacity(),
+    "_integ_wac_green_h2",
+)
 
 
 @component.add(

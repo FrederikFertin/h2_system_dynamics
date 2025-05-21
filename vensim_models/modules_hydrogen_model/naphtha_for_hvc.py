@@ -69,8 +69,8 @@ def bio_naphtha_inno_switch():
         "bio_naphtha_inno_switch": 1,
         "naphtha_feedstock_reinvestment": 1,
         "innovators": 1,
-        "biogenic_naphtha": 1,
         "sum_naphtha": 2,
+        "biogenic_naphtha": 1,
     },
 )
 def bio_naphtha_innovators():
@@ -110,8 +110,8 @@ def bio_naphtha_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "bio_naphtha_competitiveness": 1,
         "cross": 1,
+        "bio_naphtha_competitiveness": 1,
         "biogenic_naphtha": 1,
         "sum_naphtha": 1,
     },
@@ -360,8 +360,8 @@ def naphta_olefin_rate():
     depends_on={
         "biogenic_naphtha": 1,
         "bionaphtha_cost": 1,
-        "fossil_naphtha": 1,
         "naphtha_cost": 1,
+        "fossil_naphtha": 1,
         "synthetic_naphtha": 1,
         "synnaphtha_cost": 1,
         "sum_naphtha": 1,
@@ -394,9 +394,9 @@ def naphtha_biomass_demand():
     depends_on={
         "bionaphtha_cost": 1,
         "synnaphtha_cost": 1,
+        "naphtha_cost": 1,
         "carbon_tax": 1,
         "naphtha_emission_factor": 2,
-        "naphtha_cost": 1,
     },
 )
 def naphtha_co2_wtp():

@@ -198,8 +198,8 @@ def hd_bev_inno_switch():
         "hd_bev_inno_switch": 1,
         "hd_rt_reinvestment": 1,
         "innovators": 1,
-        "hd_bev_consumption": 1,
         "sum_hd_rt": 2,
+        "hd_bev_consumption": 1,
     },
 )
 def hd_bev_innovators():
@@ -239,8 +239,8 @@ def hd_bev_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "hd_bev_competitiveness": 1,
         "cross": 1,
+        "hd_bev_competitiveness": 1,
         "hd_bev_consumption": 1,
         "sum_hd_rt": 1,
     },
@@ -336,8 +336,8 @@ def hd_fcev_inno_switch():
         "hd_rt_reinvestment": 1,
         "innovators": 1,
         "hd_fcev_inno_switch": 1,
-        "hd_fcev_consumption": 1,
         "sum_hd_rt": 2,
+        "hd_fcev_consumption": 1,
     },
 )
 def hd_fcev_innovators():
@@ -435,8 +435,8 @@ _integ_hd_fossil_consumption = Integ(
     comp_subtype="Normal",
     depends_on={
         "hd_fossil_consumption": 1,
-        "hd_fossil_early_decommission_rate": 1,
         "truck_lifetime": 1,
+        "hd_fossil_early_decommission_rate": 1,
     },
 )
 def hd_fossil_decay():
@@ -482,8 +482,8 @@ def hd_fossil_investment_level():
     comp_subtype="Normal",
     depends_on={
         "slope": 1,
-        "hd_fossil_competitiveness": 1,
         "cross": 1,
+        "hd_fossil_competitiveness": 1,
         "hd_fossil_consumption": 1,
         "sum_hd_rt": 1,
     },
